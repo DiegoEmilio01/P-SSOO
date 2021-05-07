@@ -1,2 +1,2 @@
-# P1-SSOO
-Project 1 of the course IIC2333
+# P-SSOO
+Projects of the course IIC2333
