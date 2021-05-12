@@ -1,31 +1,54 @@
 
+
 enum os_error{
-    invalid_mount_partition,
-    invalid_delete_partition,
-    invalid_read_file,
-    invalid_delete_file,
-		full_disk
-    // TODO: completar
+  invalid_mount_partition,
+  invalid_delete_partition,
+  invalid_read_file,
+  invalid_delete_file,
+  invalid_read_bitmap,
+  invalid_file_name_size, // Usar para input vacio o muy largo
+  full_disk
 };
 
-void os_strerror(enum os_error error){
-  switch (error)
-  {
-  case invalid_partition:
-    printf("La partición es inválida");
-    break;
-  default:
-    break;
-  }
-}
+void os_strerror(enum os_error error);
 
 typedef struct mbt
 {
-  /* data */
+  int entry_quantity; // 128
+  Entry* entry_container;  
+
 } Mbt;
 
+/*
+Cada entrada lleva:
+  - Tamaño de entrada 8 Bytes
+  - Bit de validez (Primer bit)
+  - Identificador único de partición (7 bits)
+  - Identificador absoluto (3 Bytes) --> Bloque directorio
+  - Cantidad de bloques de partición (16384 - 131072)
+*/
+typedef struct entry
+{
+  uint8_t first_byte; // 1 bit Validez // 7 identificador único
+  Directory* directory_block; 
+  uint32_t block_partition_quantity; // Últimos 4 bytes
+} Entry;
 
-typedef struct partition
+typedef struct directory
 {
 	/* data */
-} Partition;
+  int valid; // 0 o 1
+  int relative_index;
+  char* filename; // ej: archivo.txt, máximo 28 bytes (ASCII). Se rellena con 0x00
+} Directory;
+
+typedef struct bitmap
+{
+  // será necesario?
+} Bitmap;
+
+typedef struct osfile{
+
+} osFile;
+
+Mbt* create_mbt();
