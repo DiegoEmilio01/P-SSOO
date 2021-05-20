@@ -38,11 +38,11 @@ uint8 get_partition_id(uint8 byte){
   return ((byte) << 1) >> 1;
 }
 
-/** Funcion que da el tamaño del bloque indice
+/** entrega los ultimos 3 bytes de 4. Sitve para MBT y bloque de directorio
  * @param puntero a inicio del bloque de directorio
  * @return retorna tamaño del archivo indicado por el bloque indice
  */
-uint32_t get_block_id(uint8 *bitarray){
+uint32_t last_3_bytes_of_4(uint8 *bitarray){
   uint32_t ret = *bitarray;
   ret <<= 8;
   ret >>= 8;
@@ -58,6 +58,10 @@ uint64_t get_index_size(uint8 *bitarray){
   uint64_t ret = *bitarray;
   ret >>= 3*8;
   return ret;
+}
+
+uint32_t read_4_bytes(uint8 *bitarray){
+  return *((int*) bitarray;
 }
 
 
