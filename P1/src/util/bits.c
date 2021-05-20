@@ -61,7 +61,7 @@ uint64_t get_index_size(uint8 *bitarray){
 }
 
 uint32_t read_4_bytes(uint8 *bitarray){
-  return *((int*) bitarray;
+  return *((int*) bitarray);
 }
 
 
