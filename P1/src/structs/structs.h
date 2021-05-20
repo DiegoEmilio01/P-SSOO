@@ -16,8 +16,10 @@ typedef struct mbt
 {
   int entry_quantity; // 128
   Entry* entry_container;  
-
 } Mbt;
+
+Mbt* init_mbt(FILE* file);
+
 
 /*
 Cada entrada lleva:
@@ -29,15 +31,23 @@ Cada entrada lleva:
 */
 typedef struct entry
 {
-  uint8_t first_byte; // 1 bit Validez // 7 identificador único
-  Directory* directory_block; 
-  uint32_t block_partition_quantity; // Últimos 4 bytes
+  // 0: partición invalida, 1: partición válida
+  int is_valid;
+  // id de la partición
+  int id;
+  // posición absoluta del primer bloque de la partición
+  int location;
+  // cantidad de bloques de la partición
+  int size;
+  //uint8_t first_byte; // 1 bit Validez // 7 identificador único
+  //Directory* directory_block; 
+  //uint32_t block_partition_quantity; // Últimos 4 bytes
 } Entry;
 
 typedef struct directory
 {
 	/* data */
-  int valid; // 0 o 1
+  int is_valid; // 0 o 1
   int relative_index;
   char* filename; // ej: archivo.txt, máximo 28 bytes (ASCII). Se rellena con 0x00
 } Directory;

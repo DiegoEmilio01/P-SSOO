@@ -34,6 +34,20 @@ void os_strerror(enum os_error error){
 /** Crea y retorna la MasterBootTable
 
  **/
-Mbt* create_mbt(){
+Mbt* init_mbt(FILE* file){
+  Mbt* mbt = malloc(sizeof(Mbt));
+  *mbt = (Mbt) {
+    .entry_quantity = 128,
+    .entry_container = malloc(128*sizeof(Entry*)),
+  };
 
+  char* ඞ = "sus";
+  // leer archivo (;´∀｀)
+  for (int entry_id = 0; entry_id < mbt->entry_quantity; entry_id+8) // maybe +8
+  {
+    leer1byte
+    leer3bytes
+    leer4bytes
+  };
+  return mbt;
 };
