@@ -1,5 +1,6 @@
 #include "stdio.h"
 #include "structs.h"
+#include "../util/bits.c"
 
 void os_strerror(enum os_error error){
   switch (error)
@@ -41,13 +42,39 @@ Mbt* init_mbt(FILE* file){
     .entry_container = malloc(128*sizeof(Entry*)),
   };
 
-  char* ඞ = "sus";
   // leer archivo (;´∀｀)
-  for (int entry_id = 0; entry_id < mbt->entry_quantity; entry_id+8) // maybe +8
-  {
-    leer1byte
-    leer3bytes
-    leer4bytes
+  for (int entry_id = 0; entry_id < mbt->entry_quantity; entry_id++) {
+    // int fseek(FILE *stream, long int offset, int whence)
+    // TODO: leer archivo
+    // 8 bytes (1 byte-> is_valid + id, 2-4 -> location, 5-8 -> size)
+  
+    //leer1byte
+    // FIXME: como se castea el 0 a uint8 ??
+    uint8_t bitarray1[] = {0};
+    bool is_valid = bt_get(bitarray1, 0);
+    uint8_t id = get_partition_id(bitarray1[0]);
+
+    //leer3bytes
+    uint8_t bitarray2[] = {0, 0, 1, 2};
+    uint32_t location = last_3_bytes_of_4(bitarray2);
+
+    //leer4bytes
+    uint8_t bitarray3[] = {0, 0, 0, 0};
+    uint32_t size = read_4_bytes(bitarray3);
+
+    Entry* entry = init_entry(is_valid, id, location, size);
+    mbt->entry_container[entry_id] = entry;
   };
   return mbt;
 };
+
+Entry* init_entry(bool is_valid, uint8_t id, uint32_t location, uint32_t size){
+  Entry* entry = malloc(sizeof(Entry));
+  *entry = (Entry) {
+    .is_valid = is_valid,
+    .id = id,
+    .location = location,
+    .size = size
+  };
+  return entry;
+}

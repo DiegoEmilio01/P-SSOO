@@ -1,4 +1,5 @@
-
+#include <stdbool.h>
+#include <stdint.h>
 
 enum os_error{
   invalid_mount_partition,
@@ -32,17 +33,19 @@ Cada entrada lleva:
 typedef struct entry
 {
   // 0: partición invalida, 1: partición válida
-  int is_valid;
+  bool is_valid;
   // id de la partición
-  int id;
+  uint8_t id;
   // posición absoluta del primer bloque de la partición
-  int location;
+  uint32_t location;
   // cantidad de bloques de la partición
-  int size;
+  uint32_t size;
   //uint8_t first_byte; // 1 bit Validez // 7 identificador único
   //Directory* directory_block; 
   //uint32_t block_partition_quantity; // Últimos 4 bytes
 } Entry;
+
+Entry* init_entry(bool is_valid, uint8_t id, uint32_t location, uint32_t size);
 
 typedef struct directory
 {

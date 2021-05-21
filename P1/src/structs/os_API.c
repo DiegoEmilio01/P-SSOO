@@ -1,6 +1,8 @@
 #include <stdbool.h>
+#include <stdio.h>
 #include "os_API.h"
 #include "structs.h"
+#include "../osfs/main.h"
 
 typedef struct osFile;
 
@@ -10,8 +12,14 @@ typedef struct osFile;
  */
 
 
-Mbt* os_mount(char* diskname, int partition){
-  printf("Creando las particiones\n");
+void os_mount(char* diskname, int partition_id){
+
+  path_disk = diskname;
+  partition = partition_id;
+  // OJO: rb+ para leer y escribir en binario (?)
+  FILE* disk = fopen(path_disk, "rb+");
+  mbt = init_mbt(disk);
+  fclose(disk);
 }
 
 void os_bitmap(unsigned num){

@@ -5,7 +5,7 @@
 
 // Funciones Generales
 
-Mbt* os_mount(char*, int);
+void os_mount(char*, int);
 
 void os_bitmap(unsigned int);
 
