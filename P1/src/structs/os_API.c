@@ -4,21 +4,18 @@
 #include "structs.h"
 #include "../osfs/main.h"
 
-typedef struct osFile;
 
 /** monta el os
  * @param
  * @returns Mbt*
  */
-
-
 void os_mount(char* diskname, int partition_id){
 
-  path_disk = diskname;
-  partition = partition_id;
+  char* path_disk = diskname;
+  int partition = partition_id;
   // OJO: rb+ para leer y escribir en binario (?)
   FILE* disk = fopen(path_disk, "rb+");
-  mbt = init_mbt(disk);
+  Mbt* mbt = init_mbt(disk);
   fclose(disk);
 }
 
@@ -29,6 +26,7 @@ void os_bitmap(unsigned num){
 
 bool os_exists(char* filename){
   printf("Corroborando existencia de %s\n", filename);
+  return false;
 }
 
 void os_ls(){
@@ -56,7 +54,7 @@ void os_open(char* filename, char mode){
 }
 
 void os_read(osFile* file_desc, void* buffer, int nbytes){
-  printf("Leyendo %d bytes del archivo\n");
+  printf("Leyendo %d bytes del archivo\n", nbytes);
 }
 
 void os_write(osFile* file_desc, void* buffer, int nbytes){

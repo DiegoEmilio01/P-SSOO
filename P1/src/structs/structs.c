@@ -1,6 +1,9 @@
-#include "stdio.h"
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "structs.h"
-#include "../util/bits.c"
+#include "../osfs/main.h"
+#include "../util/bits.h"
 
 void os_strerror(enum os_error error){
   switch (error)
@@ -72,7 +75,7 @@ Mbt* init_mbt(FILE* disk){
 
     //leer4bytes
     uint8_t bitarray3[] = {0, 0, 0, 0};
-    uint32_t size = read_4_bytes(bitarray3);
+    uint32_t size = int_from_4_bytes(bitarray3);
 
     Entry* entry = init_entry(is_valid, id, location, size);
     mbt->entry_container[entry_id] = entry;

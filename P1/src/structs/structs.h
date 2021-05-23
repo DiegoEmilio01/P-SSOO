@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
+#pragma once
 
 enum os_error{
   invalid_mount_partition,
@@ -11,17 +12,6 @@ enum os_error{
   full_disk,
   mbt_init_error
 };
-
-void os_strerror(enum os_error error);
-
-typedef struct mbt
-{
-  int entry_quantity; // 128
-  Entry** entry_container;  
-} Mbt;
-
-Mbt* init_mbt(FILE* file);
-
 
 /*
 Cada entrada lleva:
@@ -45,6 +35,19 @@ typedef struct entry
   //Directory* directory_block; 
   //uint32_t block_partition_quantity; // Últimos 4 bytes
 } Entry;
+
+void os_strerror(enum os_error error);
+
+typedef struct mbt
+{
+  int entry_quantity; // 128
+  Entry** entry_container;  
+} Mbt;
+
+Mbt* init_mbt(FILE* file);
+
+
+
 
 Entry* init_entry(bool is_valid, uint8_t id, uint32_t location, uint32_t size);
 
