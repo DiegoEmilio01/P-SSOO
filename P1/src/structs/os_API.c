@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdio.h>
+
 #include "os_API.h"
 #include "structs.h"
 #include "../osfs/main.h"
@@ -8,7 +9,7 @@
 /** monta el os
  * @param
  * @returns Mbt*
- */
+*/
 void os_mount(char* diskname, int partition_id){
 
   char* path_disk = diskname;
