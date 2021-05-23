@@ -26,6 +26,9 @@ void os_strerror(enum os_error error){
   case full_disk:
     printf("ERROR: Disco lleno. En este estado no se pueden crean nuevas particiones ni escribir más archivos.\n");
     break;
+  case mbt_init_error:
+    printf("ERROR: Error al leer la mbt, el largo no corresponde al tamaño del buffer.\n");
+    break;
   default:
     break;
   }
@@ -35,11 +38,11 @@ void os_strerror(enum os_error error){
 /** Crea y retorna la MasterBootTable
 
  **/
-Mbt* init_mbt(FILE* file){
+Mbt* init_mbt(FILE* disk){
   Mbt* mbt = malloc(sizeof(Mbt));
   *mbt = (Mbt) {
     .entry_quantity = 128,
-    .entry_container = malloc(128*sizeof(Entry*)),
+    .entry_container = malloc(128*sizeof(Entry**)),
   };
 
   // leer archivo (;´∀｀)
@@ -47,7 +50,16 @@ Mbt* init_mbt(FILE* file){
     // int fseek(FILE *stream, long int offset, int whence)
     // TODO: leer archivo
     // 8 bytes (1 byte-> is_valid + id, 2-4 -> location, 5-8 -> size)
-  
+
+    // * Cosas para leer archivo
+    // fijamos el puntero del archivo al inicio del mismo
+    int xd = fseek(disk, 0, SEEK_SET);
+    char buffer[1024];
+
+    size_t xd2 = fread((void*) buffer, 1, 1024, disk); // FIXME: Si no funca, aca es
+    // fseek con constantes SEEK_SET, SEEK_END, SEEK_CUR.
+    // fwrite y fread para leer y escribir bytes.
+
     //leer1byte
     // FIXME: como se castea el 0 a uint8 ??
     uint8_t bitarray1[] = {0};
@@ -78,3 +90,8 @@ Entry* init_entry(bool is_valid, uint8_t id, uint32_t location, uint32_t size){
   };
   return entry;
 }
+
+// Funcion para transformar el contenido del testdisk del Pablo
+int hex_to_int(char* input){
+  return (int)strtol(input, NULL, 16);
+};

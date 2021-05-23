@@ -8,7 +8,8 @@ enum os_error{
   invalid_delete_file,
   invalid_read_bitmap,
   invalid_file_name_size, // Usar para input vacio o muy largo
-  full_disk
+  full_disk,
+  mbt_init_error
 };
 
 void os_strerror(enum os_error error);
@@ -16,7 +17,7 @@ void os_strerror(enum os_error error);
 typedef struct mbt
 {
   int entry_quantity; // 128
-  Entry* entry_container;  
+  Entry** entry_container;  
 } Mbt;
 
 Mbt* init_mbt(FILE* file);
@@ -65,3 +66,5 @@ typedef struct osfile{
 } osFile;
 
 Mbt* create_mbt();
+
+int hex_to_int(char* input);
