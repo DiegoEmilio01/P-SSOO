@@ -44,7 +44,7 @@ typedef struct mbt
   Entry** entry_container;  
 } Mbt;
 
-Mbt* init_mbt(FILE* file);
+void init_mbt(FILE* file);
 
 
 

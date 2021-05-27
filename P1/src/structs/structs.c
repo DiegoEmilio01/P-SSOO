@@ -44,11 +44,11 @@ void os_strerror(enum os_error error){
 /** Crea y retorna la MasterBootTable
 
  **/
-Mbt* init_mbt(FILE* disk){
-  Mbt* mbt = malloc(sizeof(Mbt));
+void init_mbt(FILE* disk){
+  //Mbt* mbt = malloc(sizeof(Mbt));
   *mbt = (Mbt) {
     .entry_quantity = 128,
-    .entry_container = malloc(128*sizeof(Entry**)),
+    .entry_container = calloc(128, sizeof(Entry**)),
   };
   printf("Llegue a init_mb\n");
 
@@ -88,7 +88,7 @@ Mbt* init_mbt(FILE* disk){
     }
   }
   printf("sali\n");
-  return mbt;
+  //return mbt;
 };
 
 Entry* init_entry(bool is_valid, uint8_t id, uint32_t location, uint32_t size){
