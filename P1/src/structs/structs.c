@@ -6,8 +6,6 @@
 #include "../util/bits.h"
 #include <inttypes.h>
 
-#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
-
 void os_strerror(enum os_error error){
   switch (error)
   {
@@ -45,7 +43,6 @@ void os_strerror(enum os_error error){
 
  **/
 void init_mbt(FILE* disk){
-  //Mbt* mbt = malloc(sizeof(Mbt));
   *mbt = (Mbt) {
     .entry_quantity = 128,
     .entry_container = calloc(128, sizeof(Entry**)),
@@ -71,7 +68,6 @@ void init_mbt(FILE* disk){
     // fwrite y fread para leer y escribir bytes.
 
     // leer 1 byte
-    // FIXME: como se castea el 0 a uint8 ??
     bool is_valid = bt_get(buffer, 0);
     uint8_t id = get_partition_id(buffer[0]);
 
