@@ -5,9 +5,9 @@
 
 // Funciones Generales
 
-void os_mount(char*, int);
+void os_mount(char* path, int holi);
 
-void os_bitmap(unsigned int);
+void os_bitmap(unsigned int holi);
 
 bool os_exists(char* filename);
 

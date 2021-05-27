@@ -2,6 +2,8 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include "bits.h"
 
 typedef uint8_t uint8;
 // big endian -> valor mas alto en menor posicion
@@ -35,7 +37,7 @@ bool bt_get(uint8 *bitarray, uint8 position){
  * @return retorna valores de char[1:8]
  */
 uint8 get_partition_id(uint8 byte){
-  return ((byte) << 1) >> 1;
+  return ((uint8_t)(byte << 1)) >> 1;
 }
 
 /** entrega los ultimos 3 bytes de 4. Sitve para MBT y bloque de directorio
@@ -43,9 +45,12 @@ uint8 get_partition_id(uint8 byte){
  * @return retorna tamaño del archivo indicado por el bloque indice
  */
 uint32_t last_3_bytes_of_4(uint8 *bitarray){
-  uint32_t ret = *bitarray;
-  ret <<= 8;
-  ret >>= 8;
+  uint32_t t = (uint8_t)bitarray[3];
+  uint32_t ret = t;
+  t = (uint8_t)bitarray[2];
+  ret |= (t<<8);
+  t = (uint8_t)bitarray[1];
+  ret |= (t<<8*2);
   return ret;
 }
 
@@ -55,25 +60,52 @@ uint32_t last_3_bytes_of_4(uint8 *bitarray){
  * @return retorna tamaño del archivo indicado por el bloque indice
  */
 uint64_t get_index_size(uint8 *bitarray){
-  uint64_t ret = *bitarray;
-  ret >>= 3*8;
+  uint64_t t = (uint8_t)bitarray[4];
+  uint64_t ret = t;
+  t = (uint8_t)bitarray[3];
+  ret |= (t<<8);
+  t = (uint8_t)bitarray[2];
+  ret |= (t<<8*2);
+  t = (uint8_t)bitarray[1];
+  ret |= (t<<8*3);
+  t = (uint8_t)bitarray[0];
+  ret |= (t<<8*4);
   return ret;
 }
 
-uint32_t read_4_bytes(uint8 *bitarray){
-  return *((int*) bitarray);
+uint32_t int_from_4_bytes(uint8 *bitarray){
+  uint32_t t = (uint8_t)bitarray[3];
+  uint32_t ret = t;
+  t = (uint8_t)bitarray[2];
+  ret |= (t<<8);
+  t = (uint8_t)bitarray[1];
+  ret |= (t<<8*2);
+  t = (uint8_t)bitarray[0];
+  ret |= (t<<8*3);
+  return ret;
 }
 
 
-/* ejemplo de uso: uwu
-#include <stdio.h>
-int main()
-{
-    uint8 *a = calloc(100,sizeof(int));
-    bt_set(a, 0, 1);
-    printf("%d\n", bt_get(&a,0));
-    printf("%d\n", sizeof(char));
-    free(a);
-    return 0;
-}
-*/
+// // ejemplo de uso: uwu
+// #include <stdio.h>
+// #include <stdlib.h>
+// int main(int argc, char const **argv)
+// {
+//   // https://stackoverflow.com/questions/22059189/read-a-file-as-byte-array
+//   FILE *fileptr;
+//   char *buffer;
+//   long filelen;
+
+//   fileptr = fopen("testdisk.bin", "rb");  // Open the file in binary mode
+//   fseek(fileptr, 0, SEEK_END);          // Jump to the end of the file
+//   filelen = ftell(fileptr);             // Get the current byte offset in the file
+//   rewind(fileptr);                      // Jump back to the beginning of the file
+
+//   buffer = (char *)malloc(filelen * sizeof(char)); // Enough memory for the file
+//   fread(buffer, filelen, 1, fileptr); // Read in the entire file
+//   printf("first bit: %d\n", bt_get(buffer,0));
+//   printf("partition id: %d\n", get_partition_id(buffer[0]));
+//   printf("Idenfiticador absoluto: %d\n", last_3_bytes_of_4(buffer));
+//   fclose(fileptr); // Close the file
+// }
+
