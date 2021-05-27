@@ -2,7 +2,7 @@
 #pragma once
 typedef uint8_t uint8;
 
-void bt_set(int *bitarray, uint8 position, bool value);
+void bt_set(uint8 *bitarray, uint8 position, bool value);
 bool bt_get(uint8 *bitarray, uint8 position);
 uint8 get_partition_id(uint8 byte);
 uint32_t last_3_bytes_of_4(uint8 *bitarray);
