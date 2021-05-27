@@ -6,6 +6,8 @@
 #include "../util/bits.h"
 #include <inttypes.h>
 
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+
 void os_strerror(enum os_error error){
   switch (error)
   {
@@ -49,48 +51,34 @@ Mbt* init_mbt(FILE* disk){
     .entry_container = malloc(128*sizeof(Entry**)),
   };
   printf("Llegue a init_mb\n");
-  // leer archivo (;´∀｀)
-  uint8_t buffer[8];
-  // int xd0 = fseek(disk, 0L, SEEK_SET); 
 
+  uint8_t buffer[8];
+          
   for (int entry_id = 0; entry_id < mbt->entry_quantity; entry_id++) {
     
-    // TODO: leer archivo
-    // 8 bytes (1 byte-> is_valid + id, 2-4 -> location, 5-8 -> size)
-    // * Cosas para leer archivo
-    // fijamos el puntero del archivo al inicio del mismo
-    //printf("Llegue a 2\n");
+    // printf("\ntell-bef: %ld ; ", ftell(disk));
 
-
-    //printf("Llegue a 3\n");
-    // int fseek(FILE *stream, long int offset, int whence)funca, aca es
-    printf("\ntell-bef: %ld ; ", ftell(disk));
-    size_t xd1 = fread(buffer, sizeof(uint8_t), 8, disk); // FIXME: Si n
-    printf("tell-aft: %ld\n", ftell(disk));
-    for (int i=0; i<8; i++){
-      for (int j=0; j<8; j++)
-        printf("%d", bt_get(buffer, i*8+j));
-      printf(" ");
-    }
-    printf("\n");
+    size_t ret = fread(buffer, sizeof(uint8_t), (size_t)8, disk);
+    // for (int i=0; i<8; i++){
+    //   for (int j=0; j<8; j++)
+    //     printf("%d", bt_get(buffer, i*8+j));
+    //   printf(" ");
+    // }
+    // printf("\n");
     
-  
     
     // fseek con constantes SEEK_SET, SEEK_END, SEEK_CUR.
     // fwrite y fread para leer y escribir bytes.
 
-    //leer1byte
+    // leer 1 byte
     // FIXME: como se castea el 0 a uint8 ??
-    // uint8_t bitarray1[] = {0};
     bool is_valid = bt_get(buffer, 0);
     uint8_t id = get_partition_id(buffer[0]);
 
-    //leer3bytes
-    // uint8_t bitarray2[] = {0, 0, 1, 2};
+    // leer 3 bytes
     uint32_t location = last_3_bytes_of_4(buffer);
 
-    //leer4bytes
-    // uint8_t bitarray3[] = {0, 0, 0, 0};
+    // leer 4 bytes
     uint32_t size = int_from_4_bytes(buffer+4);
     printf("%d %" PRIu8 " %" PRIu32 " %" PRIu32 "\n", is_valid, id, location, size);
 
@@ -98,7 +86,6 @@ Mbt* init_mbt(FILE* disk){
       Entry* entry = init_entry(is_valid, id, location, size);
       mbt->entry_container[id] = entry;
     }
-    // int xd2 = fseek(disk, 8L, SEEK_CUR);
   }
   printf("sali\n");
   return mbt;
