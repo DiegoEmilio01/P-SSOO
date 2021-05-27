@@ -8,25 +8,25 @@ typedef uint8_t uint8;
 
 int pos, offset;
 
-void bt_set(int *bitarray, uint8 position, bool value){
-  offset = position / sizeof(uint8);
-  pos = sizeof(uint8)*8 - 1 - (position % sizeof(uint8));
+void bt_set(uint8_t *bitarray, uint8 position, bool value){
+  offset = position / (sizeof(uint8)*8);
+  pos = sizeof(uint8)*8 - 1 - (position % (sizeof(uint8)*8));
   bitarray += offset;
-  (*bitarray) ^= ((*bitarray) & ~(1UL << pos)) | (value << pos);
+  (*bitarray) = ((*bitarray) & ~((uint8)1 << pos)) | (value << pos);
 }
 
 
 /** función que retorna el valor de un bit dada su posición, dentro de un byte 
  * @param byte (bitarray?)
- * @param position (uint8 de 1 a 8)
+ * @param position (uint8 desde 0)
  * @return value_bit (int 0 o 1)
  * 
  */
 bool bt_get(uint8 *bitarray, uint8 position){
-  offset = position / sizeof(uint8);
-  pos = sizeof(uint8)*8 - 1 - (position % sizeof(uint8));
+  offset = position / (sizeof(uint8)*8);
+  pos = sizeof(uint8)*8 - 1 - (position % (sizeof(uint8)*8));
   bitarray += offset;
-  return ((*bitarray) >> pos) & 1UL;
+  return ((*bitarray) >> pos) & (uint8_t)1;
 }
 
 /** función que retorna un int dado un bitarray y un rango de valores
