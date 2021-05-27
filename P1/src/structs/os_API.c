@@ -15,8 +15,10 @@ void os_mount(char* diskname, int partition_id){
   char* path_disk = diskname;
   int partition = partition_id;
   // OJO: rb+ para leer y escribir en binario (?)
-  FILE* disk = fopen(path_disk, "rb+");
+  FILE* disk = fopen(path_disk, "rb");  // intentar con rb+
+  printf("archivo abierto\n");
   Mbt* mbt = init_mbt(disk);
+  printf("Vamos a cerrar\n");
   fclose(disk);
 }
 
