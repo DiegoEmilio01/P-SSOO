@@ -51,14 +51,56 @@ void os_create_partition(int id, int size){
   printf("Creando partición %d de tamaño %d\n", id, size);
 }
 
-void os_delete_partition(int id){
-  printf("Eliminando partition %d de la MTB\n", id);
-  // TODO: Chris
+// TODO: lanzar OS_ERROR invalid_delete_partition
+void os_delete_partition(FILE* disk, int delete_id){
+  printf("Eliminando partition %d de la MBT\n", id);
+
+  fseek(disk, 0, SEEK_SET);
+  bool raise_error = true;
+  uint8_t buffer[8];
+
+  for (int entry_id = 0; entry_id < mbt->entry_quantity; entry_id++){
+
+    // Obtenemos el id de partición y el bit de validez
+    size_t ret = fread(buffer, sizeof(uint8_t), (size_t)8, disk);
+    bool is_valid = bt_get(buffer, 0);
+    int partition_id = get_partition_id(buffer[0]);
+
+    if (is_valid && (partition_id == delete_id)){
+      // si la partición es válida e id es correcto, cambia el primer byte de la entrada a 0.
+      // es decir, el bit de validez y el id pasa a ser 0.
+      uint8_t zero_buffer[1] = {0};
+      fwrite(buffer, sizeof(uint8_t), 1, disk);
+      raise_error = false;
+      break;
+    }
+    // Avanzamos hacia el siguiente trozo de 8 bytes.
+    fseek(disk, 8, SEEK_CUR);
+  }
+
+  if (raise_error){
+    // RAISE ERROR
+  }
+
+  fclose(disk);
 }
 
-void os_reset_mbt(){
-  printf("Eliminando particiones de la MTB\n");
-  // TODO: Chris
+void os_reset_mbt(FILE* disk){
+  printf("Eliminando particiones de la MBT\n");
+
+  fseek(disk, 0, SEEK_SET);
+  uint8_t zero_buffer[1] = {0};
+
+  for (int entry_id = 0; entry_id < mbt->entry_quantity; entry_id++){
+    // Cambia el primer byte de la entrada a 0.
+    // es decir, el bit de validez y el id pasa a ser 0.
+    fwrite(zero_buffer, sizeof(uint8_t), 1, disk);
+    // Avanzamos hacia el siguiente trozo de 8 bytes.
+    fseek(disk, 8, SEEK_CUR);
+  }
+
+  fclose(disk);
+
 }
 
 void os_open(char* filename, char mode){

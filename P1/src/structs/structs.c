@@ -50,20 +50,12 @@ void init_mbt(FILE* disk){
   printf("Llegue a init_mb\n");
 
   uint8_t buffer[8];
+  // Coloca el puntero del disco al inicio
+  fseek(disk, 0, SEEK_SET);
           
   for (int entry_id = 0; entry_id < mbt->entry_quantity; entry_id++) {
-    
-    // printf("\ntell-bef: %ld ; ", ftell(disk));
 
     size_t ret = fread(buffer, sizeof(uint8_t), (size_t)8, disk);
-    // for (int i=0; i<8; i++){
-    //   for (int j=0; j<8; j++)
-    //     printf("%d", bt_get(buffer, i*8+j));
-    //   printf(" ");
-    // }
-    // printf("\n");
-    
-    
     // fseek con constantes SEEK_SET, SEEK_END, SEEK_CUR.
     // fwrite y fread para leer y escribir bytes.
 
