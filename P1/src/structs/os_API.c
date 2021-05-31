@@ -42,7 +42,7 @@ void os_ls(){
 void os_mbt(){
   printf("Particiones válidas\n");
   for (int i = 0; i < mbt->entry_quantity; i++){
-    if (mbt->entry_container[i]->is_valid){
+    if (mbt->entry_container[i] && mbt->entry_container[i]->is_valid){
       printf("    id: %d\n", mbt->entry_container[i]->id);
       printf("    location: %d\n", mbt->entry_container[i]->location);
       printf("    size: %d\n\n", mbt->entry_container[i]->size);
@@ -56,7 +56,7 @@ void os_create_partition(int id, int size){
 
 // TODO: lanzar OS_ERROR invalid_delete_partition
 void os_delete_partition(int delete_id){
-  printf("Eliminando partition %d de la MBT\n", delete_id);
+  printf("Eliminando partición %d de la MBT\n", delete_id);
 
   // Crea el puntero al archivo disk, en modo read write 
   FILE* disk = fopen(path_disk, "r+b");
