@@ -89,6 +89,51 @@ Entry* init_entry(bool is_valid, uint8_t id, uint32_t location, uint32_t size){
   return entry;
 }
 
+// Funciones para Temporal Entry
+
+TEntry* init_tentry(TEntry* tentry, uint32_t location, uint32_t size){
+  TEntry* new = malloc(sizeof(TEntry));
+  *new = (TEntry) {
+    .location = location,
+    .size = size,
+    .next = NULL
+  };
+  if (tentry){
+    if (tentry->location > new->location){
+      new->next = tentry;
+      tentry = new;
+    }
+    else{
+      TEntry* current = tentry;
+      while (current){
+        if (current->next){
+          if (current->next->location > new->location){
+            new->next = current->next;
+            current->next = new;
+            return tentry;
+          }
+        }
+        else{
+          current->next = new;
+          return tentry;
+        }
+        current = current->next;
+      }
+    }
+  }
+  return new;
+}
+
+void destroy_tentry(TEntry* tentry)
+{
+  TEntry* next = tentry -> next;
+  if (next)
+  {
+    destroy_tentry(next);
+  }
+  free(tentry);
+}
+
 // Funcion para transformar el contenido del testdisk del Pablo
 int hex_to_int(char* input){
   return (int)strtol(input, NULL, 16);

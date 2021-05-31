@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <inttypes.h>
 
 #include "os_API.h"
 #include "structs.h"
@@ -50,6 +51,72 @@ void os_mbt(){
 
 void os_create_partition(int id, int size){
   printf("Creando partición %d de tamaño %d\n", id, size);
+  if (size < 16384 || size > 131072)
+  {
+    printf("ERROR: wrong size as argument. Size must be between 16384 and 131072.\n");
+  }
+  else if (id < 0 || id > 128)
+  {
+    printf("ERROR: wrong id as argument. Id must be between 0 and 128.\n");
+  }
+  else if (mbt->entry_container[id] && mbt->entry_container[id]->is_valid)
+  {
+    printf("ERROR: partition already created. If aditional partition is needed, please try another id.\n");
+  }
+  else
+  {
+    TEntry* tentry = NULL;
+    for (int entry_id = 0; entry_id < mbt->entry_quantity; entry_id++){
+      if (mbt->entry_container[entry_id] && mbt->entry_container[entry_id]->is_valid){
+        tentry = init_tentry(tentry, mbt->entry_container[entry_id]->location, mbt->entry_container[entry_id]->size);
+      }
+    }
+    // TEntry* current = tentry;
+    // while (current)
+    // {
+    //   printf("%" PRIu32 ", %" PRIu32 "\n", current->location, current->size);
+    //   current = current->next;
+    // }
+    
+    if (!tentry || size < tentry->location)
+    {
+      Entry* entry = init_entry(true, id, 0, size);
+      mbt->entry_container[id] = entry;
+      printf("Partition created successfully.\n");
+      destroy_tentry(tentry);
+      return;
+    }
+
+    TEntry* current = tentry;
+    while (current)
+    {
+      uint32_t posible_location = current->location + current->size;
+      if (!current->next)
+      {
+        if (2097151 - posible_location + 1 >= size)
+        {
+          Entry* entry = init_entry(true, id, posible_location, size);
+          mbt->entry_container[id] = entry;
+          printf("Partition created successfully.\n");
+        }
+        else
+        {
+          printf("ERROR: partition cannot be allocated, please try a smaller size.\n");
+        }
+        destroy_tentry(tentry);
+        return;
+      }
+      else if (current->next->location - posible_location >= size)
+      {
+        Entry* entry = init_entry(true, id, posible_location, size);
+        mbt->entry_container[id] = entry;
+        printf("Partition created successfully.\n");
+        destroy_tentry(tentry);
+        return;
+      }
+      current = current->next;
+    }    
+  }
 }
 
 // TODO: lanzar OS_ERROR invalid_delete_partition

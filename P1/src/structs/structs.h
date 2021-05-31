@@ -13,6 +13,8 @@ enum os_error{
   mbt_init_error
 };
 
+void os_strerror(enum os_error error);
+
 /*
 Cada entrada lleva:
   - Tamaño de entrada 8 Bytes
@@ -36,7 +38,17 @@ typedef struct entry
   //uint32_t block_partition_quantity; // Últimos 4 bytes
 } Entry;
 
-void os_strerror(enum os_error error);
+Entry* init_entry(bool is_valid, uint8_t id, uint32_t location, uint32_t size);
+
+typedef struct temporal_entry
+{
+  uint32_t location;
+  uint32_t size;
+  struct temporal_entry* next;
+} TEntry;
+
+TEntry* init_tentry(TEntry* tentry, uint32_t location, uint32_t size);
+void destroy_tentry(TEntry* tentry);
 
 typedef struct mbt
 {
@@ -45,11 +57,8 @@ typedef struct mbt
 } Mbt;
 
 void init_mbt(FILE* file);
+Mbt* create_mbt();
 
-
-
-
-Entry* init_entry(bool is_valid, uint8_t id, uint32_t location, uint32_t size);
 
 typedef struct directory
 {
@@ -68,6 +77,5 @@ typedef struct osfile{
 
 } osFile;
 
-Mbt* create_mbt();
 
 int hex_to_int(char* input);
