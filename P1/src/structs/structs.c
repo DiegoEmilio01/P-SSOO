@@ -47,7 +47,7 @@ void init_mbt(FILE* disk){
     .entry_quantity = 128,
     .entry_container = calloc(128, sizeof(Entry**)),
   };
-  printf("Llegue a init_mb\n");
+  // printf("Llegue a init_mb\n");
 
   uint8_t buffer[8];
   // Coloca el puntero del disco al inicio
@@ -68,14 +68,13 @@ void init_mbt(FILE* disk){
 
     // leer 4 bytes
     uint32_t size = int_from_4_bytes(buffer+4);
-    printf("%d %" PRIu8 " %" PRIu32 " %" PRIu32 "\n", is_valid, id, location, size);
+    // printf("%d %" PRIu8 " %" PRIu32 " %" PRIu32 "\n", is_valid, id, location, size);
 
     if (is_valid){
       Entry* entry = init_entry(is_valid, id, location, size);
       mbt->entry_container[id] = entry;
     }
   }
-  printf("sali\n");
   //return mbt;
 };
 
