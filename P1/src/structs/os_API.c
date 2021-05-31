@@ -4,7 +4,10 @@
 #include "os_API.h"
 #include "structs.h"
 #include "../osfs/main.h"
+#include "../util/bits.h"
 
+char* path_disk;
+int partition;
 
 /** monta el os
  * @param
@@ -12,8 +15,8 @@
 */
 void os_mount(char* diskname, int partition_id){
 
-  char* path_disk = diskname;
-  int partition = partition_id;
+  path_disk = diskname;
+  partition = partition_id;
   // OJO: rb+ para leer y escribir en binario (?)
   FILE* disk = fopen(diskname, "r+b");  // intentar con rb+
   printf("archivo abierto\n");
