@@ -52,9 +52,11 @@ void os_create_partition(int id, int size){
 }
 
 // TODO: lanzar OS_ERROR invalid_delete_partition
-void os_delete_partition(FILE* disk, int delete_id){
-  printf("Eliminando partition %d de la MBT\n", id);
+void os_delete_partition(int delete_id){
+  printf("Eliminando partition %d de la MBT\n", delete_id);
 
+  // Crea el puntero al archivo disk, en modo read write 
+  FILE* disk = fopen(path_disk, "r+b");
   fseek(disk, 0, SEEK_SET);
   bool raise_error = true;
   uint8_t buffer[8];
@@ -71,11 +73,13 @@ void os_delete_partition(FILE* disk, int delete_id){
       // es decir, el bit de validez y el id pasa a ser 0.
       uint8_t zero_buffer[1] = {0};
       fwrite(buffer, sizeof(uint8_t), 1, disk);
+      mbt->entry_container[entry_id]->is_valid = 0;
+
       raise_error = false;
       break;
     }
-    // Avanzamos hacia el siguiente trozo de 8 bytes.
-    fseek(disk, 8, SEEK_CUR);
+    // Avanzamos hacia el siguiente trozo de 8 bytes, solución pobre
+    fseek(disk, 8 * (entry_id - 1), SEEK_SET);
   }
 
   if (raise_error){
@@ -85,9 +89,11 @@ void os_delete_partition(FILE* disk, int delete_id){
   fclose(disk);
 }
 
-void os_reset_mbt(FILE* disk){
+void os_reset_mbt(){
   printf("Eliminando particiones de la MBT\n");
 
+  // Crea el puntero al archivo disk, en modo read write 
+  FILE* disk = fopen(path_disk, "r+b");
   fseek(disk, 0, SEEK_SET);
   uint8_t zero_buffer[1] = {0};
 
@@ -95,9 +101,14 @@ void os_reset_mbt(FILE* disk){
     // Cambia el primer byte de la entrada a 0.
     // es decir, el bit de validez y el id pasa a ser 0.
     fwrite(zero_buffer, sizeof(uint8_t), 1, disk);
-    // Avanzamos hacia el siguiente trozo de 8 bytes.
-    fseek(disk, 8, SEEK_CUR);
+    // Basta con hacer la entrada inválida, ya que en ese caso se sobreescribe lo demás
+    mbt->entry_container[entry_id]->is_valid = 0;
+    // No encontré si fwrite mueve el puntero en ningún lado :( p.d mi intuición dice que sí lo mueve
+    // asi que tenemos la solución pobre:
+    fseek(disk, 8 * (entry_id - 1), SEEK_SET);
   }
+
+  // tal vez un raise_error pero no se me ocurre qué.
 
   fclose(disk);
 
