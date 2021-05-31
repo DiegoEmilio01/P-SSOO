@@ -10,6 +10,8 @@ int main(int argc, char **argv)
 {
   mbt = malloc(sizeof(Mbt));
   os_mount(argv[1], 1);
+  
+  os_mbt();
 
   for (int i = 0; i < mbt->entry_quantity; i++)
     if (mbt->entry_container[i])

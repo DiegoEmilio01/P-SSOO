@@ -72,7 +72,7 @@ void os_delete_partition(int delete_id){
       // si la partición es válida e id es correcto, cambia el primer byte de la entrada a 0.
       // es decir, el bit de validez y el id pasa a ser 0.
       uint8_t zero_buffer[1] = {0};
-      fwrite(buffer, sizeof(uint8_t), 1, disk);
+      fwrite(zero_buffer, sizeof(uint8_t), 1, disk);
       mbt->entry_container[entry_id]->is_valid = 0;
 
       raise_error = false;
