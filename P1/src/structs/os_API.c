@@ -140,6 +140,11 @@ void write_new_partition(int id, int location, int size) // falta crear los bloq
       fwrite(new_buffer, sizeof(uint8_t), 8, disk);
       break;
     }
+    if (entry_id == mbt->entry_quantity - 1)
+    {
+      printf("ERROR: partition cannot be allocated within any continuous space, please try a smaller size.\n\n");
+    }
+    
   }
   fclose(disk);
 }
