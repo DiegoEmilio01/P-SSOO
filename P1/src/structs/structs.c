@@ -47,7 +47,6 @@ void init_mbt(FILE* disk){
     .entry_quantity = 128,
     .entry_container = calloc(128, sizeof(Entry**)),
   };
-  // printf("Llegue a init_mb\n");
 
   uint8_t buffer[8];
   // Coloca el puntero del disco al inicio
@@ -75,8 +74,19 @@ void init_mbt(FILE* disk){
       mbt->entry_container[id] = entry;
     }
   }
-  //return mbt;
 };
+
+void destroy_mbt()
+{
+  if (mbt)
+  {
+    for (int i = 0; i < mbt->entry_quantity; i++)
+      if (mbt->entry_container[i])
+        free(mbt->entry_container[i]);
+    free(mbt->entry_container);
+    free(mbt);
+  }
+}
 
 Entry* init_entry(bool is_valid, uint8_t id, uint32_t location, uint32_t size){
   Entry* entry = malloc(sizeof(Entry));

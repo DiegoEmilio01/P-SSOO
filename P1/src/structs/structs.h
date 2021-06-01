@@ -57,7 +57,7 @@ typedef struct mbt
 } Mbt;
 
 void init_mbt(FILE* file);
-Mbt* create_mbt();
+void destroy_mbt();
 
 
 typedef struct directory
