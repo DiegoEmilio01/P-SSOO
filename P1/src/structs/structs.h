@@ -76,9 +76,14 @@ typedef struct directory
 
 typedef struct bitmap
 {
-  // será necesario?
+  int start; // posición en la que comienza
+  int n_blocks; // cantidad de bloques del bitmap
+  int empty_blocks; // contador bloques vacios (bits 0)
+  int full_blocks; // contador bloque ocupados (bits 1)
+  uint8_t* bytes; 
 } Bitmap;
 
+Bitmap* init_bitmap();
 
 typedef struct data_block //Siempre manejado en BigEndian
 {
