@@ -60,7 +60,7 @@ void os_create_partition(int id, int size){
   {
     printf("ERROR: wrong size as argument. Size must be between 16384 and 131072.\n\n");
   }
-  else if (id < 0 || id > 128)
+  else if (id < 0 || id > 127)
   {
     printf("ERROR: wrong id as argument. Id must be between 0 and 128.\n\n");
   }
