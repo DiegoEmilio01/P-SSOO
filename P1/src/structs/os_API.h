@@ -11,6 +11,8 @@ void os_bitmap(unsigned int holi);
 
 bool os_exists(char* filename);
 
+IndexBlock* indexblock_init(FILE* disk, int inicio_directorio /* REVISAREIS*/);
+
 void os_ls();
 
 // Funciones MBT

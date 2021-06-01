@@ -54,7 +54,7 @@ void init_mbt(FILE* disk){
           
   for (int entry_id = 0; entry_id < mbt->entry_quantity; entry_id++) {
 
-    size_t ret = fread(buffer, sizeof(uint8_t), (size_t)8, disk);
+    fread(buffer, sizeof(uint8_t), (size_t)8, disk);
     // fseek con constantes SEEK_SET, SEEK_END, SEEK_CUR.
     // fwrite y fread para leer y escribir bytes.
 
@@ -142,6 +142,52 @@ void destroy_tentry(TEntry* tentry)
     destroy_tentry(next);
   }
   free(tentry);
+}
+
+/*
+  unsigned long int file_size; // 5 Bytes para el tamaño del archivo (unsigned aguanta hasta 8).
+  int *punteros; // 2043 Bytes (Arreglo para 681 punteros) Apuntan a los bloques de datos.
+  unsigned char *array_bytes;
+  int *array_bits;
+  int partition;
+*/
+IndexBlock* indexblock_init(FILE* disk, int posicion_indexblock){ 
+  // Nos falta agregar la partición a la que pertenece
+  IndexBlock *bloque_retorno = malloc(sizeof(IndexBlock));  
+  bloque_retorno->entry_quantity = 681;
+  //El index block 
+
+  return bloque_retorno;
+}
+
+Directory* directory_init(FILE* disk, int posicion_particion){ // Falta completar
+  Directory *bloque_retorno = malloc(sizeof(Directory));
+  bloque_retorno->entry_quantity = 64;
+  bloque_retorno->entries = malloc(64*sizeof(DirectoryEntry));
+  uint8_t buffer[8];
+  char* char_buffer[29]; // recordar char vacio, chantar '\0' al final 
+  // Coloca el puntero del disco al inicio
+  fseek(disk, posicion_particion, SEEK_SET);
+  // Leemos el primer bloque y obtenemos las entradas para el Directory
+  for (int entrada_rellenada = 0; entrada_rellenada < 64; entrada_rellenada++) {
+    
+    fread(buffer, sizeof(uint8_t), (size_t)8, disk);
+    // leer 1 byte
+    bloque_retorno->entries[entrada_rellenada].is_valid = bt_get(buffer, 0);
+    bloque_retorno->entries[entrada_rellenada].relative_index = last_3_bytes_of_4(buffer);
+    // TODO: Aquí falta ingresar el nombre (28 Bytes)
+    fread(char_buffer, sizeof(char), (size_t)28, disk);
+    char_buffer[28] = '\0';  /* chantar '\0' al final */
+    //Hasta acá hacemos 32, en la siguiente iteración
+  }
+  return bloque_retorno;
+}
+
+void print_file(osFile* file){
+  printf("-------------------------------------------------\n");
+  printf("Nombre archivo: %s  Tamaño archivo: %lu Bytes  \n", file -> filename, file -> file_size);
+  //printf("Read index: %lu\n", file->relative_index->entry_quantity);
+  printf("-------------------------------------------------\n");
 }
 
 // Funcion para transformar el contenido del testdisk del Pablo

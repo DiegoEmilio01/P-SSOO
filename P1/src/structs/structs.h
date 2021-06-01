@@ -59,23 +59,56 @@ typedef struct mbt
 void init_mbt(FILE* file);
 void destroy_mbt();
 
+typedef struct directoy_entry
+{
+  /* data */
+  int is_valid; // 0 o 1
+  int relative_index; // 3 Bytes
+  char* filename; // ej: archivo.txt, máximo 28 bytes (ASCII). Se rellena con 0x00
+} DirectoryEntry;
 
 typedef struct directory
 {
-	/* data */
-  int is_valid; // 0 o 1
-  int relative_index;
-  char* filename; // ej: archivo.txt, máximo 28 bytes (ASCII). Se rellena con 0x00
+	int entry_quantity; //Deberían ser 64 entradas
+  DirectoryEntry *entries; 
 } Directory;
+
 
 typedef struct bitmap
 {
   // será necesario?
 } Bitmap;
 
-typedef struct osfile{
 
+typedef struct data_block //Siempre manejado en BigEndian
+{
+  unsigned char *array_bytes;
+  int *array_bits;
+  int entry_quantity;
+} DataBlock;
+
+ //Siempre manejado en BigEndian
+typedef struct index_block
+{
+  unsigned long int file_size; // 5 Bytes para el tamaño del archivo (unsigned aguanta hasta 8).
+  int *punteros; // 2043 Bytes (Arreglo para 681 punteros) Apuntan a los bloques de datos.
+  unsigned char *array_bytes;
+  int *array_bits;
+  int partition; // Partición a la que corresponde
+  int entry_quantity;
+}IndexBlock;
+
+typedef struct osfile{ // Representa un archivo abierto
+  char* filename;
+  unsigned long int file_size;
+  unsigned int read_index; // Posición desde donde leer sus bytes
+  Directory *relative_index; // Relacion con su directorio
+  DataBlock *data_blocks; // Contenedor de punteros de los bloques con la información del archivo
+  IndexBlock *index_block; // Bloque índice con la metadata
 } osFile;
 
 
+
+Directory* directory_init(FILE* disk, int posicion_particion);
+void print_file(osFile* file);
 int hex_to_int(char* input);

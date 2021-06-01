@@ -1,6 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include <string.h>
 
 #include "os_API.h"
 #include "structs.h"
@@ -128,7 +129,7 @@ void write_new_partition(int id, int location, int size) // falta crear los bloq
   uint8_t buffer[8];
   for (int entry_id = 0; entry_id < mbt->entry_quantity; entry_id++)
   {
-    size_t ret = fread(buffer, sizeof(uint8_t), (size_t)8, disk);
+    fread(buffer, sizeof(uint8_t), (size_t)8, disk);
     bool is_valid = bt_get(buffer, 0);
     if (!is_valid)
     {
@@ -162,7 +163,7 @@ void os_delete_partition(int delete_id){
   for (int entry_id = 0; entry_id < mbt->entry_quantity; entry_id++){
 
     // Obtenemos el id de partición y el bit de validez
-    size_t ret = fread(buffer, sizeof(uint8_t), (size_t)1, disk);
+    fread(buffer, sizeof(uint8_t), (size_t)1, disk);
     bool is_valid = bt_get(buffer, 0);
     int partition_id = get_partition_id(buffer[0]);
 
@@ -212,10 +213,6 @@ void os_reset_mbt(){
 
 }
 
-void os_open(char* filename, char mode){
-  printf("Abriendo archivo %s\n\n", filename);
-}
-
 void os_read(osFile* file_desc, void* buffer, int nbytes){
   printf("Leyendo %d bytes del archivo\n\n", nbytes);
 }
@@ -231,3 +228,29 @@ void os_close(osFile* file_desc){
 void os_rm(char* filename){
   printf("Borrando archivo %s\n\n", filename);
 }
+
+
+void os_open(char* filename, char mode){ //TODO: Falta rellenar bloque de data, y probar la inicializacion del Directory
+  printf("Abriendo archivo %s\n", filename);
+  FILE* disk = fopen(path_disk, "r+b");
+  for (int entrada = 0; entrada < mbt->entry_quantity; entrada++)
+  {
+    if (mbt->entry_container[entrada]->is_valid)
+    { //Si es que es válida vamos a revisar si es que el archivo está
+      int inicio_directorio = (mbt->entry_container[entrada]->location)*2048 + 1024; // Inicio del directorio
+      Directory *bloque_directory = directory_init(disk, inicio_directorio /* REVISAREIS*/);
+      // Tengo que ir a la particion y rescatar el identificador relativo
+      if(strcmp(bloque_directory->entries->filename, filename)){
+        //Si el archivo era el que buscaba, procedo a rellenar sus bloques de datos y retorno
+        int posicion_bloque_indice = 1024 + bloque_directory->entries[entrada].relative_index + mbt->entry_container[entrada]->size; // MBT + Particion + relative
+        // Ahora rellenamos los bloques de datos
+        IndexBlock *bloque_index = indexblock_init(disk, inicio_directorio /* REVISAREIS*/);
+        
+        break;
+      }
+    }
+    
+    /* Iteramos sobre la Mbt para buscar si es que el archivo está 
+    en alguna de las particiones */
+  }
+};
