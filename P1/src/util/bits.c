@@ -40,6 +40,11 @@ uint8 get_partition_id(uint8 byte){
   return ((uint8_t)(byte << 1)) >> 1;
 }
 
+uint8 bit_and_id_to_byte(bool bit, uint8_t id){
+  uint8_t byte_bit = (uint8_t)(bit << 7);
+  return id | byte_bit;
+}
+
 /** entrega los ultimos 3 bytes de 4. Sitve para MBT y bloque de directorio
  * @param puntero a inicio del bloque de directorio
  * @return retorna tamaño del archivo indicado por el bloque indice
@@ -52,6 +57,12 @@ uint32_t last_3_bytes_of_4(uint8 *bitarray){
   t = (uint8_t)bitarray[1];
   ret |= (t<<8*2);
   return ret;
+}
+
+void insert_location_to_buffer(uint8_t *buffer, uint32_t location){
+  buffer[3] = (uint8_t)(location);
+  buffer[2] = (uint8_t)(location >> 8);
+  buffer[1] = (uint8_t)(location >> 16);
 }
 
 /** Funcion que da el tamaño del bloque indice. 
@@ -85,6 +96,12 @@ uint32_t int_from_4_bytes(uint8 *bitarray){
   return ret;
 }
 
+void insert_size_to_buffer(uint8_t *buffer, uint32_t size){
+  buffer[7] = (uint8_t)(size);
+  buffer[6] = (uint8_t)(size >> 8);
+  buffer[5] = (uint8_t)(size >> 16);
+  buffer[4] = (uint8_t)(size >> 24);
+}
 
 // // ejemplo de uso: uwu
 // #include <stdio.h>

@@ -47,7 +47,6 @@ void init_mbt(FILE* disk){
     .entry_quantity = 128,
     .entry_container = calloc(128, sizeof(Entry**)),
   };
-  printf("Llegue a init_mb\n");
 
   uint8_t buffer[8];
   // Coloca el puntero del disco al inicio
@@ -68,16 +67,26 @@ void init_mbt(FILE* disk){
 
     // leer 4 bytes
     uint32_t size = int_from_4_bytes(buffer+4);
-    printf("%d %" PRIu8 " %" PRIu32 " %" PRIu32 "\n", is_valid, id, location, size);
+    // printf("%d %" PRIu8 " %" PRIu32 " %" PRIu32 "\n", is_valid, id, location, size);
 
     if (is_valid){
       Entry* entry = init_entry(is_valid, id, location, size);
       mbt->entry_container[id] = entry;
     }
   }
-  printf("sali\n");
-  //return mbt;
 };
+
+void destroy_mbt()
+{
+  if (mbt)
+  {
+    for (int i = 0; i < mbt->entry_quantity; i++)
+      if (mbt->entry_container[i])
+        free(mbt->entry_container[i]);
+    free(mbt->entry_container);
+    free(mbt);
+  }
+}
 
 Entry* init_entry(bool is_valid, uint8_t id, uint32_t location, uint32_t size){
   Entry* entry = malloc(sizeof(Entry));
@@ -88,6 +97,51 @@ Entry* init_entry(bool is_valid, uint8_t id, uint32_t location, uint32_t size){
     .size = size
   };
   return entry;
+}
+
+// Funciones para Temporal Entry
+
+TEntry* init_tentry(TEntry* tentry, uint32_t location, uint32_t size){
+  TEntry* new = malloc(sizeof(TEntry));
+  *new = (TEntry) {
+    .location = location,
+    .size = size,
+    .next = NULL
+  };
+  if (tentry){
+    if (tentry->location > new->location){
+      new->next = tentry;
+      tentry = new;
+    }
+    else{
+      TEntry* current = tentry;
+      while (current){
+        if (current->next){
+          if (current->next->location > new->location){
+            new->next = current->next;
+            current->next = new;
+            return tentry;
+          }
+        }
+        else{
+          current->next = new;
+          return tentry;
+        }
+        current = current->next;
+      }
+    }
+  }
+  return new;
+}
+
+void destroy_tentry(TEntry* tentry)
+{
+  TEntry* next = tentry -> next;
+  if (next)
+  {
+    destroy_tentry(next);
+  }
+  free(tentry);
 }
 
 // Funcion para transformar el contenido del testdisk del Pablo
