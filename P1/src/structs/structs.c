@@ -194,3 +194,31 @@ void print_file(osFile* file){
 int hex_to_int(char* input){
   return (int)strtol(input, NULL, 16);
 };
+
+Bitmap* init_bitmap(){
+  int bitmap_blocks = mbt->entry_container[partition]->size / 16384;
+  if (mbt->entry_container[partition]->size % 16384 != 0){
+    bitmap_blocks ++;
+  }
+
+  int inicio_bitmap = (mbt->entry_container[partition]->location)*2048 + 1024 + 2048;
+  FILE* disk = fopen(path_disk, "r+b");
+  fseek(disk, 0, inicio_bitmap);
+  
+
+  Bitmap* bitmap = malloc(sizeof(Bitmap));
+  bitmap->n_blocks = bitmap_blocks;
+  bitmap->start = inicio_bitmap;
+  bitmap->empty_blocks = 0;
+  bitmap->full_blocks = 0;
+  bitmap->bytes = calloc(bitmap->n_blocks * 2048, sizeof(uint8_t));
+
+  uint8_t buffer[1];
+  for (int byte = 0; byte < bitmap->n_blocks * 2048; byte++){
+    fread(buffer, sizeof(uint8_t), (size_t)1, disk);
+    bitmap->bytes[byte] = buffer[0];
+  }
+
+  fclose(disk);
+  return bitmap;
+}
