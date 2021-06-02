@@ -247,7 +247,8 @@ Bitmap* init_bitmap(){
 
   int inicio_bitmap = (mbt->entry_container[partition]->location)*2048 + 1024 + 2048;
   FILE* disk = fopen(path_disk, "r+b");
-  fseek(disk, 0, inicio_bitmap);
+  fseek(disk, inicio_bitmap, SEEK_CUR ); 
+  //fseek(disk, 0, inicio_bitmap); // Original
   
   Bitmap* bitmap = malloc(sizeof(Bitmap));
   bitmap->n_blocks = bitmap_blocks;
@@ -268,7 +269,7 @@ Bitmap* init_bitmap(){
 
 void close_bitmap(Bitmap* bitmap){
   FILE* disk = fopen(path_disk, "r+b");
-  fseek(disk, 0, bitmap->start);
+  fseek(disk, bitmap->start, SEEK_CUR);
   uint8_t buffer[1];
   for (int byte = 0; byte < bitmap->n_blocks * 2048; byte++){
     buffer[0] = bitmap->bytes[byte];
