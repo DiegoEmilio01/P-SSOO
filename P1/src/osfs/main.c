@@ -72,7 +72,7 @@ int main(int argc, char **argv)
   
   os_mount(argv[1], 5);
   os_mbt();
-  os_bitmap(1);
+  os_bitmap(0);
 
   os_mount(argv[1], 2);
   os_delete_partition(5);

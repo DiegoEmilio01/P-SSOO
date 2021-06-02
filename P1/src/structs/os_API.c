@@ -57,6 +57,16 @@ void os_bitmap(unsigned num){
       }
       buffer[counter] = bitmap->bytes[byte];
       counter++;
+
+      uint8_t buff[1];
+      buff[0] = bitmap->bytes[byte];
+      for (int bit = 0; bit < 8; bit++){
+        if (bt_get(buff, bit)){
+          bitmap->full_blocks++;
+        } else{
+          bitmap->empty_blocks++;
+        }
+      }
     }
   } else{
     uint8_t buffer[32];
@@ -71,9 +81,23 @@ void os_bitmap(unsigned num){
       }
       buffer[counter] = bitmap->bytes[byte];
       counter++;
+
+      // Contar bits ocupados y libres para cada byte
+      uint8_t buff[1];
+      buff[0] = bitmap->bytes[byte];
+      for (int bit = 0; bit < 8; bit++){
+        if (bt_get(buff, bit)){
+          bitmap->full_blocks++;
+        } else{
+          bitmap->empty_blocks++;
+        }
+      }
     }
   }
   fprintf(stderr, "\n");
+  fprintf(stderr, "\e[1;35mBloques Ocupados: \e[0m%d\n", bitmap->full_blocks);
+  fprintf(stderr, "\e[1;32mBloques Libres: \e[0m%d\n", bitmap->empty_blocks);
+  fprintf(stderr, "--------------------------\n\n");
 
   close_bitmap(bitmap);
 }
@@ -245,7 +269,6 @@ void create_bitmap(int id){
   for(int i = 0; i < bitmap->n_blocks + 1; i++){
     bt_set(bitmap->bytes, i, true);
   }
-  os_bitmap(1);
 
   close_bitmap(bitmap);
   //os_mount(path_disk, old_partition);
