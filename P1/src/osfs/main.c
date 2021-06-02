@@ -66,19 +66,14 @@ int main(int argc, char **argv)
   os_mbt();
   os_ls();
   osFile *archivo_prueba = os_open("mercedes_benz.mp4",'r');
-  uint16_t my_buffer[1000];
+
   int leido;
+  int buffer_size = 1000;
+
+  uint8_t my_buffer[buffer_size];
   leido = os_read(archivo_prueba, my_buffer, 1000);
-  printf("leido: %d\n", leido);
-  for (int i=0; i<10 && i<leido/2; i++)
-    printf("%" PRIu16 "\t", my_buffer[i]);
-  printf("\n");
-  uint8_t my_buffer2[1000];
-  leido = os_read(archivo_prueba, my_buffer2, 1000);
-  printf("leido: %d\n", leido);
-  for (int i=0; i<10 && i<leido; i++)
-    printf("%" PRIu8 " ", my_buffer2[i]);
-  printf("\n");
+
+  write_buffer_to_file(*my_buffer, buffer_size, archivo_prueba);
 
   int numero_random = os_close(archivo_prueba);
   destroy_mbt();

@@ -200,7 +200,8 @@ void datablocks_init(FILE* disk, osFile* osfile){
     
     bloque_actual++;
   }
-  printf("NOMBRE A IMPRIMIR %s\n", osfile->filename);
+  // ? acá se escribe el archivo en el disco del PC
+  /* printf("NOMBRE A IMPRIMIR %s\n", osfile->filename);
   FILE* test_out = fopen(osfile->filename, "wb");
   bloque_actual = 0;
   int bytes_restantes = osfile->index_block->file_size;
@@ -212,7 +213,7 @@ void datablocks_init(FILE* disk, osFile* osfile){
     bloque_actual += 1;
     if (!bytes_restantes) break;
   }
-  fclose(test_out);
+  fclose(test_out); */
   
   
 }
@@ -259,6 +260,14 @@ void print_file(osFile* file){
   //printf("Read index: %lu\n", file->relative_index->entry_quantity);
   printf("-------------------------------------------------\n");
 }
+
+void write_buffer_to_file(uint8_t* buffer, int buffer_size, osFile* osfile){
+  printf("NOMBRE A IMPRIMIR %s\n", osfile->filename);
+  FILE* file = fopen(osfile->filename, "wb");
+  
+  fwrite(buffer, sizeof(uint8_t), (size_t)(buffer_size), file);
+  fclose(file);
+};
 
 Bitmap* init_bitmap(){
   int bitmap_blocks = mbt->entry_container[partition]->size / 16384;

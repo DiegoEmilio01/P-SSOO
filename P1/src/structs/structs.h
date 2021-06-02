@@ -121,3 +121,5 @@ Directory* directory_init(FILE* disk, int posicion_particion);
 void print_file(osFile* file);
 
 void destroy_directory(Directory *bloque_directory);
+
+void write_buffer_to_file(uint8_t* buffer, int buffer_size, osFile* osfile);
