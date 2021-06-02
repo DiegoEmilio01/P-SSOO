@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h>
 
 #include "structs.h"
 #include "../osfs/main.h"
 #include "../util/bits.h"
-#include <inttypes.h>
 
 void os_strerror(enum os_error error){
   switch (error)
@@ -162,9 +162,9 @@ IndexBlock* indexblock_init(FILE* disk, uint64_t posicion_indexblock){
   uint8_t buffer_size[5];
   fseek(disk, posicion_indexblock, SEEK_SET);
   fread(buffer_size, sizeof(uint8_t), (size_t)5, disk);
-  printf("file size (RAW): %d %d %d %d %d\n", buffer_size[0], buffer_size[1], buffer_size[2], buffer_size[3], buffer_size[4]);
+  // printf("file size (RAW): %d %d %d %d %d\n", buffer_size[0], buffer_size[1], buffer_size[2], buffer_size[3], buffer_size[4]);
   bloque_retorno->file_size = get_index_size(buffer_size);
-  printf("file size: %ld\n", bloque_retorno->file_size);
+  // printf("file size: %ld\n", bloque_retorno->file_size);
 
   uint8_t buffer_pointer[3];
   // Ahora procedemos a rellenar los bloques de datos
@@ -185,37 +185,15 @@ IndexBlock* indexblock_init(FILE* disk, uint64_t posicion_indexblock){
 void datablocks_init(FILE* disk, osFile* osfile){
   int cantidad_bloques = (osfile->index_block->file_size % 2048 ? 1 : 0) + osfile->index_block->file_size / 2048 ; //Cada bloque es de 2048 bytes
   osfile->data_blocks = malloc(cantidad_bloques*sizeof(DataBlock));
-  printf("CANTIDAD DE BLOQUES %d\nSIZE %ld\n", cantidad_bloques, osfile->index_block->file_size);
-  int bloque_actual = 0;
-  // esto está cursed, pq 2 variables?
-  for (int puntero_actual = 0; puntero_actual < cantidad_bloques; puntero_actual++)
+  // printf("CANTIDAD DE BLOQUES %d\nSIZE %ld\n", cantidad_bloques, osfile->index_block->file_size);
+  for (int bloque_actual = 0; bloque_actual < cantidad_bloques; bloque_actual++)
   {
-    //printf("PUNTERO %d \n", 1024 + osfile->index_block->punteros[puntero_actual] * 2048);
-    fseek(disk, 1024 + osfile->index_block->punteros[puntero_actual] * 2048 + mbt->entry_container[partition]->location * 2048 , SEEK_SET); //Movemos el puntero a un bloque específico para que sea leído y guardado
+    //printf("PUNTERO %d \n", 1024 + osfile->index_block->punteros[bloque_actual] * 2048);
+    fseek(disk, 1024 + osfile->index_block->punteros[bloque_actual] * 2048 + mbt->entry_container[partition]->location * 2048 , SEEK_SET); //Movemos el puntero a un bloque específico para que sea leído y guardado
     osfile->data_blocks[bloque_actual].array_bytes = malloc(2048*sizeof(uint8_t));
     osfile->data_blocks[bloque_actual].entry_quantity = 0;
-    fread(osfile->data_blocks[bloque_actual].array_bytes, sizeof(uint8_t), (size_t)2048, disk);
-
-    
-    
-    bloque_actual++;
+    fread(osfile->data_blocks[bloque_actual].array_bytes, sizeof(uint8_t), (size_t)2048, disk); 
   }
-  // ? acá se escribe el archivo en el disco del PC
-  /* printf("NOMBRE A IMPRIMIR %s\n", osfile->filename);
-  FILE* test_out = fopen(osfile->filename, "wb");
-  bloque_actual = 0;
-  int bytes_restantes = osfile->index_block->file_size;
-  for (int uwu = 0; uwu < cantidad_bloques; uwu++)
-  {
-    //printf("PUNTERO %d \n", osfile->index_block->punteros[0]);
-    fwrite(osfile->data_blocks[bloque_actual].array_bytes, sizeof(uint8_t), 
-    (size_t)(bytes_restantes < 2048 ? bytes_restantes : 2048), test_out);
-    bloque_actual += 1;
-    if (!bytes_restantes) break;
-  }
-  fclose(test_out); */
-  
-  
 }
 
 
@@ -260,14 +238,6 @@ void print_file(osFile* file){
   //printf("Read index: %lu\n", file->relative_index->entry_quantity);
   printf("-------------------------------------------------\n");
 }
-
-void write_buffer_to_file(uint8_t* buffer, int buffer_size, osFile* osfile){
-  printf("NOMBRE A IMPRIMIR %s\n", osfile->filename);
-  FILE* file = fopen(osfile->filename, "wb");
-  
-  fwrite(buffer, sizeof(uint8_t), (size_t)(buffer_size), file);
-  fclose(file);
-};
 
 Bitmap* init_bitmap(){
   int bitmap_blocks = mbt->entry_container[partition]->size / 16384;

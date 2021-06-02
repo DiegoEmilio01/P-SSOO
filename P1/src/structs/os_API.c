@@ -111,16 +111,16 @@ void os_ls(){
   int inicio_directorio = 1024 + (mbt->entry_container[partition]->location)*2048 ; // Dirección para todas las particiones
   Directory *bloque_directory = directory_init(disk, inicio_directorio /* REVISAREIS*/);
   
-  printf("DirectoryBlock creado correctamente\n");
+  // printf("DirectoryBlock creado correctamente\n");
   // Tengo que ir a la particion y rescatar el identificador relativo
   for (int directory_entry = 0; directory_entry < bloque_directory->entry_quantity; directory_entry++)
   {
-    // Testeo
     if(bloque_directory->entries[directory_entry].is_valid)
     {
       printf("NOMBRE DEL ARCHIVO: %s\n", bloque_directory->entries[directory_entry].filename);
     }
   }
+  printf("\n");
   destroy_directory(bloque_directory);
   fclose(disk);
 }
@@ -343,38 +343,32 @@ void os_rm(char* filename){
 
 /*En la partición 2, el archivo nene.txt le encuentro su bloque índice en 25841 y después leo su tamaño de archivo que es 3521 Bytes*/
 osFile* os_open(char* filename, char mode){ //TODO: Falta rellenar bloque de data, y probar la inicializacion del Directory
-  printf("Abriendo archivo %s\n", filename);
+  printf("Abriendo archivo %s\n\n", filename);
   osFile *ret_file = malloc(sizeof(osFile));
   ret_file->read_index = 0;
   FILE* disk = fopen(path_disk, "r+b");
   int inicio_directorio = 1024 + (mbt->entry_container[partition]->location)*2048 ; // Dirección para todas las particiones
   Directory *bloque_directory = directory_init(disk, inicio_directorio /* REVISAREIS*/);
   
-  printf("DirectoryBlock creado correctamente\n");
+  //printf("DirectoryBlock creado correctamente\n");
   ret_file->relative_index = bloque_directory;
   // Tengo que ir a la particion y rescatar el identificador relativo
   for (int directory_entry = 0; directory_entry < bloque_directory->entry_quantity; directory_entry++)
   {
     // Testeo
-    if(bloque_directory->entries[directory_entry].is_valid)
-    {
-      printf("NOMBRE DEL ARCHIVO: %s\n", bloque_directory->entries[directory_entry].filename);
-      printf("NOMBRE DEL ARCHIVO: %i\n", bloque_directory->entries[directory_entry].relative_index);
-    }
-    // Testeo
     if(!strcmp(bloque_directory->entries[directory_entry].filename, filename)){
       ret_file->filename = bloque_directory->entries[directory_entry].filename;
       //Si el archivo era el que buscaba, procedo a rellenar sus bloques de datos y retorno
-      printf("mbt: %d \n directory_relative: %d\n",mbt->entry_container[partition]->size, bloque_directory->entries[directory_entry].relative_index);
+      //printf("mbt: %d \n directory_relative: %d\n",mbt->entry_container[partition]->size, bloque_directory->entries[directory_entry].relative_index);
       uint64_t posicion_bloque_indice = 1024 + (bloque_directory->entries[directory_entry].relative_index)*2048 + (mbt->entry_container[partition]->location)*2048; // MBT + Particion + relative
-      printf("BLOQUE INDICE POSICION: %ld\n", posicion_bloque_indice);
+      // printf("BLOQUE INDICE POSICION: %ld\n", posicion_bloque_indice);
       // Ahora rellenamos el IndexBlock para obtener punteros
       IndexBlock *bloque_index = indexblock_init(disk, posicion_bloque_indice /* REVISAREIS*/);
-      printf("IndexBlock creado correctamente\n");
+      // printf("IndexBlock creado correctamente\n");
       ret_file->index_block = bloque_index;
       // Ahora rellenamos los DataBlocks
       datablocks_init(disk, ret_file);
-      printf("DataBlocks creados correctamente\n");
+      // printf("DataBlocks creados correctamente\n");
       fclose(disk);
       return ret_file;
     }
@@ -399,14 +393,14 @@ int os_read(osFile* file_desc, void* buffer, int nbytes){
     to_read = nbytes;
   else
     to_read = file_desc->index_block->file_size;
-  printf("file size: %lu\n", file_desc->index_block->file_size);
-  printf("A leer: %d\n", to_read);
+  // printf("file size: %lu\n", file_desc->index_block->file_size);
+  // printf("A leer: %d\n", to_read);
   buffer -= over_read;
   for(int bloque_actual=0; bloque_actual < cantidad_bloques; bloque_actual++)
   {
     for(int i=0; i<to_read && i<2048; i++){
       if (over_read <= 0){
-        *(uint8_t*)(buffer + i) = file_desc->data_blocks[bloque_actual].array_bytes[file_desc->read_index]; // A continuación llamamos cada bit del array
+        *(uint8_t*)(buffer + i) = file_desc->data_blocks[bloque_actual].array_bytes[file_desc->read_index % 2048]; // A continuación llamamos cada bit del array
         file_desc->read_index += 1; // Sumamos uno al contador del archivo
         read_now++;
       }
@@ -419,4 +413,19 @@ int os_read(osFile* file_desc, void* buffer, int nbytes){
   }
   
   return read_now;
+}
+
+void extract_file(osFile* osfile)
+{
+  FILE* file = fopen(osfile->filename, "wb");
+  int cantidad_bloques = (osfile->index_block->file_size % 2048 ? 1 : 0) + osfile->index_block->file_size / 2048;
+  uint8_t buffer[2048];
+  int read_bytes;
+  for (int bloque = 0; bloque < cantidad_bloques; bloque++)
+  {
+    read_bytes = os_read(osfile, buffer, 2048);
+    fwrite(buffer, sizeof(uint8_t), (size_t)(read_bytes), file);
+  }
+  osfile->read_index = 0;
+  fclose(file);
 }

@@ -61,21 +61,16 @@ int main(int argc, char **argv)
   
   //destroy_mbt();
   //destroy_mbt();
-  os_mount(argv[1], 4);
+  os_mount(argv[1], 2);
   
   os_mbt();
   os_ls();
-  osFile *archivo_prueba = os_open("mercedes_benz.mp4",'r');
 
-  int leido;
-  int buffer_size = 1000;
-
-  uint8_t my_buffer[buffer_size];
-  leido = os_read(archivo_prueba, my_buffer, 1000);
-
-  write_buffer_to_file(*my_buffer, buffer_size, archivo_prueba);
-
+  osFile *archivo_prueba = os_open("dog.mp3",'r');
+  extract_file(archivo_prueba);
   int numero_random = os_close(archivo_prueba);
+
+
   destroy_mbt();
 
   return 0;
