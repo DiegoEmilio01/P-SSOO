@@ -39,7 +39,7 @@ void os_bitmap(unsigned num){
   Bitmap* bitmap = init_bitmap();
 
   if (num > bitmap->n_blocks || num < 0){
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: input fuera de rango \n");
+    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: input fuera de rango \n\n");
     return;
   }
 
@@ -223,7 +223,7 @@ void write_new_partition(int id, int location, int size) // falta crear los bloq
       insert_location_to_buffer(new_buffer, (uint32_t)location);
       insert_size_to_buffer(new_buffer, (uint32_t)size);
       fwrite(new_buffer, sizeof(uint8_t), 8, disk);
-      //create_bitmap(id);
+      create_bitmap(id);
       break;
     }
   }
@@ -232,9 +232,10 @@ void write_new_partition(int id, int location, int size) // falta crear los bloq
 
 void create_bitmap(int id){
   int old_partition = partition;
-  os_mount(path_disk, id);
+  //os_mount(path_disk, id);
+  partition = id;
   Bitmap* bitmap = init_bitmap();
-  printf("n_blocks %d\n", bitmap->n_blocks);
+  // printf("n_blocks %d\n", bitmap->n_blocks);
   // modificar
   for (int i = 0; i < bitmap->n_blocks * 2048; i++)
   {
@@ -244,15 +245,23 @@ void create_bitmap(int id){
   for(int i = 0; i < bitmap->n_blocks + 1; i++){
     bt_set(bitmap->bytes, i, true);
   }
+  os_bitmap(1);
 
   close_bitmap(bitmap);
-  os_mount(path_disk, old_partition);
+  //os_mount(path_disk, old_partition);
+  partition = old_partition;
 }
 
 // TODO: lanzar OS_ERROR invalid_delete_partition
 void os_delete_partition(int delete_id){
   printf("Eliminando partición %d de la MBT\n\n", delete_id);
-
+  if (partition == delete_id)
+  {
+    //os_strerror
+    printf("ERROR: No se puede borrar una partición ya montada");
+    return;
+  }
+  
   // Crea el puntero al archivo disk, en modo read write 
   FILE* disk = fopen(path_disk, "r+b");
   fseek(disk, 0, SEEK_SET);
