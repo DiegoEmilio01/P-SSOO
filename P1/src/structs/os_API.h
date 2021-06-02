@@ -37,6 +37,6 @@ int os_read(osFile* file_desc, void* buffer, int nbytes);
 
 void os_write(osFile* file_desc, void* buffer, int nbytes);
 
-void os_close(osFile* file_desc);
+int os_close(osFile* file_desc);
 
 void os_rm(char* filename);

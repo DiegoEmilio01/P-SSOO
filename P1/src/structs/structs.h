@@ -119,4 +119,5 @@ typedef struct osfile{ // Representa un archivo abierto
 void datablocks_init(FILE* disk, osFile* osfile);
 Directory* directory_init(FILE* disk, int posicion_particion);
 void print_file(osFile* file);
-int hex_to_int(char* input);
+
+void destroy_directory(Directory *bloque_directory);
