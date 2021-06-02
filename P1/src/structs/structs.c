@@ -151,33 +151,93 @@ void destroy_tentry(TEntry* tentry)
   int *array_bits;
   int partition;
 */
-IndexBlock* indexblock_init(FILE* disk, int posicion_indexblock){ 
+IndexBlock* indexblock_init(FILE* disk, uint64_t posicion_indexblock){ 
   // Nos falta agregar la partición a la que pertenece
   IndexBlock *bloque_retorno = malloc(sizeof(IndexBlock));  
   bloque_retorno->entry_quantity = 681;
-  //El index block 
+  bloque_retorno->punteros = calloc(681, sizeof(uint32_t)); //Hacemos espacio para los 681 bloques
+  
+  uint8_t buffer_size[5];
+  fseek(disk, posicion_indexblock, SEEK_SET);
+  fread(buffer_size, sizeof(uint8_t), (size_t)5, disk);
+  printf("file size (RAW): %d %d %d %d %d\n", buffer_size[0], buffer_size[1], buffer_size[2], buffer_size[3], buffer_size[4]);
+  bloque_retorno->file_size = get_index_size(buffer_size);
+  printf("file size: %ld\n", bloque_retorno->file_size);
 
+  uint8_t buffer_pointer[3];
+  // Ahora procedemos a rellenar los bloques de datos
+  for (int bloque_actual = 0; bloque_actual < 681; bloque_actual++)
+  { // Cada bloque hace hasta 2043 Bytes
+    //Vamos leyendo de a 3 bytes para rellenar cada bloque
+    fread(buffer_pointer, sizeof(uint8_t), (size_t)3, disk);
+    bloque_retorno->punteros[bloque_actual] = three_bytes_to_int(buffer_pointer);
+    // printf("pos %d >> %d\n", bloque_actual, bloque_retorno->punteros[bloque_actual]);
+  }
+  //Ahora nuestro IndexBlock tiene los punteros a los DataBlocks, solo falta llenarlos.
+  //El index block 
   return bloque_retorno;
 }
+
+
+
+void datablocks_init(FILE* disk, osFile* osfile){
+  int cantidad_bloques = (osfile->index_block->file_size % 2048 ? 1 : 0) + osfile->index_block->file_size / 2048 ; //Cada bloque es de 2048 bytes
+  osfile->data_blocks = malloc(cantidad_bloques*sizeof(DataBlock));
+  printf("CANTIDAD DE BLOQUES %d\nSIZE %ld\n", cantidad_bloques, osfile->index_block->file_size);
+  int bloque_actual = 0;
+
+  for (int puntero_actual = 0; puntero_actual < cantidad_bloques; puntero_actual++)
+  {
+    printf("PUNTERO %d \n", 1024 + osfile->index_block->punteros[puntero_actual] * 2048);
+    fseek(disk, 1024 + osfile->index_block->punteros[puntero_actual] * 2048 + mbt->entry_container[partition]->location * 2048 , SEEK_SET); //Movemos el puntero a un bloque específico para que sea leído y guardado
+    osfile->data_blocks[bloque_actual].array_bytes = malloc(2048*sizeof(uint8_t));
+    osfile->data_blocks[bloque_actual].entry_quantity = 0;
+    fread(osfile->data_blocks[bloque_actual].array_bytes, sizeof(uint8_t), (size_t)2048, disk);
+
+    
+    
+    bloque_actual++;
+  }
+  printf("NOMBRE A IMPRIMIR %s\n", osfile->filename);
+  FILE* test_out = fopen(osfile->filename, "wb");
+  bloque_actual = 0;
+  int bytes_restantes = osfile->index_block->file_size;
+  for (int uwu = 0; uwu < cantidad_bloques; uwu++)
+  {
+    printf("PUNTERO %d \n", osfile->index_block->punteros[0]);
+    fwrite(osfile->data_blocks[bloque_actual].array_bytes, sizeof(uint8_t), 
+    (size_t)(bytes_restantes < 2048 ? bytes_restantes : 2048), test_out);
+    bloque_actual += 1;
+    if (!bytes_restantes) break;
+  }
+  fclose(test_out);
+  
+  
+}
+
 
 Directory* directory_init(FILE* disk, int posicion_particion){ // Falta completar
   Directory *bloque_retorno = malloc(sizeof(Directory));
   bloque_retorno->entry_quantity = 64;
   bloque_retorno->entries = malloc(64*sizeof(DirectoryEntry));
-  uint8_t buffer[8];
-  char* char_buffer[29]; // recordar char vacio, chantar '\0' al final 
+  uint8_t buffer[4];
+  char char_buffer[29]; // recordar char vacio, chantar '\0' al final 
   // Coloca el puntero del disco al inicio
   fseek(disk, posicion_particion, SEEK_SET);
   // Leemos el primer bloque y obtenemos las entradas para el Directory
   for (int entrada_rellenada = 0; entrada_rellenada < 64; entrada_rellenada++) {
     
-    fread(buffer, sizeof(uint8_t), (size_t)8, disk);
+    fread(buffer, sizeof(uint8_t), (size_t)4, disk);
     // leer 1 byte
-    bloque_retorno->entries[entrada_rellenada].is_valid = bt_get(buffer, 0);
+    bloque_retorno->entries[entrada_rellenada].is_valid = bt_get(buffer, 7);
+    //printf("relative index %d %d %d\n", buffer[1], buffer[2],buffer[3]);
     bloque_retorno->entries[entrada_rellenada].relative_index = last_3_bytes_of_4(buffer);
-    // TODO: Aquí falta ingresar el nombre (28 Bytes)
+    //printf("relative index %d\n", bloque_retorno->entries[entrada_rellenada].relative_index);
     fread(char_buffer, sizeof(char), (size_t)28, disk);
     char_buffer[28] = '\0';  /* chantar '\0' al final */
+    
+    bloque_retorno->entries[entrada_rellenada].filename = malloc(29*sizeof(char));
+    strcpy(bloque_retorno->entries[entrada_rellenada].filename, char_buffer);
     //Hasta acá hacemos 32, en la siguiente iteración
   }
   return bloque_retorno;

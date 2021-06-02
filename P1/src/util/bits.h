@@ -11,3 +11,4 @@ void insert_location_to_buffer(uint8_t *buffer, uint32_t location);
 uint64_t get_index_size(uint8 *bitarray);
 uint32_t int_from_4_bytes(uint8 *bitarray);
 void insert_size_to_buffer(uint8_t *buffer, uint32_t size);
+uint32_t three_bytes_to_int(uint8 *bitarray);

@@ -59,6 +59,16 @@ uint32_t last_3_bytes_of_4(uint8 *bitarray){
   return ret;
 }
 
+uint32_t three_bytes_to_int(uint8 *bitarray){
+  uint32_t t = (uint8_t)bitarray[2];
+  uint32_t ret = t;
+  t = (uint8_t)bitarray[1];
+  ret |= (t<<8);
+  t = (uint8_t)bitarray[0];
+  ret |= (t<<8*2);
+  return ret;
+}
+
 void insert_location_to_buffer(uint8_t *buffer, uint32_t location){
   buffer[3] = (uint8_t)(location);
   buffer[2] = (uint8_t)(location >> 8);
@@ -126,3 +136,5 @@ void insert_size_to_buffer(uint8_t *buffer, uint32_t size){
 //   fclose(fileptr); // Close the file
 // }
 
+
+  

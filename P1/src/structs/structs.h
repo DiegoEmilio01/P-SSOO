@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include <string.h>
 #pragma once
 
 enum os_error{
@@ -38,6 +39,7 @@ typedef struct entry
   //uint32_t block_partition_quantity; // Últimos 4 bytes
 } Entry;
 
+
 Entry* init_entry(bool is_valid, uint8_t id, uint32_t location, uint32_t size);
 
 typedef struct temporal_entry
@@ -62,7 +64,7 @@ void destroy_mbt();
 typedef struct directoy_entry
 {
   /* data */
-  int is_valid; // 0 o 1
+  bool is_valid; // 0 o 1
   int relative_index; // 3 Bytes
   char* filename; // ej: archivo.txt, máximo 28 bytes (ASCII). Se rellena con 0x00
 } DirectoryEntry;
@@ -86,21 +88,20 @@ typedef struct bitmap
 Bitmap* init_bitmap();
 void close_bitmap(Bitmap* bitmap);
 
-
 typedef struct data_block //Siempre manejado en BigEndian
 {
-  unsigned char *array_bytes;
-  int *array_bits;
-  int entry_quantity;
+  uint8_t *array_bytes; //Estoy usando este por el momento.
+  //int *entry_bytes;
+  int entry_quantity; //Variable para no pasarnos al hacer read
 } DataBlock;
 
  //Siempre manejado en BigEndian
 typedef struct index_block
 {
-  unsigned long int file_size; // 5 Bytes para el tamaño del archivo (unsigned aguanta hasta 8).
-  int *punteros; // 2043 Bytes (Arreglo para 681 punteros) Apuntan a los bloques de datos.
-  unsigned char *array_bytes;
-  int *array_bits;
+  uint64_t file_size; // 5 Bytes para el tamaño del archivo (unsigned aguanta hasta 8).
+  uint32_t *punteros; // 2043 Bytes (Arreglo para 681 punteros) Apuntan a los bloques de datos.
+  //unsigned char *array_bytes;
+  //int *array_bits;
   int partition; // Partición a la que corresponde
   int entry_quantity;
 }IndexBlock;
@@ -115,7 +116,7 @@ typedef struct osfile{ // Representa un archivo abierto
 } osFile;
 
 
-
+void datablocks_init(FILE* disk, osFile* osfile);
 Directory* directory_init(FILE* disk, int posicion_particion);
 void print_file(osFile* file);
 int hex_to_int(char* input);
