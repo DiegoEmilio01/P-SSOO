@@ -166,15 +166,15 @@ void os_create_partition(int id, int size){
   printf("Creando partición %d de tamaño %d\n\n", id, size);
   if (size < 16384 || size > 131072)
   {
-    printf("ERROR: wrong size as argument. Size must be between 16384 and 131072.\n\n");
+    printf("\e[1;31m[ERROR]:\e[0m wrong size as argument. Size must be between 16384 and 131072.\n\n");
   }
   else if (id < 0 || id > 127)
   {
-    printf("ERROR: wrong id as argument. Id must be between 0 and 128.\n\n");
+    printf("\e[1;31m[ERROR]:\e[0m wrong id as argument. Id must be between 0 and 128.\n\n");
   }
   else if (mbt->entry_container[id] && mbt->entry_container[id]->is_valid)
   {
-    printf("ERROR: partition already created. If aditional partition is needed, please try another id.\n\n");
+    printf("\e[1;31m[ERROR]:\e[0m partition already created. If aditional partition is needed, please try another id.\n\n");
   }
   else
   {
@@ -210,7 +210,7 @@ void os_create_partition(int id, int size){
         }
         else
         {
-          printf("ERROR: partition cannot be allocated, please try a smaller size.\n\n");
+          printf("\e[1;31m[ERROR]:\e[0m partition cannot be allocated, please try a smaller size.\n\n");
         }
         destroy_tentry(tentry);
         return;
@@ -281,7 +281,7 @@ void os_delete_partition(int delete_id){
   if (partition == delete_id)
   {
     //os_strerror
-    printf("ERROR: No se puede borrar una partición ya montada");
+    printf("\e[1;31m[ERROR]:\e[0m No se puede borrar una partición ya montada");
     return;
   }
   
