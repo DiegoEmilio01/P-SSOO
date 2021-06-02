@@ -121,6 +121,7 @@ void os_ls(){
       printf("NOMBRE DEL ARCHIVO: %s\n", bloque_directory->entries[directory_entry].filename);
     }
   }
+  destroy_directory(bloque_directory);
   fclose(disk);
 }
 
@@ -315,8 +316,25 @@ void os_write(osFile* file_desc, void* buffer, int nbytes){
   printf("Escribiendo archivo\n\n");
 }
 
-void os_close(osFile* file_desc){
+// Debe retornar si el archivo cerró correctamente:
+// 0: sin errores
+// 1: error
+int os_close(osFile* file_desc){
   printf("Cerrando archivo\n\n");
+
+  int cantidad_bloques = (file_desc->index_block->file_size % 2048 ? 1 : 0) + file_desc->index_block->file_size / 2048 ; //Cada bloque es de 2048 bytes
+  for (int bloque_actual = 0; bloque_actual < cantidad_bloques; bloque_actual++){
+    free(file_desc->data_blocks[bloque_actual].array_bytes);
+  }
+  free(file_desc->data_blocks);
+
+  destroy_directory(file_desc->relative_index);
+
+  free(file_desc->index_block->punteros);
+  free(file_desc->index_block);
+
+  free(file_desc);
+  return 0;
 }
 
 void os_rm(char* filename){
@@ -381,7 +399,7 @@ int os_read(osFile* file_desc, void* buffer, int nbytes){
     to_read = nbytes;
   else
     to_read = file_desc->index_block->file_size;
-  printf("file size: %d\n", file_desc->index_block->file_size);
+  printf("file size: %lu\n", file_desc->index_block->file_size);
   printf("A leer: %d\n", to_read);
   buffer -= over_read;
   for(int bloque_actual=0; bloque_actual < cantidad_bloques; bloque_actual++)

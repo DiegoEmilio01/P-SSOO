@@ -88,6 +88,8 @@ void destroy_mbt()
   }
 }
 
+
+
 Entry* init_entry(bool is_valid, uint8_t id, uint32_t location, uint32_t size){
   Entry* entry = malloc(sizeof(Entry));
   *entry = (Entry) {
@@ -185,10 +187,10 @@ void datablocks_init(FILE* disk, osFile* osfile){
   osfile->data_blocks = malloc(cantidad_bloques*sizeof(DataBlock));
   printf("CANTIDAD DE BLOQUES %d\nSIZE %ld\n", cantidad_bloques, osfile->index_block->file_size);
   int bloque_actual = 0;
-
+  // esto está cursed, pq 2 variables?
   for (int puntero_actual = 0; puntero_actual < cantidad_bloques; puntero_actual++)
   {
-    printf("PUNTERO %d \n", 1024 + osfile->index_block->punteros[puntero_actual] * 2048);
+    //printf("PUNTERO %d \n", 1024 + osfile->index_block->punteros[puntero_actual] * 2048);
     fseek(disk, 1024 + osfile->index_block->punteros[puntero_actual] * 2048 + mbt->entry_container[partition]->location * 2048 , SEEK_SET); //Movemos el puntero a un bloque específico para que sea leído y guardado
     osfile->data_blocks[bloque_actual].array_bytes = malloc(2048*sizeof(uint8_t));
     osfile->data_blocks[bloque_actual].entry_quantity = 0;
@@ -198,19 +200,20 @@ void datablocks_init(FILE* disk, osFile* osfile){
     
     bloque_actual++;
   }
-  printf("NOMBRE A IMPRIMIR %s\n", osfile->filename);
+  // ? acá se escribe el archivo en el disco del PC
+  /* printf("NOMBRE A IMPRIMIR %s\n", osfile->filename);
   FILE* test_out = fopen(osfile->filename, "wb");
   bloque_actual = 0;
   int bytes_restantes = osfile->index_block->file_size;
   for (int uwu = 0; uwu < cantidad_bloques; uwu++)
   {
-    printf("PUNTERO %d \n", osfile->index_block->punteros[0]);
+    //printf("PUNTERO %d \n", osfile->index_block->punteros[0]);
     fwrite(osfile->data_blocks[bloque_actual].array_bytes, sizeof(uint8_t), 
     (size_t)(bytes_restantes < 2048 ? bytes_restantes : 2048), test_out);
     bloque_actual += 1;
     if (!bytes_restantes) break;
   }
-  fclose(test_out);
+  fclose(test_out); */
   
   
 }
@@ -243,6 +246,14 @@ Directory* directory_init(FILE* disk, int posicion_particion){ // Falta completa
   return bloque_retorno;
 }
 
+void destroy_directory(Directory *bloque_directory){
+  for (int entrada_rellenada = 0; entrada_rellenada < 64; entrada_rellenada++) {
+    free(bloque_directory->entries[entrada_rellenada].filename);
+  }
+  free(bloque_directory->entries);
+  free(bloque_directory);
+}
+
 void print_file(osFile* file){
   printf("-------------------------------------------------\n");
   printf("Nombre archivo: %s  Tamaño archivo: %lu Bytes  \n", file -> filename, file -> file_size);
@@ -250,9 +261,12 @@ void print_file(osFile* file){
   printf("-------------------------------------------------\n");
 }
 
-// Funcion para transformar el contenido del testdisk del Pablo
-int hex_to_int(char* input){
-  return (int)strtol(input, NULL, 16);
+void write_buffer_to_file(uint8_t* buffer, int buffer_size, osFile* osfile){
+  printf("NOMBRE A IMPRIMIR %s\n", osfile->filename);
+  FILE* file = fopen(osfile->filename, "wb");
+  
+  fwrite(buffer, sizeof(uint8_t), (size_t)(buffer_size), file);
+  fclose(file);
 };
 
 Bitmap* init_bitmap(){
