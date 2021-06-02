@@ -11,7 +11,7 @@ void os_bitmap(unsigned int holi);
 
 bool os_exists(char* filename);
 
-IndexBlock* indexblock_init(FILE* disk, int inicio_directorio /* REVISAREIS*/);
+IndexBlock* indexblock_init(FILE* disk, uint64_t inicio_directorio /* REVISAREIS*/);
 
 void os_ls();
 
@@ -29,12 +29,14 @@ void os_reset_mbt();
 
 // Funciones de manejo de archivos
 
-void os_open(char* filename, char mode);
+osFile* os_open(char* filename, char mode);
 
-void os_read(osFile* file_desc, void* buffer, int nbytes);
+int os_read(osFile* file_desc, void* buffer, int nbytes);
 
 void os_write(osFile* file_desc, void* buffer, int nbytes);
 
 void os_close(osFile* file_desc);
 
 void os_rm(char* filename);
+
+      

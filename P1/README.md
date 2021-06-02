@@ -13,3 +13,5 @@ Suposiciones:
 - Se asume que no existen 2 entradas válidas para un mismo `id` de partición.
 
 - De lo anterior, se asume que al intentar escribir una nueva partición en el disco (porque la partición con ese `id` no existe) habrá en el disco una entrada con bit de validez 0.
+
+- Se asume que todo disco viene con una partición válida. Esto permite ejecutar `os_mount`.
