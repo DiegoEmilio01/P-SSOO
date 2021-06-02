@@ -23,6 +23,8 @@ void os_create_partition(int id, int size);
 
 void write_new_partition(int id, int location, int size);
 
+void create_bitmap(int id);
+
 void os_delete_partition(int delete_id);
 
 void os_reset_mbt();
@@ -38,5 +40,3 @@ void os_write(osFile* file_desc, void* buffer, int nbytes);
 void os_close(osFile* file_desc);
 
 void os_rm(char* filename);
-
-      

@@ -39,6 +39,7 @@ typedef struct entry
   //uint32_t block_partition_quantity; // Últimos 4 bytes
 } Entry;
 
+
 Entry* init_entry(bool is_valid, uint8_t id, uint32_t location, uint32_t size);
 
 typedef struct temporal_entry
@@ -77,9 +78,15 @@ typedef struct directory
 
 typedef struct bitmap
 {
-  // será necesario?
+  int start; // posición en la que comienza
+  int n_blocks; // cantidad de bloques del bitmap
+  int empty_blocks; // contador bloques vacios (bits 0)
+  int full_blocks; // contador bloque ocupados (bits 1)
+  uint8_t* bytes; 
 } Bitmap;
 
+Bitmap* init_bitmap();
+void close_bitmap(Bitmap* bitmap);
 
 typedef struct data_block //Siempre manejado en BigEndian
 {

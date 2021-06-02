@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include <string.h>
-
 #include "os_API.h"
 #include "structs.h"
 #include "../osfs/main.h"
@@ -23,16 +22,60 @@ void os_mount(char* diskname, int partition_id){
   mbt = malloc(sizeof(Mbt));
 
   path_disk = diskname;
-  partition = partition_id;
+
   // OJO: rb+ para leer y escribir en binario (?)
   FILE* disk = fopen(diskname, "r+b");  // intentar con rb+
   init_mbt(disk);
+  if (mbt->entry_container[partition_id] && mbt->entry_container[partition_id]->is_valid){
+    partition = partition_id;
+  } else{
+    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: partición inválida \n");
+  }
   fclose(disk);
 }
 
 void os_bitmap(unsigned num){
-  // https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
-  printf("Imprimir bitmap\n"); 
+  // instanciar bitmap
+  Bitmap* bitmap = init_bitmap();
+
+  if (num > bitmap->n_blocks || num < 0){
+    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: input fuera de rango \n");
+    return;
+  }
+
+  fprintf(stderr, "\e[1;34m    Bitmap\e[0m\n\n");
+  if (num == 0){
+    uint8_t buffer[32];
+    int counter = 0;
+    for (int byte = 0; byte < bitmap->n_blocks * 2048; byte++){
+      if (counter == 32){
+        for (int i = 0; i < 32; i++){
+          fprintf(stderr, "0x%02hhX ", buffer[i]);
+        }
+        fprintf(stderr, "\n");
+        counter = 0;
+      }
+      buffer[counter] = bitmap->bytes[byte];
+      counter++;
+    }
+  } else{
+    uint8_t buffer[32];
+    int counter = 0;
+    for(int byte = 2048 * (num - 1); byte < 2048 * (num - 1) + 2048; byte++){
+      if (counter == 32){
+        for (int i = 0; i < 32; i++){
+          fprintf(stderr, "0x%02hhX ", buffer[i]);
+        }
+        fprintf(stderr, "\n");
+        counter = 0;
+      }
+      buffer[counter] = bitmap->bytes[byte];
+      counter++;
+    }
+  }
+  fprintf(stderr, "\n");
+
+  close_bitmap(bitmap);
 }
 
 bool os_exists(char* filename){
@@ -83,14 +126,16 @@ void os_ls(){
 
 void os_mbt(){
   printf("Particiones válidas\n");
-  for (int i = 0; i < mbt->entry_quantity; i++){
-    if (mbt->entry_container[i] && mbt->entry_container[i]->is_valid){
-      printf("    id: %d\n", mbt->entry_container[i]->id);
-      printf("    location: %d\n", mbt->entry_container[i]->location);
-      printf("    size: %d\n\n", mbt->entry_container[i]->size);
+  for (int entry_id = 0; entry_id < mbt->entry_quantity; entry_id++){
+    if (mbt->entry_container[entry_id] && mbt->entry_container[entry_id]->is_valid){
+      printf("    \e[1;35m id: \e[0m %d\n", mbt->entry_container[entry_id]->id);
+      printf("    \e[1;34m location: \e[0m %d\n", mbt->entry_container[entry_id]->location);
+      printf("    \e[1;32m size: \e[0m %d\n", mbt->entry_container[entry_id]->size);
+      printf("    --------------------------\n\n");
     }
   }
 }
+
 
 void os_create_partition(int id, int size){
   printf("Creando partición %d de tamaño %d\n\n", id, size);
@@ -159,6 +204,7 @@ void os_create_partition(int id, int size){
   }
 }
 
+
 void write_new_partition(int id, int location, int size) // falta crear los bloques de bitmap
 {
   FILE* disk = fopen(path_disk, "r+b");
@@ -176,15 +222,30 @@ void write_new_partition(int id, int location, int size) // falta crear los bloq
       insert_location_to_buffer(new_buffer, (uint32_t)location);
       insert_size_to_buffer(new_buffer, (uint32_t)size);
       fwrite(new_buffer, sizeof(uint8_t), 8, disk);
+      //create_bitmap(id);
       break;
     }
-    if (entry_id == mbt->entry_quantity - 1)
-    {
-      printf("ERROR: partition cannot be allocated within any continuous space, please try a smaller size.\n\n");
-    }
-    
   }
   fclose(disk);
+}
+
+void create_bitmap(int id){
+  int old_partition = partition;
+  os_mount(path_disk, id);
+  Bitmap* bitmap = init_bitmap();
+  printf("n_blocks %d\n", bitmap->n_blocks);
+  // modificar
+  for (int i = 0; i < bitmap->n_blocks * 2048; i++)
+  {
+    bitmap->bytes[i] = 0;
+  }
+
+  for(int i = 0; i < bitmap->n_blocks + 1; i++){
+    bt_set(bitmap->bytes, i, true);
+  }
+
+  close_bitmap(bitmap);
+  os_mount(path_disk, old_partition);
 }
 
 // TODO: lanzar OS_ERROR invalid_delete_partition

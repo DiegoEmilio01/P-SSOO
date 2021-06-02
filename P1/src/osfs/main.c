@@ -20,7 +20,20 @@ int main(int argc, char **argv)
   - ubu.gif ?
   - mercedes_benz.mp4
   */
+  os_mount(argv[1], 3);
+  os_create_partition(5, 20000);    // 123506, 20000
+  os_mbt();
+  os_bitmap(1);
 
+
+  os_mount(argv[1], 5);
+  os_bitmap(1);
+
+
+
+  os_delete_partition(5);
+  
+  destroy_mbt();
   /*
   En la partición 2, el archivo nene.txt le encuentro su bloque
   índice en 25841 y después leo su tamaño de archivo que es 3521 Bytes
