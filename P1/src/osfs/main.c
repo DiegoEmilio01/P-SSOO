@@ -66,9 +66,9 @@ int main(int argc, char **argv)
   os_mbt();
   os_ls();
 
-  osFile *archivo_prueba = os_open("dog.mp3",'r');
-  extract_file(archivo_prueba);
-  int numero_random = os_close(archivo_prueba);
+  osFile *archivo_prueba = os_open("dog.2",'r');
+  //extract_file(archivo_prueba);
+  //int numero_random = os_close(archivo_prueba);
 
 
   destroy_mbt();

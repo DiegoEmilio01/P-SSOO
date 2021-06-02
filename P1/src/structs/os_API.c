@@ -373,7 +373,10 @@ osFile* os_open(char* filename, char mode){ //TODO: Falta rellenar bloque de dat
       return ret_file;
     }
   }
+
   fclose(disk);
+  os_strerror(invalid_read_file);
+  return ret_file;
 }
 
 // Ahora que tenemos el IndexBlock procedemos a llenar los DataBlocks usando los punteros que este guarda
