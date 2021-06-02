@@ -75,6 +75,8 @@ void os_bitmap(unsigned num){
     }
   }
   fprintf(stderr, "\n");
+
+  close_bitmap(bitmap);
 }
 
 bool os_exists(char* filename){
@@ -182,15 +184,30 @@ void write_new_partition(int id, int location, int size) // falta crear los bloq
       insert_location_to_buffer(new_buffer, (uint32_t)location);
       insert_size_to_buffer(new_buffer, (uint32_t)size);
       fwrite(new_buffer, sizeof(uint8_t), 8, disk);
+      //create_bitmap(id);
       break;
     }
-    if (entry_id == mbt->entry_quantity - 1)
-    {
-      printf("ERROR: partition cannot be allocated within any continuous space, please try a smaller size.\n\n");
-    }
-    
   }
   fclose(disk);
+}
+
+void create_bitmap(int id){
+  int old_partition = partition;
+  os_mount(path_disk, id);
+  Bitmap* bitmap = init_bitmap();
+  printf("n_blocks %d\n", bitmap->n_blocks);
+  // modificar
+  for (int i = 0; i < bitmap->n_blocks * 2048; i++)
+  {
+    bitmap->bytes[i] = 0;
+  }
+
+  for(int i = 0; i < bitmap->n_blocks + 1; i++){
+    bt_set(bitmap->bytes, i, true);
+  }
+
+  close_bitmap(bitmap);
+  os_mount(path_disk, old_partition);
 }
 
 // TODO: lanzar OS_ERROR invalid_delete_partition

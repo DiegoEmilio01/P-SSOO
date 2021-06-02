@@ -23,6 +23,8 @@ void os_create_partition(int id, int size);
 
 void write_new_partition(int id, int location, int size);
 
+void create_bitmap(int id);
+
 void os_delete_partition(int delete_id);
 
 void os_reset_mbt();

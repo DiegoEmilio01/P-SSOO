@@ -84,6 +84,8 @@ typedef struct bitmap
 } Bitmap;
 
 Bitmap* init_bitmap();
+void close_bitmap(Bitmap* bitmap);
+
 
 typedef struct data_block //Siempre manejado en BigEndian
 {
