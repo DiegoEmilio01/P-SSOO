@@ -76,7 +76,7 @@ Solo un byte indicando el char de respuesta al input es lo esperado. Se puede en
 
 <tr>
 <td>4</td>
-<td>1 si se se trata de un envío de imágen, 0 e.o.c.; En caso de enviar una imágen, los siguientes 3 bytes indican el numero de imágen que se está enviando</td>
+<td>1 si se se trata de un envío de imágen, 0 e.o.c.; En caso de enviar una imágen, los siguientes 3 bytes indican el numero de imágen que se está enviando, si los otros 3 bytes son 0, se indica que no se envian mas imágenes</td>
 </tr>
 
 
