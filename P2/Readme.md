@@ -8,7 +8,8 @@
 
 
 # Protocolos
-## cliente -> servidor
+## cliente -> servidor:
+### ID
 <table>
 <tr>
 <th>numero byte</th>
@@ -47,7 +48,11 @@
 </tr>
 </table>
 
-## servidor -> cliente
+### Payload
+Solo un byte indicando el char de respuesta al input es lo esperado. Se puede enviar un string, pero no se necesita.
+
+## servidor -> cliente:
+### ID:
 <table>
 <tr>
 <th>numero byte</th>
@@ -80,3 +85,6 @@
 <td>1 si se enviarán varios mensajes. Es 0 si es el último de varios o si se envía uno solo</td>
 </tr>
 </table>
+
+### Payload:
+Texto que se deberá mostrar en consola del cliente
