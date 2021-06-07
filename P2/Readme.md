@@ -74,6 +74,11 @@ Solo un byte indicando el char de respuesta al input es lo esperado. Se puede en
 <td>0 si se trata de antes de una partida, 1 si se inicia la partida, 2 si es dentro de la partida, 3 si es de termino de la partida</td>
 </tr>
 
+<tr>
+<td>4</td>
+<td>1 si se se trata de un envío de imágen, 0 e.o.c.; En caso de enviar una imágen, los siguientes 3 bytes indican el numero de imágen que se está enviando</td>
+</tr>
+
 
 <tr>
 <td>6</td>
@@ -87,4 +92,4 @@ Solo un byte indicando el char de respuesta al input es lo esperado. Se puede en
 </table>
 
 ### Payload
-Texto que se deberá mostrar en consola del cliente
+Texto que se deberá mostrar en consola del cliente. O la información de la imágen
