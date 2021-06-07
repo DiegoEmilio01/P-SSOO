@@ -41,4 +41,4 @@ void os_write(osFile* file_desc, void* buffer, int nbytes);
 
 int os_close(osFile* file_desc);
 
-void os_rm(char* filename);
+int os_rm(char* filename);

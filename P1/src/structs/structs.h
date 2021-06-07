@@ -7,11 +7,16 @@ enum os_error{
   invalid_mount_partition,
   invalid_delete_partition,
   invalid_read_file,
+  invalid_write_file,
   invalid_delete_file,
+  invalid_open_mode,
   invalid_read_bitmap,
   invalid_file_name_size, // Usar para input vacio o muy largo
   full_disk,
-  mbt_init_error
+  mbt_init_error,
+  invalid_create_partition,
+  invalid_input_range_bitmap,
+  phantom_file_error
 };
 
 void os_strerror(enum os_error error);
@@ -113,6 +118,7 @@ typedef struct osfile{ // Representa un archivo abierto
   Directory *relative_index; // Relacion con su directorio
   DataBlock *data_blocks; // Contenedor de punteros de los bloques con la información del archivo
   IndexBlock *index_block; // Bloque índice con la metadata
+  char mode; //r o w
 } osFile;
 
 

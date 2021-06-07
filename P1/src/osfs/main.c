@@ -63,19 +63,35 @@ int main(int argc, char **argv)
   //destroy_mbt();
   os_mount(argv[1], 2);
   
-  
   //os_ls();
-  os_create_partition(5, 20000);
+  //os_create_partition(5, 20000);
+  os_mount(argv[1], 2);
   //printf("1--------\n");
   os_mbt();
+  os_ls();
+  //os_exists("nene.txt");
+  //os_exists("nena.txt");
+  osFile *archivo = os_open("nene.txt", 'r');
+  os_close(archivo);
+  //os_rm("nene.txt");
+  //os_exists("nene.txt");
+  //os_reset_mbt();
+
+  // si queremos re iniciar la mbt, debemos ejecutar:
+  // init_mbt(disk);
+
+  //destroy_mbt();
+  //os_mbt();
+  //os_ls();
+  //os_bitmap(1);
   //printf("2--------\n");
   
-  os_mount(argv[1], 5);
-  os_mbt();
-  os_bitmap(0);
+  
+  // os_mbt();
+  
 
-  os_mount(argv[1], 2);
-  os_delete_partition(5);
+  // os_mount(argv[1], 2);
+  // os_delete_partition(5);
 
 
   // os_bitmap(0);

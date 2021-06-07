@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <inttypes.h>
 #include <string.h>
 #include "os_API.h"
@@ -29,7 +30,7 @@ void os_mount(char* diskname, int partition_id){
   if (mbt->entry_container[partition_id] && mbt->entry_container[partition_id]->is_valid){
     partition = partition_id;
   } else{
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: partición inválida \n");
+    fprintf(stderr, "\e[1;31m [WHY] \e[0m: Partición inválida \n");
   }
   fclose(disk);
 }
@@ -39,7 +40,7 @@ void os_bitmap(unsigned num){
   Bitmap* bitmap = init_bitmap();
 
   if (num > bitmap->n_blocks || num < 0){
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: input fuera de rango \n\n");
+    os_strerror(invalid_input_range_bitmap);
     return;
   }
 
@@ -57,7 +58,6 @@ void os_bitmap(unsigned num){
       }
       buffer[counter] = bitmap->bytes[byte];
       counter++;
-
       uint8_t buff[1];
       buff[0] = bitmap->bytes[byte];
       for (int bit = 0; bit < 8; bit++){
@@ -81,8 +81,7 @@ void os_bitmap(unsigned num){
       }
       buffer[counter] = bitmap->bytes[byte];
       counter++;
-
-      // Contar bits ocupados y libres para cada byte
+       // Contar bits ocupados y libres para cada byte
       uint8_t buff[1];
       buff[0] = bitmap->bytes[byte];
       for (int bit = 0; bit < 8; bit++){
@@ -99,11 +98,11 @@ void os_bitmap(unsigned num){
   fprintf(stderr, "\e[1;32mBloques Libres: \e[0m%d\n", bitmap->empty_blocks);
   fprintf(stderr, "--------------------------\n\n");
 
+
   close_bitmap(bitmap);
 }
 
 bool os_exists(char* filename){
-  printf("Corroborando existencia de %s\n", filename);
   FILE* disk = fopen(path_disk, "r+b");
   
   int inicio_directorio = 1024 + (mbt->entry_container[partition]->location)*2048 ;
@@ -112,18 +111,17 @@ bool os_exists(char* filename){
   {
     if(bloque_directory->entries[directory_entry].is_valid)
     {
-      // printf("FILENAME's %s | %s \n", bloque_directory->entries[directory_entry].filename, filename);
-      // printf("directory_entry %i\n",directory_entry);
-      
-      if (strcmp(bloque_directory->entries[directory_entry - 1].filename, filename))
+      if (!strcmp(bloque_directory->entries[directory_entry].filename, filename))
       {
         printf("directory_entry %i\n",directory_entry);
         printf("Archivo <%s> encontrado!\n",bloque_directory->entries[directory_entry].filename);
         fclose(disk);
+        destroy_directory(bloque_directory);
         return true;
       }
     }
   }
+  destroy_directory(bloque_directory);
   fclose(disk);
   return false;
 }
@@ -135,7 +133,6 @@ void os_ls(){
   int inicio_directorio = 1024 + (mbt->entry_container[partition]->location)*2048 ; // Dirección para todas las particiones
   Directory *bloque_directory = directory_init(disk, inicio_directorio /* REVISAREIS*/);
   
-  // printf("DirectoryBlock creado correctamente\n");
   // Tengo que ir a la particion y rescatar el identificador relativo
   for (int directory_entry = 0; directory_entry < bloque_directory->entry_quantity; directory_entry++)
   {
@@ -166,15 +163,18 @@ void os_create_partition(int id, int size){
   printf("Creando partición %d de tamaño %d\n\n", id, size);
   if (size < 16384 || size > 131072)
   {
-    printf("\e[1;31m[ERROR]:\e[0m wrong size as argument. Size must be between 16384 and 131072.\n\n");
+    os_strerror(invalid_create_partition);
+    fprintf(stderr, "\e[1;31m [WHY] \e[0m: Wrong size as argument. Size must be between 16384 and 131072.\n\n \n");
   }
   else if (id < 0 || id > 127)
   {
-    printf("\e[1;31m[ERROR]:\e[0m wrong id as argument. Id must be between 0 and 128.\n\n");
+    os_strerror(invalid_create_partition);
+    fprintf(stderr, "\e[1;31m [WHY] \e[0m: wrong id as argument. Id must be between 0 and 128.\n\n");
   }
   else if (mbt->entry_container[id] && mbt->entry_container[id]->is_valid)
   {
-    printf("\e[1;31m[ERROR]:\e[0m partition already created. If aditional partition is needed, please try another id.\n\n");
+    os_strerror(invalid_create_partition);
+    fprintf(stderr, "\e[1;31m [WHY] \e[0m: Partition already created. If aditional partition is needed, please try another id.\n\n");
   }
   else
   {
@@ -210,7 +210,8 @@ void os_create_partition(int id, int size){
         }
         else
         {
-          printf("\e[1;31m[ERROR]:\e[0m partition cannot be allocated, please try a smaller size.\n\n");
+          os_strerror(invalid_create_partition);
+          fprintf(stderr, "\e[1;31m [WHY] \e[0m: Partition cannot be allocated, please try a smaller size.\n\n");
         }
         destroy_tentry(tentry);
         return;
@@ -230,11 +231,12 @@ void os_create_partition(int id, int size){
 }
 
 
-void write_new_partition(int id, int location, int size) // falta crear los bloques de bitmap
+void write_new_partition(int id, int location, int size) 
 {
   FILE* disk = fopen(path_disk, "r+b");
   fseek(disk, 0, SEEK_SET);
   uint8_t buffer[8];
+
   for (int entry_id = 0; entry_id < mbt->entry_quantity; entry_id++)
   {
     fread(buffer, sizeof(uint8_t), (size_t)8, disk);
@@ -251,15 +253,36 @@ void write_new_partition(int id, int location, int size) // falta crear los bloq
       break;
     }
   }
+  int inicio_directiory = (mbt->entry_container[partition]->location)*2048 + 1024;
+  uint8_t buffer_validez2[1] = {0};
+  uint8_t buffer_identificador[3] = {0, 0, 0};
+  uint8_t buffer_nombre[28] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  
+  fseek(disk, inicio_directiory, SEEK_SET);
+  // El bloque directorio posee (2048/32) entradas
+  for (int entrada_directory = 0; entrada_directory < 64; entrada_directory++)
+  {
+    // 1er byte de validez
+    fwrite(buffer_validez2, sizeof(uint8_t), 1, disk);
+    // 3 Bytes para el identificador relativo
+    fwrite(buffer_identificador, sizeof(uint8_t), 3, disk);
+    // 28 Bytes para el nombre del archivo
+    fwrite(buffer_nombre, sizeof(uint8_t), 28, disk);
+    // Ahora cambiamos la posición del puntero en el archivo para seguir escribiendo
+    inicio_directiory = (mbt->entry_container[partition]->location)*2048 + 1024 + 32;
+    fseek(disk, inicio_directiory, SEEK_SET);
+    
+  }
+  
+  // Sabemos que el primer bloque si o si es directory
+  
   fclose(disk);
 }
 
 void create_bitmap(int id){
   int old_partition = partition;
-  //os_mount(path_disk, id);
   partition = id;
   Bitmap* bitmap = init_bitmap();
-  // printf("n_blocks %d\n", bitmap->n_blocks);
   // modificar
   for (int i = 0; i < bitmap->n_blocks * 2048; i++)
   {
@@ -271,7 +294,6 @@ void create_bitmap(int id){
   }
 
   close_bitmap(bitmap);
-  //os_mount(path_disk, old_partition);
   partition = old_partition;
 }
 
@@ -281,7 +303,7 @@ void os_delete_partition(int delete_id){
   if (partition == delete_id)
   {
     //os_strerror
-    printf("\e[1;31m[ERROR]:\e[0m No se puede borrar una partición ya montada");
+    printf("ERROR: No se puede borrar una partición ya montada");
     return;
   }
   
@@ -332,16 +354,20 @@ void os_reset_mbt(){
     // es decir, el bit de validez y el id pasa a ser 0.
     fwrite(zero_buffer, sizeof(uint8_t), 1, disk);
     // Basta con hacer la entrada inválida, ya que en ese caso se sobreescribe lo demás
-    mbt->entry_container[entry_id]->is_valid = 0;
+
+    /* if (mbt->entry_container){
+      if (mbt->entry_container[entry_id]){
+        mbt->entry_container[entry_id]->is_valid = 0;
+      }
+    } */
+
     // No encontré si fwrite mueve el puntero en ningún lado :( p.d mi intuición dice que sí lo mueve
     // asi que tenemos la solución pobre:
     fseek(disk, 8 * (entry_id + 1), SEEK_SET);
   }
 
   // tal vez un raise_error pero no se me ocurre qué.
-
   fclose(disk);
-
 }
 
 void os_write(osFile* file_desc, void* buffer, int nbytes){
@@ -369,86 +395,202 @@ int os_close(osFile* file_desc){
   return 0;
 }
 
-void os_rm(char* filename){
-  printf("Borrando archivo %s\n\n", filename);
-}
+
 
 /*En la partición 2, el archivo nene.txt le encuentro su bloque índice en 25841 y después leo su tamaño de archivo que es 3521 Bytes*/
 osFile* os_open(char* filename, char mode){ //TODO: Falta rellenar bloque de data, y probar la inicializacion del Directory
-  printf("Abriendo archivo %s\n\n", filename);
+  // printf("Abriendo archivo %s\n\n", filename);
   osFile *ret_file = malloc(sizeof(osFile));
   ret_file->read_index = 0;
   FILE* disk = fopen(path_disk, "r+b");
   int inicio_directorio = 1024 + (mbt->entry_container[partition]->location)*2048 ; // Dirección para todas las particiones
   Directory *bloque_directory = directory_init(disk, inicio_directorio /* REVISAREIS*/);
   
-  //printf("DirectoryBlock creado correctamente\n");
   ret_file->relative_index = bloque_directory;
   // Tengo que ir a la particion y rescatar el identificador relativo
-  for (int directory_entry = 0; directory_entry < bloque_directory->entry_quantity; directory_entry++)
+  
+  if (mode == 'r' && os_exists(filename))
   {
-    // Testeo
-    if(!strcmp(bloque_directory->entries[directory_entry].filename, filename)){
-      ret_file->filename = bloque_directory->entries[directory_entry].filename;
-      //Si el archivo era el que buscaba, procedo a rellenar sus bloques de datos y retorno
-      //printf("mbt: %d \n directory_relative: %d\n",mbt->entry_container[partition]->size, bloque_directory->entries[directory_entry].relative_index);
-      uint64_t posicion_bloque_indice = 1024 + (bloque_directory->entries[directory_entry].relative_index)*2048 + (mbt->entry_container[partition]->location)*2048; // MBT + Particion + relative
-      // printf("BLOQUE INDICE POSICION: %ld\n", posicion_bloque_indice);
-      // Ahora rellenamos el IndexBlock para obtener punteros
-      IndexBlock *bloque_index = indexblock_init(disk, posicion_bloque_indice /* REVISAREIS*/);
-      // printf("IndexBlock creado correctamente\n");
-      ret_file->index_block = bloque_index;
-      // Ahora rellenamos los DataBlocks
-      datablocks_init(disk, ret_file);
-      // printf("DataBlocks creados correctamente\n");
-      fclose(disk);
-      return ret_file;
+    for (int directory_entry = 0; directory_entry < bloque_directory->entry_quantity; directory_entry++)
+    {
+      if(!strcmp(bloque_directory->entries[directory_entry].filename, filename)){
+        ret_file->filename = bloque_directory->entries[directory_entry].filename;
+        //Si el archivo era el que buscaba, procedo a rellenar sus bloques de datos y retorno
+        uint64_t posicion_bloque_indice = 1024 + (bloque_directory->entries[directory_entry].relative_index)*2048 + (mbt->entry_container[partition]->location)*2048; // MBT + Particion + relative
+        // Ahora rellenamos el IndexBlock para obtener punteros
+        IndexBlock *bloque_index = indexblock_init(disk, posicion_bloque_indice /* REVISAREIS*/);
+        ret_file->index_block = bloque_index;
+        // Ahora rellenamos los DataBlocks
+        datablocks_init(disk, ret_file);
+        ret_file->mode = 'r';
+        fclose(disk);
+        return ret_file;
+      }
     }
   }
-
-  fclose(disk);
-  os_strerror(invalid_read_file);
-  return ret_file;
+  else if (mode == 'r')
+  {
+    fclose(disk);
+    os_strerror(invalid_read_file);
+    ret_file->mode = 'r';
+    return ret_file;
+  }
+  else if (mode == 'w' && !os_exists(filename))
+  {
+    for (int directory_entry = 0; directory_entry < bloque_directory->entry_quantity; directory_entry++)
+    {
+      if(!strcmp(bloque_directory->entries[directory_entry].filename, filename)){
+        ret_file->filename = filename;
+        //Si el archivo era el que buscaba, procedo a rellenar sus bloques de datos y retorno
+        uint64_t posicion_bloque_indice = 1024 + (bloque_directory->entries[directory_entry].relative_index)*2048 + (mbt->entry_container[partition]->location)*2048; // MBT + Particion + relative
+        // Ahora rellenamos el IndexBlock para obtener punteros
+        IndexBlock *bloque_index = indexblock_init(disk, posicion_bloque_indice /* REVISAREIS*/);
+        ret_file->index_block = bloque_index;
+        ret_file->mode = 'w';
+        // Ahora rellenamos los DataBlocks
+        datablocks_init(disk, ret_file);
+        fclose(disk);
+        return ret_file;
+      }
+    }
+  }
+  else if (mode == 'w')
+  { //Acá ya existe
+  for (int directory_entry = 0; directory_entry < bloque_directory->entry_quantity; directory_entry++)
+    {
+      if(!strcmp(bloque_directory->entries[directory_entry].filename, filename)){
+        ret_file->filename = filename;
+        //Si el archivo era el que buscaba, procedo a rellenar sus bloques de datos y retorno
+        uint64_t posicion_bloque_indice = 1024 + (bloque_directory->entries[directory_entry].relative_index)*2048 + (mbt->entry_container[partition]->location)*2048; // MBT + Particion + relative
+        // Ahora rellenamos el IndexBlock para obtener punteros
+        IndexBlock *bloque_index = indexblock_init(disk, posicion_bloque_indice /* REVISAREIS*/);
+        ret_file->index_block = bloque_index;
+        // Ahora rellenamos los DataBlocks
+        datablocks_init(disk, ret_file);
+        ret_file->mode = 'w';
+        fclose(disk);
+        os_strerror(invalid_write_file);
+        return ret_file;
+      }
+    }
+  }
+  else
+  {
+    for (int directory_entry = 0; directory_entry < bloque_directory->entry_quantity; directory_entry++)
+    {
+      if(!strcmp(bloque_directory->entries[directory_entry].filename, filename)){
+        ret_file->filename = filename;
+        //Si el archivo era el que buscaba, procedo a rellenar sus bloques de datos y retorno
+        uint64_t posicion_bloque_indice = 1024 + (bloque_directory->entries[directory_entry].relative_index)*2048 + (mbt->entry_container[partition]->location)*2048; // MBT + Particion + relative
+        // Ahora rellenamos el IndexBlock para obtener punteros
+        IndexBlock *bloque_index = indexblock_init(disk, posicion_bloque_indice /* REVISAREIS*/);
+        ret_file->index_block = bloque_index;
+        // Ahora rellenamos los DataBlocks
+        datablocks_init(disk, ret_file);
+        fclose(disk);
+        os_strerror(invalid_open_mode);
+        ret_file->mode = 'r';
+        return ret_file;
+      }
+    }
+  }
+  return NULL;
 }
 
+int os_rm(char* filename){
+  if(os_exists(filename) == false){
+    os_strerror(phantom_file_error);
+    return 1;
+  }else{
+    /* Para matar un archivo en disco tengo que:
+        - MATAR su entrada del bloque directorio
+        - Borrar sus bloques de datos y escribirlos en disco (todos en 0)
+        - Matar el index
+    */
+    printf("BORRANDO: %s\n", filename);
+    FILE* disk = fopen(path_disk, "r+b");
+    int inicio_directorio = 1024 + (mbt->entry_container[partition]->location)*2048 ; // Dirección para todas las particiones
+    Directory *bloque_directory = directory_init(disk, inicio_directorio /* REVISAREIS*/);
+    fseek(disk, inicio_directorio, SEEK_SET);
+    uint8_t zero_bytes[1] = {0};
+    uint8_t buffer[4];
+    char buffer_name[29];
+    int bloque_n;
+
+    for (bloque_n = 0; bloque_n < bloque_directory->entry_quantity; bloque_n++){
+      fread(buffer, sizeof(uint8_t), (size_t)4, disk);
+      fread(buffer_name, sizeof(char), (size_t)28, disk);
+      //if (bloque_n == 51) printf("[¿]%ld\n", ftell(disk));
+      if (!buffer[0]) continue;
+      //buffer_name[28] = '\0';
+      if (!strcmp(buffer_name, filename)){  // igual nombre
+        fseek(disk, (long int)-32, SEEK_CUR);
+        fwrite(zero_bytes, sizeof(uint8_t), (size_t)1, disk);
+        break;
+      }
+    }
+    if (bloque_n == 64) return 1;
+
+    uint32_t bloques_a_liberar[681];
+    uint32_t relative_index = last_3_bytes_of_4(buffer);
+    fseek(disk, 5 + relative_index * 2048 + 1024 * (mbt->entry_container[partition]->location) * 2048, SEEK_SET);
+    uint8_t pointer[3];
+    for (int i=0; i<681; i++){
+      fread(pointer, sizeof(uint8_t), (size_t)3, disk);
+      bloques_a_liberar[i] = three_bytes_to_int(pointer);
+    }
+    fclose(disk);
+    // borrar en bitmap
+    // cargar bitmap a memoria
+    Bitmap* le_bitmap = init_bitmap();
+    for (int i=0; i<681; i++){
+      // no borrar el directorio por error
+      if (!bloques_a_liberar[i]) continue;
+      bt_set(le_bitmap->bytes, bloques_a_liberar[i], 0);
+    }
+    
+    close_bitmap(le_bitmap);
+    return 0;
+  }
+};
 // Ahora que tenemos el IndexBlock procedemos a llenar los DataBlocks usando los punteros que este guarda
 
 /*Lee los siguientes nbytes del archivo y los guarda en la dirección apuntada por buffer*/
 int os_read(osFile* file_desc, void* buffer, int nbytes){
-  int read_now=0;
-  int cantidad_bloques = (file_desc->index_block->file_size % 2048 ? 1 : 0) + file_desc->index_block->file_size / 2048 ; //Cada bloque es de 2048 bytes
-  //printf("CANTIDAD DE BLOQUES %d\nSIZE %ld\n", cantidad_bloques, file_desc->index_block->file_size);
-  // printf("READINDEX: %d\n", file_desc->read_index);
-  nbytes += file_desc->read_index;
-  // leer extra hasta alcanzar el punto a seguir
-  int over_read = file_desc->read_index;
-  int to_read;
-  // printf("Filesize: %ld _ %d\n", file_desc->index_block->file_size, nbytes);
-  if (file_desc->index_block->file_size > nbytes)
-    to_read = nbytes;
-  else
-    to_read = file_desc->index_block->file_size;
-  // printf("file size: %lu\n", file_desc->index_block->file_size);
-  // printf("A leer: %d\n", to_read);
-  buffer -= over_read;
-  for(int bloque_actual=0; bloque_actual < cantidad_bloques; bloque_actual++)
+  if (file_desc->mode == 'r')
   {
-    for(int i=0; i<to_read && i<2048; i++){
-      if (over_read <= 0){
-        *(uint8_t*)(buffer + i) = file_desc->data_blocks[bloque_actual].array_bytes[file_desc->read_index % 2048]; // A continuación llamamos cada bit del array
-        file_desc->read_index += 1; // Sumamos uno al contador del archivo
-        read_now++;
+    int read_now=0;
+    int cantidad_bloques = (file_desc->index_block->file_size % 2048 ? 1 : 0) + file_desc->index_block->file_size / 2048 ; //Cada bloque es de 2048 bytes
+    nbytes += file_desc->read_index;
+    // leer extra hasta alcanzar el punto a seguir
+    int over_read = file_desc->read_index;
+    int to_read;
+    if (file_desc->index_block->file_size > nbytes)
+      to_read = nbytes;
+    else
+      to_read = file_desc->index_block->file_size;
+    buffer -= over_read;
+    for(int bloque_actual=0; bloque_actual < cantidad_bloques; bloque_actual++)
+    {
+      for(int i=0; i<to_read && i<2048; i++){
+        if (over_read <= 0){
+          *(uint8_t*)(buffer + i) = file_desc->data_blocks[bloque_actual].array_bytes[file_desc->read_index % 2048]; // A continuación llamamos cada bit del array
+          file_desc->read_index += 1; // Sumamos uno al contador del archivo
+          read_now++;
+        }
+        else
+          over_read--;
       }
-      else
-        over_read--;
+      to_read -= 2048;
+      if (to_read <= 0) break;
+      buffer += 2048;
     }
-    to_read -= 2048;
-    if (to_read <= 0) break;
-    buffer += 2048;
+    return read_now;
   }
-  
-  return read_now;
+  os_strerror(invalid_read_file);
+  return 0;
 }
+
 
 void extract_file(osFile* osfile)
 {
