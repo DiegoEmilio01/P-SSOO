@@ -37,6 +37,12 @@
 </tr>
 
 <tr>
+<td>5</td>
+<td>1 si se recibió un paquete, 0 en otro caso. (usado para el bonus de imágenes) </td>
+</tr>
+
+
+<tr>
 <td>6</td>
 <td>1 si se se trata de un mensaje de desconexión (desconectarse del servidor), 0 e.o.c.</td>
 </tr>
