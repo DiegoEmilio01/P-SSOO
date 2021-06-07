@@ -98,4 +98,4 @@ Solo un byte indicando el char de respuesta al input es lo esperado. Se puede en
 </table>
 
 ### Payload
-Texto que se deberá mostrar en consola del cliente. O la información de la imágen
+Texto que se deberá mostrar en consola del cliente. O los bytes de la imágen
