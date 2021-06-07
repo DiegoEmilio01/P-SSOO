@@ -33,7 +33,7 @@
 
 <tr>
 <td>4</td>
-<td>1 si se trata de una acción previa al juego</td>
+<td>1 si se trata de entregar el nombre del usuario</td>
 </tr>
 
 <tr>
@@ -49,7 +49,7 @@
 </table>
 
 ### Payload
-Solo un byte indicando el char de respuesta al input es lo esperado. Se puede enviar un string, pero no se necesita.
+Solo un byte indicando el char de respuesta al input es lo esperado. Se puede enviar un string en caso de ser necesario (nombre del jugador).
 
 ## servidor -> cliente:
 ### ID
