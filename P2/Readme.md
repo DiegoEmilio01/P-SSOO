@@ -52,7 +52,7 @@
 Solo un byte indicando el char de respuesta al input es lo esperado. Se puede enviar un string, pero no se necesita.
 
 ## servidor -> cliente:
-### ID:
+### ID
 <table>
 <tr>
 <th>numero byte</th>
@@ -86,5 +86,5 @@ Solo un byte indicando el char de respuesta al input es lo esperado. Se puede en
 </tr>
 </table>
 
-### Payload:
+### Payload
 Texto que se deberá mostrar en consola del cliente
