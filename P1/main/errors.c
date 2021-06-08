@@ -23,7 +23,7 @@ int main(int argc, char **argv)
 
   os_exists("");    // No genera ningún error.
 
-  osFile *archivo = os_open("nene.txt", 'w');
+  osFile *archivo = os_open("nene.txt", 'w'); // intenta abrir como escritura un archivo existente
   os_close(archivo);
 
   destroy_mbt();
