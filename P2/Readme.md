@@ -22,13 +22,8 @@
 </tr>
 
 <tr>
-<td>1-2</td>
+<td>1-3</td>
 <td>id jugador</td>
-</tr>
-
-<tr>
-<td>3</td>
-<td>Si es mounstro, en caso de que sea verdad, se ignora el id del jugador</td>
 </tr>
 
 <tr>
@@ -85,6 +80,10 @@ Solo un byte indicando el char de respuesta al input es lo esperado. Se puede en
 <td>1 si se se trata de un envío de imágen, 0 e.o.c.; En caso de enviar una imágen, los siguientes 3 bytes indican el numero de imágen que se está enviando, si los otros 3 bytes son 0, se indica que no se envian mas imágenes</td>
 </tr>
 
+<tr>
+<td>5</td>
+<td>1 si se desea setear el id del usuario con el primer byte de payload, 0 e.o.c.</td>
+</tr>
 
 <tr>
 <td>6</td>
