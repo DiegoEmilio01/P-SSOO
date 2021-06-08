@@ -20,12 +20,10 @@ int main(int argc, char **argv)
   osFile *archivo = os_open("mystery.mp3", 'r');
   extract_file(archivo); //extract_file usa os_read y recupera el archivo.
   os_close(archivo);
-  os_rm("mystery.mp3");
   
-  os_ls();
+  // os_rm("mystery.mp3");  Función incompleta
+  // destroy_directory(bloque_directory); para línea 531 de os_API.c
   
   destroy_mbt();
   return 0;
-  
-  // destroy_directory(bloque_directory); para línea 531 de os_API.c
 }
