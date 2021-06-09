@@ -6,13 +6,15 @@
 - Macarena Muñoz - 18637086
 - Maximiliano Narea - 17626463
 
+# Supuestos
+* personajes solo son afectados por la ultima habilidad que les afecta algun stat.
 
 # Protocolos
 ## cliente -> servidor:
 ### ID
 <table>
 <tr>
-<th>numero byte</th>
+<th>numero bit</th>
 <th>Uso</th>
 </tr>
 
@@ -56,7 +58,7 @@ Solo un byte indicando el char de respuesta al input es lo esperado. Se puede en
 ### ID
 <table>
 <tr>
-<th>numero byte</th>
+<th>numero bit</th>
 <th>Uso</th>
 </tr>
 
