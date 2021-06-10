@@ -3,6 +3,13 @@
 #include <stdlib.h>
 #include "comunication.h"
 #include "conection.h"
+#include "bits.h"
+#include "texts.h"
+
+char * NO_TXT = "\0";
+const uint8_t TXT_ONLY = 0;
+char texto_opciones[] = "¿Qué desea hacer?\n   [1]Enviar mensaje al servidor\n   [2]agregar otro cliente\n";
+
 
 char * revert(char * message){
   //Se invierte el mensaje
@@ -32,55 +39,67 @@ int main(int argc, char *argv[]){
   get_client(server_socket, sockets_array, 0);
 
   printf("Servidor escuchando\n");
-  // Le enviamos a todos los clientes que se conectó uno nuevo
-  char welcome_all[24];
-  sprintf(welcome_all, "LLegó el cliente %d!!", clientes+1);
-  server_send_message(sockets_array[0], 2, welcome_all);
+  // le damos la opción al admin si desea jugar con monstruo
+  send_txt(sockets_array[0], TXT_ONLY, x_admin_req_monster);
+  int choice = request_int(sockets_array[0]);
+  if (choice == 1)
+    send_txt(sockets_array[0], TXT_ONLY, x_admin_req_monster_succ);
+  else
+    send_txt(sockets_array[0], TXT_ONLY, x_admin_req_monster_fail);
+
 
   // Le enviamos al primer cliente un mensaje de bienvenida
   char welcome[24];
   sprintf(welcome, "Bienvenido Cliente %d!!", clientes+1);
-  server_send_message(sockets_array[0], 1, welcome);
   printf("cliente conectado\n");
-
 
   // Guardaremos los sockets en un arreglo e iremos alternando a quién escuchar.
   int my_attention = 0;
-  while (1)
+  for(;;)
   {
+    send_txt(sockets_array[0], TXT_ONLY, x_req_nombre);  // en lugar equivocado, cambiar luego
+    int choice = request_int(sockets_array[0]);
+    /*
+    // enviarle texto al cliente pidiendo la instruccion
+    server_send_and_wait(sockets_array[0], TXT_ONLY, texto_opciones);
+    server_send_message(sockets_array[my_attention], REQ_CHAR, NO_TXT);
+
     // Se obtiene el paquete del cliente 1
     int msg_code = server_receive_id(sockets_array[0]);
+    char * char_action = server_receive_payload(sockets_array[my_attention]);
+    printf("Recibido mensaje de cliente\n");
+    int action = char_action[0] - '0';
+    if (action > 9 || action < 0){
+      // este es un error, pedirle al cliente input de nuevo
+      continue;
+    }
 
-    if (msg_code == 1) //El cliente me envió un mensaje a mi (servidor)
+    if (action == 1) //El cliente me envió un mensaje a mi (servidor)
     {
       char * client_message = server_receive_payload(sockets_array[my_attention]);
-      printf("El cliente %d dice: %s\n", my_attention+1, client_message);
+      printf("El cliente %i dice: %s\n", my_attention+1, client_message);
 
       // Le enviaremos el mismo mensaje invertido jeje
       char * response = revert(client_message);
-
-      // Le enviamos la respuesta
-      server_send_message(sockets_array[my_attention], 1, response);
+      server_send_and_wait(sockets_array[my_attention], TXT_ONLY, response);
     }
-    else if (msg_code == 2){ //El cliente le envía un mensaje al otro cliente
+    if (action == 2){ //El cliente le envía un mensaje al otro cliente
       // char * client_message = server_receive_payload(sockets_array[my_attention]);
       // printf("Servidor traspasando desde %d a %d el mensaje: %s\n", my_attention+1, ((my_attention+1)%2)+1, client_message);
       char * client_message = "Esperando a otro cliente";
-      server_send_message(sockets_array[my_attention], 2, client_message);
+      server_send_and_wait(sockets_array[my_attention], 0, client_message);
       clientes++;
       get_client(server_socket, sockets_array, clientes);
       sprintf(welcome, "Bienvenido Cliente %d!!", clientes+1);
-      server_send_message(sockets_array[clientes], 2, welcome);
+      server_send_and_wait(sockets_array[clientes], 0, welcome);
 
       sprintf(welcome_all, "LLegó el cliente %d!!", clientes+1);
-      for (int client_n=1; client_n < clientes; client_n++){
-        server_send_message(sockets_array[client_n], 2, welcome_all);
+      for (int client_n=0; client_n < clientes; client_n++){
+        server_send_and_wait(sockets_array[client_n], TXT_ONLY, welcome_all);
       }
-      // Mi atención cambia al otro socket
-      // my_attention = (my_attention + 1) % 5;
-      server_send_message(sockets_array[0], 1, welcome_all);
-
+      
     }
+    //*/
     printf("------------------\n");
   }
 

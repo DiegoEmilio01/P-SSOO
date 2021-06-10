@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "conection.h"
 #include "comunication.h"
+#include "bits.h"
 
 char * get_input(){
   char * response = malloc(20);
@@ -16,6 +17,7 @@ char * get_input(){
   return response;
 }
 
+char *NO_TXT = "\0";
 
 int main (int argc, char *argv[]){
   //Se obtiene la ip y el puerto donde está escuchando el servidor (la ip y puerto de este cliente da igual)
@@ -27,42 +29,42 @@ int main (int argc, char *argv[]){
 
   // Se inicializa un loop para recibir todo tipo de paquetes y tomar una acción al respecto
   while (1){
-    int msg_code = client_receive_id(server_socket);
+    uint8_t msg_code = client_receive_id(server_socket);
+    // printf("server RCV:, %d\n", msg_code);
 
-    if (msg_code == 1) { //Recibimos un mensaje del servidor
+    if (bt_get(&msg_code, 1)) { // servidor pide char
       char * message = client_receive_payload(server_socket);
-      printf("El servidor dice: %s\n", message);
+      client_send_message(server_socket, (uint8_t)0, NO_TXT);
+      printf("%s", message);
       free(message);
 
-      printf("¿Qué desea hacer?\n   1)Enviar mensaje al servidor\n   2)agregar otro cliente\n");
-      int option = getchar() - '0';
-      getchar(); //Para capturar el "enter" que queda en el buffer de entrada stdin
+      char option[2];
+      option[0] = getchar();
+      option[1] = '\0';
+      getchar();
+      
+      client_send_message(server_socket, (uint8_t)0, option);      
+    }
+    else if (bt_get(&msg_code, 0)) { 
+      // servidor pide string de vuelta
+      char * message = client_receive_payload(server_socket);
+      client_send_message(server_socket, (uint8_t)0, NO_TXT);
+      printf("%s", message);
+      free(message);
 
-      if (option == 1){
-        printf("Ingrese su mensaje: ");
-        char * response = get_input();
-        client_send_message(server_socket, option, response);
-      }else{
-        client_send_message(server_socket, option, "get_input()");
-      }
+      printf("Ingrese su mensaje: ");
+      char * response = get_input();
+      client_send_message(server_socket, (uint8_t)0, response);
       
     }
-
-    if (msg_code == 2) { //Recibimos un mensaje que proviene del otro cliente
+    else if (msg_code == 0) { //Recibimos un mensaje que proviene del servidor
       char * message = client_receive_payload(server_socket);
-      printf("El servidor dice: %s\n", message);
+      client_send_message(server_socket, (uint8_t)0, NO_TXT);
+      printf("%s", message);
       free(message);
-
-      // printf("¿Qué desea hacer?\n   1)Enviar mensaje al servidor\n   2)Enviar mensaje al otro cliente\n");
-      // int option = getchar() - '0';
-      // getchar(); //Para capturar el "enter" que queda en el buffer de entrada stdin
-
-      // printf("Ingrese su mensaje: ");
-      // char * response = get_input();
-
-      // client_send_message(server_socket, option, response);
+      client_send_message(server_socket, (uint8_t)0, NO_TXT);
     }
-    printf("------------------\n");
+    // printf("------------------\n");
   }
 
   // Se cierra el socket
