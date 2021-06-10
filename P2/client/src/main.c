@@ -62,7 +62,7 @@ int main (int argc, char *argv[]){
       client_send_message(server_socket, (uint8_t)0, NO_TXT);
       printf("%s", message);
       free(message);
-      client_send_message(server_socket, (uint8_t)0, NO_TXT);
+      // client_send_message(server_socket, (uint8_t)0, NO_TXT);
     }
     // printf("------------------\n");
   }

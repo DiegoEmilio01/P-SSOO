@@ -1,3 +1,4 @@
+#pragma once
 #include <string.h>
 #include "comunication.h"
 #include "bits.h"
@@ -50,8 +51,8 @@ void server_send_and_wait(int client_socket, int pkg_id, char * message){
 void send_txt(int client_socket, uint8_t pkg_id, char * message){
   // separar el texto en grupos de 255 elementos
   int len = strlen(message) + 1;
-  if (len > 255)  // recordar el largo de linea
-    bt_set(&pkg_id, 7, 1);
+  // if (len > 255)  // recordar el largo de linea
+  //   bt_set(&pkg_id, 7, 1);
   char msg_buffer[255];
   while (len > 255){
     strncpy(msg_buffer, message, 254);
@@ -60,7 +61,7 @@ void send_txt(int client_socket, uint8_t pkg_id, char * message){
     message += 254;
     len -= 254;
   }
-  bt_set(&pkg_id, 7, 0);
+  // bt_set(&pkg_id, 7, 0);
   server_send_and_wait(client_socket, pkg_id, message);
 }
 
@@ -72,9 +73,10 @@ int request_int(int client_socket){
   char message[] = "$> ";
   uint8_t pkg_id=0;
   bt_set(&pkg_id, 1, 1);
-  server_send_message(client_socket, pkg_id, message);
+  server_send_and_wait(client_socket, pkg_id, message);
   server_receive_id(client_socket);
   char * recv = server_receive_payload(client_socket);
+  printf("recv[0]: %d\n", recv[0]);
   int ret = recv[0]-'0';
   free(recv);
   return ret;

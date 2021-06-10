@@ -5,6 +5,7 @@
 #include "conection.h"
 #include "bits.h"
 #include "texts.h"
+#include "clases.h"
 
 char * NO_TXT = "\0";
 const uint8_t TXT_ONLY = 0;
@@ -30,6 +31,8 @@ int main(int argc, char *argv[]){
   char * IP = "0.0.0.0";
   int PORT = 8080;
   printf("Servidor encendido\n");
+  Entity entes[5];
+  entes[1].func1 = f_estocada;
 
   // Se crea el servidor y se obtienen los sockets de ambos clientes.
   // Se inicializa una estructura propia para guardar los n°s de sockets de los clientes.
@@ -42,6 +45,7 @@ int main(int argc, char *argv[]){
   // le damos la opción al admin si desea jugar con monstruo
   send_txt(sockets_array[0], TXT_ONLY, x_admin_req_monster);
   int choice = request_int(sockets_array[0]);
+  printf("choice: %d\n", choice);
   if (choice == 1)
     send_txt(sockets_array[0], TXT_ONLY, x_admin_req_monster_succ);
   else

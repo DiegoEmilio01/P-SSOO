@@ -1,3 +1,4 @@
+#pragma once
 // enum texts {
 //   t_exit,
 //   t_admin_start,
@@ -10,15 +11,14 @@
 // };
 
 
-
-char
+static char
   *x_none = "\0",
   *x_exit = " [0]>Desconectarse\n",
   *x_admin_start = "Bienvenido! Tu eres admin\n",
   *x_member_start = "Bienvenido! Tu eres admin\n",
   *x_admin_req_monster = "¿Deseas que haya un mounstro?\n [1]>Si\n [2]>No\n",
   *x_admin_req_monster_succ = "Se decidió que haya mounstro\n",
-  *x_admin_req_monster_fail = "Se decidió que haya mounstro\n",
+  *x_admin_req_monster_fail = "Se decidió que NO haya mounstro\n",
   *x_req_nombre = "A continuación, ingresa tu nombre. Se truncará a 15 caracteres\n",
   *x_req_class = "¿Qué clases deseas ser?\n [1]>Cazador\n [2]>Médico\n [3]>Hacker\n",
   *x_req_class_ex = " [4]>Monstruo\n",
