@@ -32,6 +32,7 @@ typedef struct entity{
   char playername[13];
   int is_monster;
   int socket;
+  int multiplier; // debe iniciar en 1, puede duplicarse o reducirse a la mitad
 } Entity;
 
 /* ----- CLASS FUNCTIONS ----- */

@@ -33,6 +33,7 @@ char* f_corte_cruzado(Entity* aliados, int len_aliados, int posicion_yo, Entity*
   if (!len_enemigos) printf("Va a fallar\n");
   int objective = rand() % len_enemigos;
   enemigos[objective].hp -= 1000;
+
   return NULL;
 }
 
@@ -117,7 +118,7 @@ char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* ene
 
   int pos_aliado = rand() % len_aliados;
   Entity* aliado = &aliados[pos_aliado];
-  aliado->effect_type = 'q';
+  aliado->effect_type = 'q'; // S'Q'L
 
   return NULL;
 }
@@ -139,7 +140,11 @@ char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* e
   Entity* yo = &aliados[posicion_yo];
   int enemy_pos = rand() % len_enemigos;
 
-  yo->effect_type = 'f';
+  if (yo->effect_type != 'f'){
+    yo->effect_contador = 1;
+    yo->effect_value = 0;
+  }
+  yo->effect_type = 'f'; // fuerzaBruta
   yo->effect_contador += 1;
   if (yo->effect_contador == 3){
     enemigos[enemy_pos].hp -= 10000;
@@ -170,26 +175,40 @@ char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
 #pragma region RUZALOS
 // ------ FUNCIONES RUZALOS ------
 
-// RUZALOS
-char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
+// RUZALOS n°0
+char* f_salto(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
 
 }
 
-// RUZALOS
-char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
+// RUZALOS n°1
+char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
+
+}
 
 #pragma endregion RUZALOS
 
+
+
+/* void extras_handler(Entity* aliados, int len_aliados, Entity* enemigos, int len_enemigos){
+  for (int n_enemigo = 0; n_enemigo < len_enemigos; n_enemigo++){
+    if (enemigos[n_enemigo].effect_type == 's'){
+      Entity* enemigo = &enemigos[n_enemigo];
+      enemigo->hp -= enemigo->effect_value;
+    }
+  }
+} */
 /* 
 EFECTOS ESPECIALES:
 
-TODO: if del hacker, duplica daño
-TODO: revisar si aliados y monstruos tienen HP <= 0
+TODO: if del hacker, duplica daño.
+TODO: En turno de monstruo, si type = 's', sangrado.
+TODO: Forzar que monstruo ataque por 'd' - "distraer".
+TODO: revisar si aliados y monstruos tienen HP <= 0.
 
-Estocada: 's': realizar sangrado
-Distraer: 'd': forzar ataque por distracción
-SQL: 'q': duplicar daño de aliado
-FuerzaBruta: 'f': si se usa 3 veces, causa 10.000 de daño
-Reprobaton-9000:
+Estocada:     's': realizar sangrado
+Distraer:     'd': forzar ataque por distracción
+SQL:          'q': duplicar daño de aliado
+FuerzaBruta:  'f': si se usa 3 veces, causa 10.000 de daño
+Reprobaton:   
 
- */
+*/
