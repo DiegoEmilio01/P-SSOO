@@ -69,20 +69,31 @@ void send_txt(int client_socket, char * message){
   server_send_and_wait(client_socket, pkg_id, message);
 }
 
-/** Pide un char del usuario
- * 
+/** Pide un char del usuario, debe ser tal que low_b <= opcion <= high_b
+ * @param low_b Indica el valor valido minimo inclusive
+ * @param high_b Indica el valor valido maximo inclusive
  * @returns int que corresponde al numero indicado por el usuario
  */
-int request_int(int client_socket){
+int request_int(int client_socket, int low_b, int high_b){
   uint8_t pkg_id=0;
   bt_set(&pkg_id, 1, 1);
-  server_send_and_wait(client_socket, pkg_id, x_input);
-  server_receive_id(client_socket);
-  char * recv = server_receive_payload(client_socket);
-  printf("recv[0]: %d\n", recv[0]);
-  int ret = recv[0]-'0';
-  free(recv);
-  return ret;
+  int opcion = -10;
+  while (!(low_b <= opcion && opcion <= high_b)){
+    server_send_and_wait(client_socket, pkg_id, x_input);
+    server_receive_id(client_socket);
+    char * recv = server_receive_payload(client_socket);
+    printf("recv[0]: %d\n", recv[0]);
+    opcion = recv[0]-'0';
+    free(recv);
+    if (!(low_b <= opcion && opcion <= high_b)){
+      char *err_msg = malloc(255);
+      sprintf(err_msg, x_req_char_err, low_b, high_b);
+      send_txt(client_socket, err_msg);
+      free(err_msg);
+    }
+
+  }
+  return opcion;
 }
 
 char* request_txt(int client_socket){

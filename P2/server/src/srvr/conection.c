@@ -37,11 +37,11 @@ int init_sockets(char * IP, int port){
   return server_socket;
 }
 
-void get_client(int server_socket, int *sockets_clients, int client_number){
+void get_client(int server_socket, int *socket_client){
   // Se definen las estructuras para almacenar info sobre los sockets de los clientes
   struct sockaddr_in client1_addr;
   socklen_t addr_size = sizeof(client1_addr);
 
-  // Se aceptan a los primeros 2 clientes que lleguen. "accept" retorna el n° de otro socket asignado para la comunicación
-  sockets_clients[client_number] = accept(server_socket, (struct sockaddr *)&client1_addr, &addr_size);
+  // Se acepta el cliente que llega
+  *socket_client = accept(server_socket, (struct sockaddr *)&client1_addr, &addr_size);
 }

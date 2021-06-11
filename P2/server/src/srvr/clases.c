@@ -42,7 +42,7 @@ char* f_curar(struct entity* aliados, int len_aliados, int posicion_yo, struct e
   if (!len_enemigos) printf("Va a fallar\n");
   int objective = len_aliados;
   if (objective != 1){
-    objective = (int)request_int(socket_yo);
+    objective = (int)request_int(socket_yo, 0, objective-1);
   }
   aliados[objective].hp += 2000;
   if (aliados[objective].hp > aliados[objective].max_hp)
