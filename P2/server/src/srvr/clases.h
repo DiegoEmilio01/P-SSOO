@@ -11,7 +11,8 @@ struct entity;
 
 // typedef return_type (*ALIAS) (argtype1, ..., argtype n)
 typedef char* (*ENT_FUNC) (struct entity*, int, int, struct entity*, int, int);
-// yo, entities1, len_entities1, entities2, len_entities1
+// F_FUNC (aliados, len_aliados, posicion_yo, enemigos, len_enemigos, auxiliar)
+
 
 typedef struct entity{
   int hp;
@@ -33,15 +34,21 @@ typedef struct entity{
   int socket;
 } Entity;
 
+/* ----- CLASS FUNCTIONS ----- */
 // CAZADOR
-char* f_estocada(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int socket_yo);
-char* f_corte_cruzado(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int socket_yo);
-char* f_distraer(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int socket_yo);
+/*  */
+char* f_estocada(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar);
+char* f_corte_cruzado(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar);
+char* f_distraer(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar);
 
 // MÉDICO
-char* f_curar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int socket_yo);
-char* f_destello(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int socket_yo);
-char* f_descarga(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int socket_yo);
+/*  */
+char* f_curar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar);
+char* f_destello(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar);
+char* f_descarga(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar);
 
 // HACKER
-char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int socket_yo);
+/*  */
+char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar);
+char* f_ddos(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar);
+char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar);
