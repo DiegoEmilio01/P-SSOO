@@ -43,18 +43,18 @@ int main(int argc, char *argv[]){
 
   printf("Servidor escuchando\n");
   // le damos la opción al admin si desea jugar con monstruo
-  send_txt(sockets_array[0], TXT_ONLY, x_admin_req_monster);
+  send_txt(sockets_array[0], x_admin_req_monster);
   int choice = request_int(sockets_array[0]);
   printf("choice: %d\n", choice);
   if (choice == 1){
-    send_txt(sockets_array[0], TXT_ONLY, x_admin_req_monster_succ);
+    send_txt(sockets_array[0], x_admin_req_monster_succ);
     game.can_have_monster = true;
   }
   else
-    send_txt(sockets_array[0], TXT_ONLY, x_admin_req_monster_fail);
+    send_txt(sockets_array[0], x_admin_req_monster_fail);
   
   // le preguntamos por su nombre al cliente
-  send_txt(sockets_array[0], TXT_ONLY, x_req_nombre);
+  send_txt(sockets_array[0], x_req_nombre);
   char *pname = request_txt(sockets_array[0]);
   strncpy(game.players[0].playername, pname, 12);
   free(pname);

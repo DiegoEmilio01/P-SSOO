@@ -1,4 +1,5 @@
 #include "comunication.h"
+#include "bits.h"
 
 int client_receive_id(int client_socket){
   // Se obtiene solamente el ID del mensaje
@@ -29,4 +30,19 @@ void client_send_message(int client_socket, int pkg_id, char * message){
   memcpy(&msg[2], message, payloadSize);
   // Se envía el paquete
   send(client_socket, msg, 2+payloadSize, 0);
+}
+
+void client_receive_txt_only(int client_socket, uint8_t msg_code){
+  while(bt_get(&msg_code, 7)){
+    char *to_print = client_receive_payload(client_socket);
+    printf("%s", to_print);
+    free(to_print);
+    client_send_message(client_socket, 0, NO_TXT);
+
+    msg_code = client_receive_id(client_socket);
+  }
+  char *to_print = client_receive_payload(client_socket);
+  printf("%s", to_print);
+  free(to_print);
+  client_send_message(client_socket, 0, NO_TXT);
 }

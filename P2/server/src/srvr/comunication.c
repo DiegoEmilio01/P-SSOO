@@ -49,11 +49,14 @@ void server_send_and_wait(int client_socket, int pkg_id, char * message){
 /** Envía un string de largo cualquiera de a poco. Al momento de este comentario, el cliente no sabe recibir largos mayores a 255
  * 
  */
-void send_txt(int client_socket, uint8_t pkg_id, char * message){
+void send_txt(int client_socket, char * message){
+  uint8_t pkg_id = 0;
+  // indicar solo envío de texto
+  bt_set(&pkg_id, 2, 1);
   // separar el texto en grupos de 255 elementos
   int len = strlen(message) + 1;
-  // if (len > 255)  // recordar el largo de linea
-  //   bt_set(&pkg_id, 7, 1);
+  if (len > 255)  // recordar el largo de linea
+    bt_set(&pkg_id, 7, 1);
   char msg_buffer[255];
   while (len > 255){
     strncpy(msg_buffer, message, 254);
@@ -62,7 +65,7 @@ void send_txt(int client_socket, uint8_t pkg_id, char * message){
     message += 254;
     len -= 254;
   }
-  // bt_set(&pkg_id, 7, 0);
+  bt_set(&pkg_id, 7, 0);
   server_send_and_wait(client_socket, pkg_id, message);
 }
 

@@ -20,7 +20,6 @@ char * get_input(){
   return response;
 }
 
-char *NO_TXT = "\0";
 
 int main (int argc, char *argv[]){
   //Se obtiene la ip y el puerto donde está escuchando el servidor (la ip y puerto de este cliente da igual)
@@ -60,12 +59,12 @@ int main (int argc, char *argv[]){
       free(response);
       
     }
-    else if (msg_code == 0) { //Recibimos un mensaje que proviene del servidor
-      char * message = client_receive_payload(server_socket);
-      client_send_message(server_socket, (uint8_t)0, NO_TXT);
-      printf("%s", message);
-      free(message);
+    else if (bt_get(&msg_code, 2)) { //Recibimos un mensaje que proviene del servidor
+      // char * message = client_receive_payload(server_socket);
       // client_send_message(server_socket, (uint8_t)0, NO_TXT);
+      // printf("%s", message);
+      // free(message);
+      client_receive_txt_only(server_socket, msg_code);
     }
     // printf("------------------\n");
   }
