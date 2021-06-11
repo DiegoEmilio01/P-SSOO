@@ -5,7 +5,7 @@
 #include "bits.h"
 
 char * get_input(){
-  char * response = malloc(14);
+  char * response = calloc(13, sizeof(char));
   int pos=0;
   while (1){
     char c = getchar();

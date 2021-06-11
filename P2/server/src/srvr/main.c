@@ -6,28 +6,16 @@
 #include "conection.h"
 #include "bits.h"
 #include "texts.h"
-#include "clases.h"
+#include "game.h"
 
-char * NO_TXT = "\0";
-const uint8_t TXT_ONLY = 0;
-char texto_opciones[] = "¿Qué desea hacer?\n   [1]Enviar mensaje al servidor\n   [2]agregar otro cliente\n";
-
-typedef struct game{
-  bool jugadores_activos[5];
-  int rondas;
-  bool can_have_monster;
-  // posicion admin y mounstro
-  int pos_admin;
-  int pos_monster;
-  Entity players[4];
-  Entity monsters[1];
-} Game;
+// const uint8_t TXT_ONLY = 0;
+// char texto_opciones[] = "¿Qué desea hacer?\n   [1]Enviar mensaje al servidor\n   [2]agregar otro cliente\n";
 
 int main(int argc, char *argv[]){
   // Se define una IP y un puerto
   Game game = (Game){
-    .jugadores_activos = {false, false, false, false, false},
-    .rondas = 0, .can_have_monster=false,
+    .active_players = {0, 0, 0, 0, 0},
+    .rounds = 0, .can_have_monster=false,
     .pos_admin = 0, .pos_monster = -1
   };
   char * IP = "0.0.0.0";
@@ -42,20 +30,29 @@ int main(int argc, char *argv[]){
   int server_socket = init_sockets(IP, PORT);
   printf("Servidor escuchando\n");
 
+  char welcome[24];
+
   // CONEXION INICIAL
+  
   // guarda decicion del jugador
-  int choice;
-  for (;;){
+  int choice =-1;
+  while (choice != 2){
+    // conectar nuevo jugador
     get_client(server_socket, &BuildPlayer.socket);
-
+    clientes++;
+    if (clientes == 1){
+      send_txt(BuildPlayer.socket, x_admin_start);
+    }else{
+      send_txt(BuildPlayer.socket, x_member_start);
+    }
     // TODO: Dar bienvenida
-    // // Le enviamos al primer cliente un mensaje de bienvenida
-    // char welcome[24];
-    // sprintf(welcome, "Bienvenido Cliente %d!!", clientes+1);
-    // printf("cliente conectado\n");
+    printf("cliente conectado\n");
+    // avisar llegada a todos
+    send_txt_all(game, x_member_joined);
 
-    if (clientes == 0){
+    if (clientes == 1){
       // le damos la opción al admin si desea jugar con monstruo
+      game.admin_socket = BuildPlayer.socket;
       send_txt(BuildPlayer.socket, x_admin_req_monster);
       choice = request_int(BuildPlayer.socket, 1, 2);
       printf("choice: %d\n", choice);
@@ -84,7 +81,25 @@ int main(int argc, char *argv[]){
     }
     choice = request_int(BuildPlayer.socket, 1, option_high_b);
 
+    // seteamos los valores de la clase
 
+
+    // cargamos jugador en el juego
+    if (choice == 4){  // mounstro
+      game.monsters[0] = BuildPlayer;
+      game.active_players[clientes-1] = -1;
+    }else{
+      int guerreros=0;
+      for (int i=0; i<=4; i++){
+        if (game.active_players[i] == 1)
+          guerreros++;
+      }
+      game.players[guerreros] = BuildPlayer;
+      game.active_players[clientes-1] = 1;
+    }
+    // preguntar si se desean mas jugadores
+    send_txt(game.admin_socket, x_req_add_or_start);
+    choice = request_int(game.admin_socket, 1, 2);
   }
 
   int my_attention = 0;
