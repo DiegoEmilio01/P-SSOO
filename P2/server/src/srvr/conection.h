@@ -23,4 +23,4 @@ typedef struct players_info{
 } PlayersInfo;
 
 int init_sockets(char * IP, int port);
-void get_client(int server_socket, int *sockets_clients, int client_number);
+void get_client(int server_socket, int *socket_client);

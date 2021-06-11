@@ -74,6 +74,11 @@ Solo un byte indicando el char de respuesta al input es lo esperado. Se puede en
 <td>1 si se desea un char como input del usuario, 0 e.o.c.</td>
 </tr>
 
+<tr>
+<td>2</td>
+<td>1 si UNICAMENTE se quiere que el cliente muestre texto en su pantalla 0 e.o.c.</td>
+</tr>
+
 <!-- <tr>
 <td>1</td>
 <td>1 si se trata de conexión (conectar el cliente al servidor), 0 e.o.c.</td>

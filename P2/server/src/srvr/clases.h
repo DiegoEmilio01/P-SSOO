@@ -20,9 +20,7 @@ typedef struct entity{
   int effect_contador;  // contador de cambios de status
   int effect_value;  // valor del efecto
   char effect_type;  // que fue afectado (puede ser en vez un enum)
-  ENT_FUNC func1;
-  ENT_FUNC func2;
-  ENT_FUNC func3;
+  ENT_FUNC func[3];
   int n_funciones;
   // enum classname cls;
   char* classname;
@@ -30,7 +28,9 @@ typedef struct entity{
   // int usos_fza_bruta;
   // int atq_buf;
   // int turns_atq_buf_left;
-
+  char playername[13];
+  int is_monster;
+  int socket;
 } Entity;
 
 // CAZADOR
