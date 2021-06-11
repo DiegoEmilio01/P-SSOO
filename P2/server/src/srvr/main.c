@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "comunication.h"
@@ -11,28 +12,27 @@ char * NO_TXT = "\0";
 const uint8_t TXT_ONLY = 0;
 char texto_opciones[] = "¿Qué desea hacer?\n   [1]Enviar mensaje al servidor\n   [2]agregar otro cliente\n";
 
-
-char * revert(char * message){
-  //Se invierte el mensaje
-
-  int len = strlen(message) + 1;
-  char * response = malloc(len);
-
-  for (int i = 0; i < len-1; i++)
-  {
-    response[i] = message[len-2-i];
-  }
-  response[len-1] = '\0';
-  return response;
-}
+typedef struct game{
+  bool jugadores_activos[5];
+  int rondas;
+  bool can_have_monster;
+  // posicion admin y mounstro
+  int pos_admin;
+  int pos_monster;
+  Entity players[4];
+  Entity monsters[1];
+} Game;
 
 int main(int argc, char *argv[]){
   // Se define una IP y un puerto
+  Game game = (Game){
+    .jugadores_activos = {false, false, false, false, false},
+    .rondas = 0, .can_have_monster=false,
+    .pos_admin = 0, .pos_monster = -1
+  };
   char * IP = "0.0.0.0";
   int PORT = 8080;
   printf("Servidor encendido\n");
-  Entity entes[5];
-  entes[1].func1 = f_estocada;
 
   // Se crea el servidor y se obtienen los sockets de ambos clientes.
   // Se inicializa una estructura propia para guardar los n°s de sockets de los clientes.
@@ -46,11 +46,20 @@ int main(int argc, char *argv[]){
   send_txt(sockets_array[0], TXT_ONLY, x_admin_req_monster);
   int choice = request_int(sockets_array[0]);
   printf("choice: %d\n", choice);
-  if (choice == 1)
+  if (choice == 1){
     send_txt(sockets_array[0], TXT_ONLY, x_admin_req_monster_succ);
+    game.can_have_monster = true;
+  }
   else
     send_txt(sockets_array[0], TXT_ONLY, x_admin_req_monster_fail);
-
+  
+  // le preguntamos por su nombre al cliente
+  send_txt(sockets_array[0], TXT_ONLY, x_req_nombre);
+  char *pname = request_txt(sockets_array[0]);
+  strncpy(game.players[0].playername, pname, 12);
+  free(pname);
+  game.players[0].playername[12] = '\0';
+  printf("nombre usuario: %s\n", game.players[0].playername);
 
   // Le enviamos al primer cliente un mensaje de bienvenida
   char welcome[24];
@@ -61,7 +70,6 @@ int main(int argc, char *argv[]){
   int my_attention = 0;
   for(;;)
   {
-    send_txt(sockets_array[0], TXT_ONLY, x_req_nombre);  // en lugar equivocado, cambiar luego
     int choice = request_int(sockets_array[0]);
     /*
     // enviarle texto al cliente pidiendo la instruccion

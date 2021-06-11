@@ -2,6 +2,7 @@
 #include <string.h>
 #include "comunication.h"
 #include "bits.h"
+#include "texts.h"
 
 //LINKS REFERENCIAS
 //https://pubs.opengroup.org/onlinepubs/009695399/functions/recv.html
@@ -70,14 +71,22 @@ void send_txt(int client_socket, uint8_t pkg_id, char * message){
  * @returns int que corresponde al numero indicado por el usuario
  */
 int request_int(int client_socket){
-  char message[] = "$> ";
   uint8_t pkg_id=0;
   bt_set(&pkg_id, 1, 1);
-  server_send_and_wait(client_socket, pkg_id, message);
+  server_send_and_wait(client_socket, pkg_id, x_input);
   server_receive_id(client_socket);
   char * recv = server_receive_payload(client_socket);
   printf("recv[0]: %d\n", recv[0]);
   int ret = recv[0]-'0';
   free(recv);
   return ret;
+}
+
+char* request_txt(int client_socket){
+  uint8_t pkg_id=0;
+  bt_set(&pkg_id, 0, 1);
+  server_send_and_wait(client_socket, pkg_id, x_input);
+  server_receive_id(client_socket);
+  char * recv = server_receive_payload(client_socket);
+  return recv;
 }

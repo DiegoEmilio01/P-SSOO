@@ -30,7 +30,8 @@ typedef struct entity{
   // int usos_fza_bruta;
   // int atq_buf;
   // int turns_atq_buf_left;
-
+  char playername[13];
+  int is_monster;
 } Entity;
 
 char* f_estocada(struct entity* aliados, int len_aliados, int posicion_yo, struct entity* enemigos, int len_enemigos, int socket_yo);

@@ -5,15 +5,18 @@
 #include "bits.h"
 
 char * get_input(){
-  char * response = malloc(20);
+  char * response = malloc(14);
   int pos=0;
   while (1){
     char c = getchar();
     if (c == '\n') break;
+    if (pos > 12) continue;
     response[pos] = c;
+    if (pos == 12) response[13] = '\0';
     pos++;
   }
-  response[pos] = '\0';
+  if (pos < 12)
+    response[pos] = '\0';
   return response;
 }
 
@@ -52,9 +55,9 @@ int main (int argc, char *argv[]){
       printf("%s", message);
       free(message);
 
-      printf("Ingrese su mensaje: ");
       char * response = get_input();
       client_send_message(server_socket, (uint8_t)0, response);
+      free(response);
       
     }
     else if (msg_code == 0) { //Recibimos un mensaje que proviene del servidor
