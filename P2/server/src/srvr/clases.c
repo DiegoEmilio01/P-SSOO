@@ -119,7 +119,7 @@ char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* ene
   int pos_aliado = rand() % len_aliados;
   Entity* aliado = &aliados[pos_aliado];
   aliado->effect_type = 'q'; // S'Q'L
-
+  aliado->duracion_efecto = 2;
   return NULL;
 }
 
@@ -164,10 +164,10 @@ char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
 
 }
 
-// JAGRUZ
-char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
+// // JAGRUZ
+// char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
 
-}
+// }
 
 #pragma endregion JAGRUZ
 
@@ -189,21 +189,70 @@ char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
 
 
 
-/* void extras_handler(Entity* aliados, int len_aliados, Entity* enemigos, int len_enemigos){
+void extras_handler(Entity* aliados, int len_aliados, Entity* enemigos, int len_enemigos){
+  /*
+  Para 
+  */
   for (int n_enemigo = 0; n_enemigo < len_enemigos; n_enemigo++){
+    //Verificamos si es que el monstrue posee sangrado. Si lo tiene multiplicamos por el núm
     if (enemigos[n_enemigo].effect_type == 's'){
       Entity* enemigo = &enemigos[n_enemigo];
-      enemigo->hp -= enemigo->effect_value;
+      enemigo->hp -= (enemigo->effect_value) * (enemigos[n_enemigo].accumulative_blood_counter); 
+      enemigo->duracion_efecto -= 1;
+    }
+    if (enemigos[n_enemigo].hp <= 0)
+    {
+      enemigos[n_enemigo].alive = false;
+      printf("Ete m3n ya murió\n");
+      continue;
+    }
+    if(enemigos[n_enemigo].effect_type == 'd' && enemigos[n_enemigo].target_id >= 0 ){
+      printf("Enemigo distraído, debe atacar al jugador con índice %d\n", enemigos[n_enemigo].target_id);
+      //TODO: Atacar al aliando con índice target_id
+      enemigos[n_enemigo].target_id = -1; //Volvemos a setear el target_id en -1 para que no entre a la condición
     }
   }
-} */
+  //Ahora iteramos sobre los aliados para definir sus efectos
+  for (int n_aliado = 0; n_aliado < len_aliados; n_aliado++)
+  {
+    if (aliados[n_aliado].hp <= 0)
+    {
+      aliados[n_aliado].alive = false;
+      printf("Ete m3n ya murió\n");
+      continue;
+    }
+    // Ahora verificamos si ya pasaron los turnos que duraba el efecto y v
+    if(aliados[n_aliado].effect_type == 'q' && aliados[n_aliado].duracion_efecto <= 0)
+    {
+      aliados[n_aliado].multiplier = 1; //Volvemos a setear el multiplicador en 1
+    }
+    //Primero revisamos si es que el personaje posee efecto de intección SQL
+    if (aliados[n_aliado].effect_type == 'q' && aliados[n_aliado].duracion_efecto > 0)
+    {
+      // Si tenía multiplicador, entonces determinamos que su multiplicador será == 2
+      aliados[n_aliado].multiplier = 2; //TODO:Estoy asumiendo que este multiplicador es para esto, checkear con Chris
+      aliados[n_aliado].duracion_efecto -= 1; //Restamos 1 a la cantidad de turnos que durará el efecto
+      
+    }
+    //Si el aliado está distrayendo, el monstruo lo atacará a él en el próximo turno
+    if (aliados[n_aliado].distracting)
+    {
+      //TODO: Setear en -1 cuando ya se haya usado.
+      enemigos[0].target_id = n_aliado; // Le damos índice para que ataque después.
+    }
+    
+
+
+    
+    
+    
+    
+  }
+  
+}
 /* 
 EFECTOS ESPECIALES:
 
-TODO: if del hacker, duplica daño.
-TODO: En turno de monstruo, si type = 's', sangrado.
-TODO: Forzar que monstruo ataque por 'd' - "distraer".
-TODO: revisar si aliados y monstruos tienen HP <= 0.
 
 Estocada:     's': realizar sangrado
 Distraer:     'd': forzar ataque por distracción

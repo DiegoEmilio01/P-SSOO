@@ -1,6 +1,8 @@
 #pragma once
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
 
 enum classname {
   Cazador, Medico, Hacker, GreatJagRuz, Ruzalos, Ruiz
@@ -33,6 +35,12 @@ typedef struct entity{
   int is_monster;
   int socket;
   int multiplier; // debe iniciar en 1, puede duplicarse o reducirse a la mitad
+
+  int accumulative_blood_counter; //multiplicador de daño por sangrado. Máximo 3
+  int duracion_efecto; // Contador para la duración de los efectos de las habilidades 
+  bool distracting; //Si el cazador está distrayendo o no.
+  int target_id; //id del jugador que distrajo en el último turno.
+  bool alive; //Variable para descartar que hagan algo cuando se tenga que revisar los efectos especiales.
 } Entity;
 
 /* ----- CLASS FUNCTIONS ----- */
