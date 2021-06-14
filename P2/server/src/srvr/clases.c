@@ -13,7 +13,8 @@
 // Daña 1000 a enemigo aleatorio, y deja sangrado de 500 infinito
 char* f_estocada(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   if (!len_enemigos) printf("Va a fallar\n");
-  int objective = rand() % len_enemigos;
+  //int objective = rand() % len_enemigos; //Según enunciado creo que debería ser a un objetivo arbitrario.
+  int objective = request_int(aliados[posicion_yo].socket, 0, len_enemigos); 
   enemigos[objective].hp -= 1000;
   if (enemigos[objective].effect_type != 's'){
     enemigos[objective].effect_contador = 0;
@@ -31,7 +32,8 @@ char* f_estocada(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
 // Daña 3000 a enemigo aleatorio
 char* f_corte_cruzado(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   if (!len_enemigos) printf("Va a fallar\n");
-  int objective = rand() % len_enemigos;
+  //int objective = rand() % len_enemigos;
+  int objective = request_int(aliados[posicion_yo].socket, 0, len_enemigos); 
   enemigos[objective].hp -= 1000;
 
   return NULL;
@@ -41,7 +43,8 @@ char* f_corte_cruzado(Entity* aliados, int len_aliados, int posicion_yo, Entity*
 // Distrae al monstruo, haciendo que este ataque al último cazador en distraerlo
 char* f_distraer(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   if (!len_enemigos) printf("Va a fallar\n");
-  int objective = rand() % len_enemigos;
+  //int objective = rand() % len_enemigos; 
+  int objective = request_int(aliados[posicion_yo].socket, 0, len_enemigos); 
   enemigos[objective].effect_type = 'd';  // distraer
   enemigos[objective].effect_value = posicion_yo;
   return NULL;
@@ -98,7 +101,8 @@ char* f_descarga(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
 
   Entity* aliado = &aliados[posicion_yo];
   int damage = (aliado->max_hp - aliado->hp) * 2;
-  int enemy_pos = rand() % len_enemigos;
+  //int enemy_pos = rand() % len_enemigos;
+  int enemy_pos = request_int(aliados[posicion_yo].socket, 0, len_enemigos); 
   enemigos[enemy_pos].hp -= damage;
 
   return NULL;
@@ -116,7 +120,8 @@ char* f_descarga(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
 char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   if (!len_enemigos) printf("Va a fallar\n");
 
-  int pos_aliado = rand() % len_aliados;
+  //int pos_aliado = rand() % len_aliados;
+  int pos_aliado = request_int(aliados[posicion_yo].socket, 0, len_aliados); 
   Entity* aliado = &aliados[pos_aliado];
   aliado->effect_type = 'q'; // S'Q'L
   aliado->duracion_efecto = 2;
@@ -127,9 +132,21 @@ char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* ene
 // Daña 1500 a enemigo aleatorio
 char* f_ddos(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   if (!len_enemigos) printf("Va a fallar\n");
-
-  int enemy_pos = rand() % len_enemigos;
-  enemigos[enemy_pos].hp -= 1500;
+  //Ahora vamos a darle al jugador que va a usar esta opción, la posibilidad de escoger el enemigo
+  if (len_enemigos == 1)
+  {
+    printf("Se ataca al único enemigo disponible\n");
+    //int enemy_pos = rand() % len_enemigos;
+    int enemy_pos = 0; // Solo hay un enemigo disponible
+    enemigos[enemy_pos].hp -= 1500;
+  }else{
+    int enemigo_objetivo = request_int(aliados[posicion_yo].socket, 0, len_enemigos); 
+    enemigos[enemigo_objetivo].hp -= 1500;
+  }
+  return NULL; //TODO: Qué debería retornar esta funcion?
+  
+  
+  
 }
 
 // HACKER n°2
@@ -138,7 +155,8 @@ char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* e
   if (!len_enemigos) printf("Va a fallar\n");
   
   Entity* yo = &aliados[posicion_yo];
-  int enemy_pos = rand() % len_enemigos;
+  int enemy_pos = request_int(aliados[posicion_yo].socket, 0, len_enemigos); 
+  //int enemy_pos = rand() % len_enemigos;
 
   if (yo->effect_type != 'f'){
     yo->effect_contador = 1;
