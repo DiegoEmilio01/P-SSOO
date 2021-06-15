@@ -24,6 +24,7 @@ typedef struct entity{
   int n_funciones;
   // enum classname cls;
   char* classname;
+  //bool admin; //Soy admin
   // int usos_estocada;
   // int usos_fza_bruta;
   // int atq_buf;

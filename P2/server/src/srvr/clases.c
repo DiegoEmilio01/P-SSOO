@@ -139,9 +139,13 @@ char* f_ddos(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos
 
 // JAGRUZ
 char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int socket_yo){
+  return NULL;
+  }
 
 // JAGRUZ
-char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int socket_yo){
+char* f_coletazo(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int socket_yo){
+  return NULL;
+  }
 
 #pragma endregion JAGRUZ
 
@@ -150,10 +154,14 @@ char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
 // ------ FUNCIONES RUZALOS ------
 
 // RUZALOS
-char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int socket_yo){
+char* f_salto(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int socket_yo){
+  return NULL;
+  }
 
 // RUZALOS
-char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int socket_yo){
+char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int socket_yo){
+  return NULL;
+  }
 
 #pragma endregion RUZALOS
 /* 

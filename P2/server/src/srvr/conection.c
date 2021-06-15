@@ -33,7 +33,7 @@ int init_sockets(char * IP, int port){
   int ret2 = bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
   // Se coloca el socket en modo listening
-  int ret3 = listen(server_socket, 1);
+  int ret3 = listen(server_socket, 5);
   return server_socket;
 }
 
