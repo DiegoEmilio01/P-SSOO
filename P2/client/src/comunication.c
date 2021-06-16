@@ -46,3 +46,4 @@ void client_receive_txt_only(int client_socket, uint8_t msg_code){
   free(to_print);
   client_send_message(client_socket, 0, NO_TXT);
 }
+

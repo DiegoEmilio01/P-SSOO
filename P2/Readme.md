@@ -10,6 +10,7 @@
 * personajes solo son afectados por la ultima habilidad que les afecta algun stat o alguna alteración a sus status.
 * El mounstro ataca un objetivo al azar.
 * El ID se usa para no enviar mas de un tipo de información en el payload, por lo que si se envía un tipo de información, y sabe quien la recibe quien es, no es necesarioenviar todo en el ID (Esto es solo para justificar el motivo de que el cliente usa solo un bit del ID, ya que todo texto de respuesta, en caso de ser necesaria, se envía en el payload)
+* 
 
 # Protocolos
 ## cliente -> servidor:
