@@ -75,7 +75,7 @@ int game_start(Game game, int maximo_clientes){
     for(int i = 0; i < maximo_clientes; i++)
     {
       //Acá se muestra el estado a todos los jugadores, luego el admin hace el primer movimiento
-      char buffer_interfaz[999999];//(Maco)
+      char buffer_interfaz[999999];//(Maco) ke
       send_txt_all(game, buffer_interfaz, maximo_clientes);
       if (game.players[i].hp <= 0)
       {

@@ -15,7 +15,7 @@ struct entity;
 
 // typedef return_type (*ALIAS) (argtype1, ..., argtype n)
 typedef char* (*ENT_FUNC) (struct entity*, int, int, struct entity*, int, int);
-// yo, entities1, len_entities1, entities2, len_entities1
+// entities1, len_entities1, yo, entities2, len_entities2, auxiliar
 
 typedef struct entity{
   int hp;
@@ -38,6 +38,7 @@ typedef struct entity{
   int is_monster;
   int socket;
   int multiplier; // debe iniciar en 1, puede duplicarse o reducirse a la mitad
+  bool jumped;
 
   int accumulative_blood_counter; //multiplicador de daño por sangrado. Máximo 3
   int duracion_efecto; // Contador para la duración de los efectos de las habilidades 

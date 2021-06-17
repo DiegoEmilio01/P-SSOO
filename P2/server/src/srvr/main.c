@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
     {
       // BuildPlayer.socket ==
       
-      printf("ITERANDO ACÁ\n");
+      //printf("ITERANDO ACÁ\n");
       if (i==0 && game.players[0].has_name == false){ //Pregunta por monstruo
         if(game.players[i].has_name == false)
         {
