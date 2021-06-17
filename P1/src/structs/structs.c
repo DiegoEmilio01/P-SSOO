@@ -10,43 +10,43 @@ void os_strerror(enum os_error error){
   switch (error)
   {
   case invalid_mount_partition:
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: Invalid Mount Partition. La Partición seleccionada para montar es inválida.\n");
+    fprintf(stderr, "\e[1;91m [ERROR] \e[0m: Invalid Mount Partition. La Partición seleccionada para montar es inválida.\n");
     break;
   case invalid_create_partition:
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: Invalid Create Partition. El tamaño no corresponde o la partición ya existe \n");
+    fprintf(stderr, "\e[1;91m [ERROR] \e[0m: Invalid Create Partition. El tamaño no corresponde o la partición ya existe \n");
     break;
   case invalid_delete_partition:
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: Invalid Delete Partition. La Partición seleccionada para borrar es inválida.\n");
+    fprintf(stderr, "\e[1;91m [ERROR] \e[0m: Invalid Delete Partition. La Partición seleccionada para borrar es inválida.\n");
     break;
   case invalid_read_file:
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: Invalid Read File. El Archivo seleccionado no puede ser abierto en este modo.\n");
+    fprintf(stderr, "\e[1;91m [ERROR] \e[0m: Invalid Read File. El Archivo seleccionado no puede ser abierto en este modo.\n");
     break;
   case invalid_write_file:
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: Invalid Write File. El Archivo seleccionado no puede ser abierto en este modo.\n");
+    fprintf(stderr, "\e[1;91m [ERROR] \e[0m: Invalid Write File. El Archivo seleccionado no puede ser abierto en este modo.\n");
     break;
   case invalid_delete_file:
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: Invalid Delete File. El Archivo seleccionado para borrar es inválido.\n");
+    fprintf(stderr, "\e[1;91m [ERROR] \e[0m: Invalid Delete File. El Archivo seleccionado para borrar es inválido.\n");
     break;
   case invalid_open_mode:
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: Invalid Open Mode. El modo en el que se desea leer un archivo es inválido.\n");
+    fprintf(stderr, "\e[1;91m [ERROR] \e[0m: Invalid Open Mode. El modo en el que se desea leer un archivo es inválido.\n");
     break;
   case invalid_read_bitmap:
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: Invalid Read Bitmap. El Bitmap seleccionado para leer es inválido.\n");
+    fprintf(stderr, "\e[1;91m [ERROR] \e[0m: Invalid Read Bitmap. El Bitmap seleccionado para leer es inválido.\n");
     break;
   case invalid_input_range_bitmap:
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: input fuera de rango \n");
+    fprintf(stderr, "\e[1;91m [ERROR] \e[0m: input fuera de rango \n");
     break;
   case invalid_file_name_size:
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: Invalid File Name Size. El Nombre del Archivo a escribir tiene un tamaño inválido. Debe ser entre 1 y 20 caracteres.\n");
+    fprintf(stderr, "\e[1;91m [ERROR] \e[0m: Invalid File Name Size. El Nombre del Archivo a escribir tiene un tamaño inválido. Debe ser entre 1 y 20 caracteres.\n");
     break;
   case full_disk:
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: Disco lleno. En este estado no se pueden crean nuevas particiones ni escribir más archivos.\n");
+    fprintf(stderr, "\e[1;91m [ERROR] \e[0m: Disco lleno. En este estado no se pueden crean nuevas particiones ni escribir más archivos.\n");
     break;
   case mbt_init_error:
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: Error al leer la mbt, el largo no corresponde al tamaño del buffer.\n");
+    fprintf(stderr, "\e[1;91m [ERROR] \e[0m: Error al leer la mbt, el largo no corresponde al tamaño del buffer.\n");
     break;
   case phantom_file_error:
-    fprintf(stderr, "\e[1;31m [ERROR] \e[0m: El archivo no existe en la partición\n");
+    fprintf(stderr, "\e[1;91m [ERROR] \e[0m: El archivo no existe en la partición\n");
     break;
   default:
     break;

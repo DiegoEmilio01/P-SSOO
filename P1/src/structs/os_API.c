@@ -30,7 +30,7 @@ void os_mount(char* diskname, int partition_id){
   if (mbt->entry_container[partition_id] && mbt->entry_container[partition_id]->is_valid){
     partition = partition_id;
   } else{
-    fprintf(stderr, "\e[1;31m [WHY] \e[0m: Partición inválida \n");
+    fprintf(stderr, "\e[1;91m [WHY] \e[0m: Partición inválida \n");
   }
   fclose(disk);
 }
@@ -44,7 +44,7 @@ void os_bitmap(unsigned num){
     return;
   }
 
-  fprintf(stderr, "\e[1;34m    Bitmap\e[0m\n\n");
+  fprintf(stderr, "\e[0;94m    Bitmap\e[0m\n\n");
   if (num == 0){
     uint8_t buffer[32];
     int counter = 0;
@@ -94,8 +94,8 @@ void os_bitmap(unsigned num){
     }
   }
   fprintf(stderr, "\n");
-  fprintf(stderr, "\e[1;35mBloques Ocupados: \e[0m%d\n", bitmap->full_blocks);
-  fprintf(stderr, "\e[1;32mBloques Libres: \e[0m%d\n", bitmap->empty_blocks);
+  fprintf(stderr, "\e[0;35mBloques Ocupados: \e[0m%d\n", bitmap->full_blocks);
+  fprintf(stderr, "\e[1;35mBloques Libres: \e[0m%d\n", bitmap->empty_blocks);
   fprintf(stderr, "--------------------------\n\n");
 
 
@@ -150,9 +150,9 @@ void os_mbt(){
   printf("Particiones válidas\n");
   for (int entry_id = 0; entry_id < mbt->entry_quantity; entry_id++){
     if (mbt->entry_container[entry_id] && mbt->entry_container[entry_id]->is_valid){
-      printf("    \e[1;35m id: \e[0m %d\n", mbt->entry_container[entry_id]->id);
-      printf("    \e[1;34m location: \e[0m %d\n", mbt->entry_container[entry_id]->location);
-      printf("    \e[1;32m size: \e[0m %d\n", mbt->entry_container[entry_id]->size);
+      printf("    \e[0;35m id: \e[0m %d\n", mbt->entry_container[entry_id]->id);
+      printf("    \e[0;94m location: \e[0m %d\n", mbt->entry_container[entry_id]->location);
+      printf("    \e[1;35m size: \e[0m %d\n", mbt->entry_container[entry_id]->size);
       printf("    --------------------------\n\n");
     }
   }
@@ -164,17 +164,17 @@ void os_create_partition(int id, int size){
   if (size < 16384 || size > 131072)
   {
     os_strerror(invalid_create_partition);
-    fprintf(stderr, "\e[1;31m [WHY] \e[0m: Wrong size as argument. Size must be between 16384 and 131072.\n\n \n");
+    fprintf(stderr, "\e[1;91m [WHY] \e[0m: Wrong size as argument. Size must be between 16384 and 131072.\n\n \n");
   }
   else if (id < 0 || id > 127)
   {
     os_strerror(invalid_create_partition);
-    fprintf(stderr, "\e[1;31m [WHY] \e[0m: wrong id as argument. Id must be between 0 and 128.\n\n");
+    fprintf(stderr, "\e[1;91m [WHY] \e[0m: wrong id as argument. Id must be between 0 and 128.\n\n");
   }
   else if (mbt->entry_container[id] && mbt->entry_container[id]->is_valid)
   {
     os_strerror(invalid_create_partition);
-    fprintf(stderr, "\e[1;31m [WHY] \e[0m: Partition already created. If aditional partition is needed, please try another id.\n\n");
+    fprintf(stderr, "\e[1;91m [WHY] \e[0m: Partition already created. If aditional partition is needed, please try another id.\n\n");
   }
   else
   {
@@ -211,7 +211,7 @@ void os_create_partition(int id, int size){
         else
         {
           os_strerror(invalid_create_partition);
-          fprintf(stderr, "\e[1;31m [WHY] \e[0m: Partition cannot be allocated, please try a smaller size.\n\n");
+          fprintf(stderr, "\e[1;91m [WHY] \e[0m: Partition cannot be allocated, please try a smaller size.\n\n");
         }
         destroy_tentry(tentry);
         return;

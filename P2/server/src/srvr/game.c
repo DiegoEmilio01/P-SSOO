@@ -69,14 +69,19 @@ int game_start(Game game, int maximo_clientes){
   //Ahora decidimos el monstruo
   for(;;)
   {
-    char buffer[1000];
-    sprintf(buffer, "\e[1;33mNuevo turno, piensa cuidadosamente tu jugada...");
+    char buffer[100];
+    sprintf(buffer, "\e[0;93mNuevo turno, piensa cuidadosamente tu jugada...");
     send_txt_all(game, buffer, maximo_clientes);
     for(int i = 0; i < maximo_clientes; i++)
     {
       //Acá se muestra el estado a todos los jugadores, luego el admin hace el primer movimiento
-      char buffer_interfaz[999999];//(Maco) ke
-      send_txt_all(game, buffer_interfaz, maximo_clientes);
+      char buffer_interfaz[100]; 
+      send_txt_all(game, "[ESTADOS JUGADORES]\n", maximo_clientes);
+      for(int ply = 0; ply < maximo_clientes; ply++ )
+      {
+        sprintf(buffer_interfaz, "- [%s] HP:%d/%d ",game.players[ply].playername, game.players[ply].hp, game.players[ply].max_hp);
+        send_txt_all(game, buffer_interfaz, maximo_clientes);
+      }
       if (game.players[i].hp <= 0)
       {
         send_txt(game.players[i].socket, "Tas muerto, ahora solo te queda mirar sentado uwu.\n");
@@ -92,6 +97,7 @@ int game_start(Game game, int maximo_clientes){
 
         int objetivo = request_int(game.players[i].socket, 0, 2);
         //TODO: Colocar interacción con funciones de cada clase!
+        //ejecutar_movimiento()
       }
       if (!game.monsters[0].alive)
       {
@@ -102,7 +108,7 @@ int game_start(Game game, int maximo_clientes){
       if(game.n_alive == 0)
       {
         printf("Todos se murieron, na que hacerle \n");
-        send_txt_all(game, "\e[1;31m - FIN DE LA PARTIDA -\n", maximo_clientes);
+        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA -\n", maximo_clientes);
         for (int numero_jugador = 0; i < maximo_clientes; numero_jugador++)
         {
           //Desconectamos a los jugadores y seteamos su socket en 0
@@ -124,12 +130,12 @@ char *objetivos_habilidad(Game game, int pos_jugador, int movimiento, char* buff
   switch (game.players[pos_jugador].class)
   {
   case Cazador:
-    sprintf(buffer_aux, "\e[1;33mEjercerás tu habilidad sobre el monstruo.\nEnvía un 1 para atacar.");
+    sprintf(buffer_aux, "\e[0;93mEjercerás tu habilidad sobre el monstruo.\nEnvía un 1 para atacar.");
     return buffer_aux;
   case Medico:
     if (movimiento == 0) // Va a curar a alguno de los aliados
     {
-      send_txt(game.players[pos_jugador].socket, "\e[1;33mEjercerás tu habilidad de curación ¿Qué jugador deseas sanar?\n");
+      send_txt(game.players[pos_jugador].socket, "\e[0;93mEjercerás tu habilidad de curación ¿Qué jugador deseas sanar?\n");
       int i;
       for(i = 0; i < game.n_alive - 1; i++)
       {
@@ -139,12 +145,12 @@ char *objetivos_habilidad(Game game, int pos_jugador, int movimiento, char* buff
       sprintf(buffer_aux, "[%i]> %s\n", i, game.players[i].playername);
       return buffer_aux;
     }
-    sprintf(buffer_aux, "\e[1;33mEjercerás tu habilidad sobre el monstruo.\nEnvía un 1 para atacar.");
+    sprintf(buffer_aux, "\e[0;93mEjercerás tu habilidad sobre el monstruo.\nEnvía un 1 para atacar.");
     return buffer_aux;
   case Hacker:
     if (movimiento == 0) // Duplicar la habilidad de alguno de los aliados
     {
-      send_txt(game.players[pos_jugador].socket, "\e[1;33mEjercerás tu habilidad de boostear a un jugador ¿A quién deseas ayudar?\n");
+      send_txt(game.players[pos_jugador].socket, "\e[0;93mEjercerás tu habilidad de boostear a un jugador ¿A quién deseas ayudar?\n");
       int i;
       for(i = 0; i < game.n_alive - 1; i++)
       {
@@ -155,9 +161,9 @@ char *objetivos_habilidad(Game game, int pos_jugador, int movimiento, char* buff
       return buffer_aux;
     }
     if (movimiento == 1) {
-      return buffer_aux = "\e[1;33mEjercerás tu habilidad sobre el monstruo.\nEnvía un 1 para atacar.";
+      return buffer_aux = "\e[0;93mEjercerás tu habilidad sobre el monstruo.\nEnvía un 1 para atacar.";
     }
-    return buffer_aux = "\e[1;33mHas ocupado FUERZA BRUTA.\nEnvía un 1 para sumar una carga de esta habilidad.";
+    return buffer_aux = "\e[0;93mHas ocupado FUERZA BRUTA.\nEnvía un 1 para sumar una carga de esta habilidad.";
   default:
     return NULL;
   }
@@ -168,13 +174,13 @@ char *movimientos_jugador(int class, char *buffer_aux)
   switch (class)
   {
   
-  case 0: //Cazador
+  case Cazador:
     sprintf(buffer_aux, "[0] Estocada\n[1] Corte Cruzado\n[2]Distraer\n");
     return buffer_aux;
-  case 1: // Médico
+  case Medico:
     sprintf(buffer_aux, "[0] Curar\n[1] Destello\n[2] Descarga\n");
     return buffer_aux;
-  case 2: // Hacker
+  case Hacker:
     sprintf(buffer_aux, "[0] Sql Injection\n[1] DDos Attack\n[2] Bruteforce\n");
     return buffer_aux;
   default:
@@ -182,3 +188,27 @@ char *movimientos_jugador(int class, char *buffer_aux)
     return buffer_aux;
   }
 };
+
+/*Función para inicializar las entidades del juego. Las variables se setean a 0*/
+void game_entities_init(Game game, int clientes_maximos)
+{
+  for (int player = 0; player < clientes_maximos; player++){
+    game.players[player] = (Entity){
+      .hp = 0, 
+      .max_hp = 0,
+      .self_contador = 0,
+      .effect_contador = 0,
+      .effect_value = 0,
+      .effect_type = 0,
+      .n_funciones = 3, //3 tipos de movimientos
+      .class = -1,
+      .has_name = false,
+      .is_monster = false,
+      .socket = 0,
+      .jumped = false,
+      .alive = true,
+      .multiplier = 1
+    };
+  }
+}
+

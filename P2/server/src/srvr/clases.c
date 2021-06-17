@@ -13,31 +13,43 @@ char* class_def(enum classname clases, Entity *entity){
       entity->func[0] = f_estocada;
       entity->func[1] = f_corte_cruzado;
       entity->func[2] = f_distraer;
+      entity->hp = 5000;
+      entity->max_hp = 5000;
       return x_c_cazador;
     case Medico:
       entity->func[0] = f_curar;
       entity->func[1] = f_destello;
       entity->func[2] = f_descarga;
+      entity->hp = 3000;
+      entity->max_hp = 3000;
       return x_c_medico;
     case Hacker:
       entity->func[0] = f_inyeccion;
       entity->func[1] = f_ddos;
       entity->func[2] = f_fuerzabruta;
+      entity->hp = 2500;
+      entity->max_hp = 2500;
       return x_c_hacker;
     case GreatJagRuz:
       entity->func[0] = f_ruzgar;
       entity->func[1] = f_coletazo;
       entity->func[2] = NULL;
+      entity->hp = 10000;
+      entity->max_hp = 10000;
       return x_c_gjr;
     case Ruzalos:
       entity->func[0] = f_salto;
       entity->func[1] = f_espina;
       entity->func[2] = NULL;
+      entity->hp = 20000;
+      entity->max_hp = 20000;
       return x_c_ruzalos;
     case Ruiz:
       entity->func[0] = f_copia;
       entity->func[1] = f_reprobaton;
       entity->func[2] = f_rm;
+      entity->hp = 25000;
+      entity->max_hp = 25000;
       return x_c_ruiz;
     default:
       return "AAAAAA ERRORRRR MALA CLASE";
@@ -339,7 +351,7 @@ void extras_handler(Entity* aliados, int len_aliados, Entity* enemigos, int len_
   */
   for (int n_enemigo = 0; n_enemigo < len_enemigos; n_enemigo++){
     //Verificamos si es que el monstrue posee sangrado. Si lo tiene multiplicamos por el núm
-    if (enemigos[n_enemigo].effect_type ==s ''){
+    if (enemigos[n_enemigo].effect_type == 's'){
       Entity* enemigo = &enemigos[n_enemigo];
       enemigo->hp -= (enemigo->effect_value) * (enemigos[n_enemigo].accumulative_blood_counter); 
       enemigo->duracion_efecto -= 1;

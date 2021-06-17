@@ -12,26 +12,27 @@
 
 char *NO_TXT = "\0";
 const uint8_t TXT_ONLY = 0;
-char texto_opciones[] = "\e[1;33m¿Qué desea hacer?\n   \e[0m[1]Enviar mensaje al servidor\n   [2]agregar otro cliente\n";
+char texto_opciones[] = "\e[0;93m¿Qué desea hacer?\n   \e[0m[1]Enviar mensaje al servidor\n   [2]agregar otro cliente\n";
 
 
 int main(int argc, char *argv[])
 {
   // Se define una IP y un puerto
   Game game = (Game){
-      .active_players = {false, false, false, false, false},
-      .dead_players = {false, false, false, false},
-      .n_alive = 0,
-      .n_dead = 0,
-      .rondas = 0,
-      .can_have_monster = false,
-      .pos_admin = 0,
-      .game_start = false,
-      .pos_monster = -1};
+    .active_players = {false, false, false, false, false},
+    .dead_players = {false, false, false, false},
+    .n_alive = 0,
+    .n_dead = 0,
+    .rondas = 0,
+    .can_have_monster = false,
+    .pos_admin = 0,
+    .game_start = false,
+    .pos_monster = -1
+  };
   char *IP = "0.0.0.0";
   int PORT = 8080;
-  printf("\e[1;34mServidor encendido\n");
-
+  printf("\e[0;94mServidor encendido\n");
+  
   // Cosas X
 
   fd_set readfds;
@@ -40,6 +41,7 @@ int main(int argc, char *argv[])
   int activity, valread, addrlen , new_socket;
   char buffer[1025];
   struct sockaddr_in address;
+  game_entities_init(game, maximo_clientes);
   /*
   fd_set readfds;
   // Clear an fd_set
@@ -58,9 +60,10 @@ int main(int argc, char *argv[])
   //Entity BuildPlayer;
   int clientes = 0;
   int server_socket = init_sockets(IP, PORT);
-  printf("\e[1;34mServidor escuchando\n");
+  printf("\e[0;94mServidor escuchando\n");
   
   // CONEXION INICIAL
+  
   // guarda decisión del jugador
   int choice;
   for (;;)
@@ -106,11 +109,11 @@ int main(int argc, char *argv[])
       }
 
       //inform user of socket number - used in send and receive commands
-      printf("\e[1;34mNew connection , socket fd is %d , ip is : %s , port : %d\n " , new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
+      printf("\e[0;94mNew connection , socket fd is %d , ip is : %s , port : %d\n " , new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port));
 
       //send new connection greeting message
       char welcome[100];
-      sprintf(welcome, "\e[1;33mBienvenido Cliente %d!!\n", clientes);
+      sprintf(welcome, "\e[0;93mBienvenido Cliente %d!!\n", clientes);
       clientes += 1;
       //char hola[] = "Bienvenido Cliente 0!!\n";
       send_txt(new_socket, welcome);
@@ -119,11 +122,11 @@ int main(int argc, char *argv[])
       //   perror("send");
       // }
 
-      puts("\e[1;34mWelcome message sent successfully");
+      puts("\e[0;94mWelcome message sent successfully");
 
       //add new socket to array of sockets
       game.players[0].socket = new_socket;
-      printf("\e[1;34mAdding to list of sockets as 0\n"); //Le da al admin el primer socket
+      printf("\e[0;94mAdding to list of sockets as 0\n"); //Le da al admin el primer socket
       game.players[0].has_name = false;
       game.players[0].class = -1;
       
@@ -149,12 +152,12 @@ int main(int argc, char *argv[])
             }
 
             //inform user of socket number - used in send and receive commands
-            printf("\e[1;34mNew connection , socket fd is %d , ip is : %s , port : %d\n " , new_socket , inet_ntoa(address.sin_addr) , ntohs
+            printf("\e[0;94mNew connection , socket fd is %d , ip is : %s , port : %d\n " , new_socket , inet_ntoa(address.sin_addr) , ntohs
                    (address.sin_port));
 
             //send new connection greeting message
             char welcome[1024];
-            sprintf(welcome, "\e[1;33mBienvenido Cliente %d!!\n", clientes);
+            sprintf(welcome, "\e[0;93mBienvenido Cliente %d!!\n", clientes);
             clientes += 1;
             // printf("cliente conectado\n");
             send_txt(new_socket, welcome);
@@ -163,7 +166,7 @@ int main(int argc, char *argv[])
             //   perror("send");
             // }
 
-            puts("\e[1;34mWelcome message sent successfully");
+            puts("\e[0;94mWelcome message sent successfully");
           
             //add new socket to array of sockets
             for (int i = 0; i < maximo_clientes; i++)
@@ -172,7 +175,7 @@ int main(int argc, char *argv[])
               if (game.players[i].socket == 0)
               {
                 game.players[i].socket = new_socket;
-                printf("\e[1;34mAdding to list of sockets as %d\n", i);
+                printf("\e[0;94mAdding to list of sockets as %d\n", i);
                 break;
                 
               }
@@ -191,7 +194,7 @@ int main(int argc, char *argv[])
                 //Somebody disconnected , get his details and print
                 getpeername(game.players[i].socket, (struct sockaddr *)&address,
                             (socklen_t *)&addrlen);
-                printf("\e[1;34mHost disconnected , ip %s , port %d \n",
+                printf("\e[0;94mHost disconnected , ip %s , port %d \n",
                        inet_ntoa(address.sin_addr), ntohs(address.sin_port));
 
                 //Close the socket and mark as 0 in list for reuse
@@ -246,16 +249,24 @@ int main(int argc, char *argv[])
         {
           send_txt(game.players[i].socket, x_admin_req_monster_succ);
           game.can_have_monster = true;
+          game.monsters[0].alive = true;
+          //Acá hay que inicializar al monstruo.
+          char buffer_monstruo[100];
+          sprintf(buffer_monstruo, "[3] GreatJagRuz\n[4] Ruzalos\n[5] Ruiz\n");
+          send_txt(game.players[i].socket, buffer_monstruo);
+          int opcion_monstruo = request_int(game.players[i].socket, 3, 5);
+          class_def(opcion_monstruo, &game.monsters[0]);
         }
         else{
           send_txt(game.players[i].socket, x_admin_req_monster_fail);
+         
         }
       }
         
       if(i != 0 && game.game_start == false)
       {
         char auxiliar[300];
-        sprintf(auxiliar, "\e[1;33m¿Iniciar partida?\n\e[0m[0] Esperar\n[1] Iniciar\n");
+        sprintf(auxiliar, "\e[0;93m¿Iniciar partida?\n\e[0m[0] Esperar\n[1] Iniciar\n");
         send_txt(game.players[0].socket, auxiliar);
         int begin = request_int(game.players[0].socket, 0, 1);
         if( i < 4 && game.players[3].has_name == false && begin == 1)
@@ -306,11 +317,16 @@ int main(int argc, char *argv[])
         }
         choice = request_int(game.players[i].socket, 0, option_high_b);
         game.players[i].class = choice; //Clase seteada
+        //Ahora inicializamos la clase correspondiente para el jugador
+        class_def(choice, &game.players[i]);
+        printf("\e[1;91m[DEBUG]: VIDA DEL RECIEN CREADO %d\n", game.players[i].hp);
+        
+
         if(i > 0){
           //Enviamos la información al admin
           char auxiliar[100];
 
-          sprintf(auxiliar, "\e[1;32mEl jugador %s ha escogido la clase <%s>\n", game.players[i].playername, class_def(choice, &game.players[i]));
+          sprintf(auxiliar, "\e[1;35mEl jugador %s ha escogido la clase <%s>\n", game.players[i].playername, class_def(choice, &game.players[i]));
           send_txt(game.players[0].socket, auxiliar);
         }
       }
@@ -325,7 +341,7 @@ int main(int argc, char *argv[])
           //Somebody disconnected , get his details and print
           getpeername(game.players[i].socket, (struct sockaddr *)&address,
                       (socklen_t *)&addrlen);
-          printf("\e[1;34mHost disconnected , ip %s , port %d \n",
+          printf("\e[0;94mHost disconnected , ip %s , port %d \n",
                  inet_ntoa(address.sin_addr), ntohs(address.sin_port));
 
           //Close the socket and mark as 0 in list for reuse
@@ -353,7 +369,7 @@ int main(int argc, char *argv[])
         }
         
         
-        printf("\e[1;34mJugando\n");
+        printf("\e[0;94mJugando\n");
       }
       printf("Terminé todas las opciones FINAL\n");
     }
