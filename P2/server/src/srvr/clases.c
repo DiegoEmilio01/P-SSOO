@@ -13,31 +13,43 @@ char* class_def(enum classname clases, Entity *entity){
       entity->func[0] = f_estocada;
       entity->func[1] = f_corte_cruzado;
       entity->func[2] = f_distraer;
+      entity->hp = 5000;
+      entity->max_hp = 5000;
       return x_c_cazador;
     case Medico:
       entity->func[0] = f_curar;
       entity->func[1] = f_destello;
       entity->func[2] = f_descarga;
+      entity->hp = 3000;
+      entity->max_hp = 3000;
       return x_c_medico;
     case Hacker:
       entity->func[0] = f_inyeccion;
       entity->func[1] = f_ddos;
       entity->func[2] = f_fuerzabruta;
+      entity->hp = 2500;
+      entity->max_hp = 2500;
       return x_c_hacker;
     case GreatJagRuz:
       entity->func[0] = f_ruzgar;
       entity->func[1] = f_coletazo;
       entity->func[2] = NULL;
+      entity->hp = 10000;
+      entity->max_hp = 10000;
       return x_c_gjr;
     case Ruzalos:
       entity->func[0] = f_salto;
       entity->func[1] = f_espina;
       entity->func[2] = NULL;
+      entity->hp = 20000;
+      entity->max_hp = 20000;
       return x_c_ruzalos;
     case Ruiz:
       entity->func[0] = f_copia;
       entity->func[1] = f_reprobaton;
       entity->func[2] = f_rm;
+      entity->hp = 25000;
+      entity->max_hp = 25000;
       return x_c_ruiz;
     default:
       return "AAAAAA ERRORRRR MALA CLASE";
@@ -58,7 +70,7 @@ TODO:
 char* f_estocada(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   if (!len_enemigos) printf("Va a fallar\n");
   //int objective = rand() % len_enemigos; //Según enunciado creo que debería ser a un objetivo arbitrario.
-  int objective = request_int(aliados[posicion_yo].socket, 0, len_enemigos); 
+  int objective = enemy_selector(&aliados[posicion_yo], len_enemigos); 
   enemigos[objective].hp -= 1000;
   if (enemigos[objective].effect_type != 's'){
     enemigos[objective].effect_contador = 0;
@@ -119,7 +131,6 @@ char* f_curar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
 // Asumimos que se puede curar a si mismo
 // Daña entre 750 y 2000 a enemigo aleatorio y cura ceil(daño) a aliado
 char* f_destello(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  if (!len_enemigos) printf("Va a fallar\n");
   // entre 0 y 1250, luego le damos offset 750 para [750, 2000]
   int damage = rand() % 1251;
   int pos_to_heal = rand() % len_aliados;
@@ -141,12 +152,11 @@ char* f_destello(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
 // MEDICO n[2]
 // Daña 2 * (vida_max - vida) a enemigo aleatorio
 char* f_descarga(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  if (!len_enemigos) printf("Va a fallar\n");
 
   Entity* aliado = &aliados[posicion_yo];
   int damage = (aliado->max_hp - aliado->hp) * 2;
   //int enemy_pos = rand() % len_enemigos;
-  int enemy_pos = request_int(aliados[posicion_yo].socket, 0, len_enemigos); 
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos); 
   enemigos[enemy_pos].hp -= damage;
 
   return NULL;
@@ -162,11 +172,9 @@ char* f_descarga(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
 // Asumimos que puede darse efecto a si mismo
 // Duplica el daño de un aliado, por 2 turnos
 char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  if (!len_enemigos) printf("Va a fallar\n");
 
-  //int pos_enemigo = rand() % len_aliados;
-  int pos_enemigo = request_int(aliados[posicion_yo].socket, 0, len_aliados); 
-  Entity* aliado = &aliados[pos_enemigo];
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos); 
+  Entity* aliado = &aliados[enemy_pos];
   aliado->effect_type = 'q'; // S'Q'L
   aliado->duracion_efecto = 2;
   return NULL;
@@ -175,19 +183,10 @@ char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* ene
 // HACKER n[1]
 // Daña 1500 a enemigo aleatorio
 char* f_ddos(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  if (!len_enemigos) printf("Va a fallar\n");
-  //Ahora vamos a darle al jugador que va a usar esta opción, la posibilidad de escoger el enemigo
-  if (len_enemigos == 1)
-  {
-    printf("Se ataca al único enemigo disponible\n");
-    //int enemy_pos = rand() % len_enemigos;
-    int enemy_pos = 0; // Solo hay un enemigo disponible
-    enemigos[enemy_pos].hp -= 1500;
-  }else{
-    int enemigo_objetivo = request_int(aliados[posicion_yo].socket, 0, len_enemigos); 
-    enemigos[enemigo_objetivo].hp -= 1500;
-  }
-  return NULL; //TODO: Qué debería retornar esta funcion?
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos); 
+  enemigos[enemy_pos].hp -= 1500;
+  
+  return NULL; 
   
   
   
@@ -199,8 +198,7 @@ char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* e
   if (!len_enemigos) printf("Va a fallar\n");
   
   Entity* yo = &aliados[posicion_yo];
-  int enemy_pos = request_int(aliados[posicion_yo].socket, 0, len_enemigos); 
-  //int enemy_pos = rand() % len_enemigos;
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos); 
 
   if (yo->effect_type != 'f'){
     yo->effect_contador = 1;
@@ -247,7 +245,7 @@ char* f_coletazo(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
 // ------ FUNCIONES RUZALOS ------
 
 // RUZALOS n[0]
-// j de jump xd
+// j de jump
 char* f_salto(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   
   if (aliados[posicion_yo].jumped){
@@ -293,7 +291,6 @@ char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
 // RUIZ n[0]
 // Copia una habilidad de un enemigo a elección, para usarla en contra
 char* f_copia(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  // int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
   int enemy_pos = rand() % len_enemigos;
   int habilidad_a_elegir = rand() % 3;
   // TODO: a quién ataca?
@@ -306,8 +303,6 @@ char* f_copia(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
 
 // RUIZ n[1]
 char* f_reprobaton(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  
-  // int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
   int enemy_pos = rand() % len_enemigos;
 
   enemigos[enemy_pos].effect_type = 'r';
@@ -339,7 +334,7 @@ void extras_handler(Entity* aliados, int len_aliados, Entity* enemigos, int len_
   */
   for (int n_enemigo = 0; n_enemigo < len_enemigos; n_enemigo++){
     //Verificamos si es que el monstrue posee sangrado. Si lo tiene multiplicamos por el núm
-    if (enemigos[n_enemigo].effect_type ==s ''){
+    if (enemigos[n_enemigo].effect_type == 's'){
       Entity* enemigo = &enemigos[n_enemigo];
       enemigo->hp -= (enemigo->effect_value) * (enemigos[n_enemigo].accumulative_blood_counter); 
       enemigo->duracion_efecto -= 1;
@@ -389,6 +384,7 @@ void extras_handler(Entity* aliados, int len_aliados, Entity* enemigos, int len_
 }
 
 int enemy_selector(Entity* yo, int len_enemigos){
+  if (!len_enemigos) printf("Va a fallar\n");
   // TODO: distraer
   int socket = yo->socket;
   int enemy_pos;
@@ -404,8 +400,8 @@ int enemy_selector(Entity* yo, int len_enemigos){
 }
 
 /* 
-TODO: inicializar clases, es decir volver las variables en 0 (?), porque los structs están en stack (??)
 TODO: cambiar elección de enemigo (en caso que enemigos > 1) 
+TODO: que pasa con elegir enemigo si monstruo copia func (pide input), 3er arg en elegir_enemigo (bool forced)
 
 EFECTOS ESPECIALES:
 Estocada:     's': realizar sangrado
@@ -415,8 +411,3 @@ FuerzaBruta:  'f': si se usa 3 veces, causa 10.000 de daño
 Reprobaton:   'r':
 Espina:       'e': hace daño por 3 turnos
 */
-
-// #pragma region
-
-
-// #pragma endregion
