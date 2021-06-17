@@ -18,6 +18,7 @@ typedef struct game{
   int pos_monster;  // -1 si no existe
   Entity players[4];
   Entity monsters[1];
+  int jugadores_inicializados_totalmente;
   bool game_start; //regula el flujo
   int admin_socket;  // para mayor facilidad de acceso, se guarda aqui
 } Game;

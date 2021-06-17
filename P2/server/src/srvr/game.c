@@ -70,17 +70,18 @@ int game_start(Game game, int maximo_clientes){
   for(;;)
   {
     char buffer[100];
-    sprintf(buffer, "\e[0;93mNuevo turno, piensa cuidadosamente tu jugada...");
-    send_txt_all(game, buffer, maximo_clientes);
-    for(int i = 0; i < maximo_clientes; i++)
+    sprintf(buffer, "\e[0;93mNuevo turno, piensa cuidadosamente tu jugada...\n");
+    send_txt_all(game, buffer, game.jugadores_inicializados_totalmente);
+    for(int i = 0; i < game.jugadores_inicializados_totalmente; i++)
     {
       //Acá se muestra el estado a todos los jugadores, luego el admin hace el primer movimiento
-      char buffer_interfaz[100]; 
-      send_txt_all(game, "[ESTADOS JUGADORES]\n", maximo_clientes);
-      for(int ply = 0; ply < maximo_clientes; ply++ )
+      
+      for(int ply = 0; ply < game.jugadores_inicializados_totalmente; ply++ )
       {
+        char buffer_interfaz[100]; 
+        send_txt_all(game, "[ESTADOS JUGADORES]\n", game.jugadores_inicializados_totalmente);
         sprintf(buffer_interfaz, "- [%s] HP:%d/%d ",game.players[ply].playername, game.players[ply].hp, game.players[ply].max_hp);
-        send_txt_all(game, buffer_interfaz, maximo_clientes);
+        send_txt_all(game, buffer_interfaz, game.jugadores_inicializados_totalmente);
       }
       if (game.players[i].hp <= 0)
       {
@@ -101,15 +102,22 @@ int game_start(Game game, int maximo_clientes){
       }
       if (!game.monsters[0].alive)
       {
-        send_txt_all(game, "Felicidades, vencieron al monstruo!\n", maximo_clientes);
+        send_txt_all(game, "Felicidades, vencieron al monstruo!\n", game.jugadores_inicializados_totalmente);
         printf("Ganaron uwu.\n");
+        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA -\n", game.jugadores_inicializados_totalmente);
+        for (int numero_jugador = 0; i < game.jugadores_inicializados_totalmente; numero_jugador++)
+        {
+          //Desconectamos a los jugadores y seteamos su socket en 0
+          close(game.players[numero_jugador].socket);
+          game.players[numero_jugador].socket = 0;
+        }
       }
       //Revisamos si ya no quedan jugadores y si es así, se termina el juego
-      if(game.n_alive == 0)
+      if(game.n_alive <= 0)
       {
         printf("Todos se murieron, na que hacerle \n");
-        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA -\n", maximo_clientes);
-        for (int numero_jugador = 0; i < maximo_clientes; numero_jugador++)
+        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA -\n", game.jugadores_inicializados_totalmente);
+        for (int numero_jugador = 0; i < game.jugadores_inicializados_totalmente; numero_jugador++)
         {
           //Desconectamos a los jugadores y seteamos su socket en 0
           close(game.players[numero_jugador].socket);
