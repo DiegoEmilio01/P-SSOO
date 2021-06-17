@@ -404,6 +404,7 @@ int enemy_selector(Entity* yo, int len_enemigos){
 }
 
 /* 
+TODO: inicializar clases, es decir volver las variables en 0 (?), porque los structs están en stack (??)
 TODO: cambiar elección de enemigo (en caso que enemigos > 1) 
 
 EFECTOS ESPECIALES:
