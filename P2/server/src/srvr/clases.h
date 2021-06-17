@@ -27,13 +27,14 @@ typedef struct entity{
   ENT_FUNC func[3];
   int n_funciones;
   bool has_name; //Para no preguntar más de una vez
-  // enum classname cls;
   int class;
-  //bool admin; //Soy admin
-  // int usos_estocada;
-  // int usos_fza_bruta;
-  // int atq_buf;
-  // int turns_atq_buf_left;
+
+  /* efectos especiales */
+  char bleed; // sangrado por estocada o espinas
+  bool distracted; //Si fue distraido por el cazador o no.
+  int bruteforce; // contador de veces ejecutadas por fuerzabruta
+  bool jumped; // intercalador de jump
+
   char playername[13];
   int is_monster;
   int socket;
@@ -42,7 +43,7 @@ typedef struct entity{
 
   int accumulative_blood_counter; //multiplicador de daño por sangrado. Máximo 3
   int duracion_efecto; // Contador para la duración de los efectos de las habilidades 
-  bool distracting; //Si el cazador está distrayendo o no.
+   
   int target_id; //id del jugador que distrajo en el último turno.
   bool alive; //Variable para descartar que hagan algo cuando se tenga que revisar los efectos especiales.
 } Entity;

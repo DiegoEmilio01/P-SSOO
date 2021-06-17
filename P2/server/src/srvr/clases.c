@@ -31,41 +31,31 @@ char* class_def(enum classname clases, Entity *entity){
       entity->max_hp = 2500;
       return x_c_hacker;
     case GreatJagRuz:
-      sprintf(entity->playername, "GreatJagRuz");
       entity->func[0] = f_ruzgar;
       entity->func[1] = f_coletazo;
       entity->func[2] = NULL;
       entity->hp = 10000;
       entity->max_hp = 10000;
-      entity->alive = true;
       return x_c_gjr;
     case Ruzalos:
-      sprintf(entity->playername, "Ruzalos");
       entity->func[0] = f_salto;
       entity->func[1] = f_espina;
       entity->func[2] = NULL;
       entity->hp = 20000;
       entity->max_hp = 20000;
-      entity->alive = true;
       return x_c_ruzalos;
     case Ruiz:
-      sprintf(entity->playername, "Ruiz");
       entity->func[0] = f_copia;
       entity->func[1] = f_reprobaton;
       entity->func[2] = f_rm;
       entity->hp = 25000;
       entity->max_hp = 25000;
-      entity->alive = true;
       return x_c_ruiz;
     default:
-      return "AAAAAA ERRORRRR CLASE MALA";
+      return "AAAAAA ERRORRRR MALA CLASE";
   }
 }
-/* 
-TODO:
-- cambiar las weas de null (arriba -> nombre de func)
-- avanzar en JAGRUZ
- */
+
       
 #pragma region CAZADOR
 // ------ FUNCIONES CAZADOR ------
@@ -140,7 +130,7 @@ char* f_destello(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   // entre 0 y 1250, luego le damos offset 750 para [750, 2000]
   int damage = rand() % 1251;
   int pos_to_heal = rand() % len_aliados;
-  int pos_to_dmg = rand() % len_enemigos;
+  int pos_to_dmg = enemy_selector(&aliados[posicion_yo], len_enemigos);
   damage += 750;
 
   // divide en la mitad y redondea hacia arriba (ej: 1001 / 2 + 1001 % 2 = 500 + 1 = 501)
@@ -299,9 +289,7 @@ char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
 char* f_copia(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   int enemy_pos = rand() % len_enemigos;
   int habilidad_a_elegir = rand() % 3;
-  // TODO: a quién ataca?
   ENT_FUNC fn = enemigos[enemy_pos].func[habilidad_a_elegir];
-  // TODO: concatenar strings para retornar
   fn(aliados, len_aliados, posicion_yo, enemigos, len_enemigos, auxiliar);
 
   return NULL;
@@ -390,6 +378,7 @@ void extras_handler(Entity* aliados, int len_aliados, Entity* enemigos, int len_
 }
 
 int enemy_selector(Entity* yo, int len_enemigos){
+
   if (!len_enemigos) printf("Va a fallar\n");
   // TODO: distraer
   int socket = yo->socket;
@@ -398,22 +387,55 @@ int enemy_selector(Entity* yo, int len_enemigos){
   {
     printf("Se ataca al único enemigo disponible\n");
     enemy_pos = 0; // Solo hay un enemigo disponible
-  }else{
+  }else {
+    /* en el caso que se haga el bonus donde el monstruo es un cliente: (necesitaría un if)
     enemy_pos = request_int(socket, 0, len_enemigos); 
+    */
+    enemy_pos = rand() % len_enemigos; 
+    printf("Se eligió atacar a %i\n", enemy_pos);
   }
 
   return enemy_pos;
 }
 
+// TODO: concatenar strings para retornar
+
+// bleeds (1: 's' o 'e')
+// distraido (1: 'd')
+// reprobaton (??)
+// contadores (2: bruteforce y jump)
+// buff (1: sql)
+
 /* 
-TODO: cambiar elección de enemigo (en caso que enemigos > 1) 
-TODO: que pasa con elegir enemigo si monstruo copia func (pide input), 3er arg en elegir_enemigo (bool forced)
 
 EFECTOS ESPECIALES:
-Estocada:     's': realizar sangrado
-Distraer:     'd': forzar ataque por distracción
-SQL:          'q': duplicar daño de aliado
-FuerzaBruta:  'f': si se usa 3 veces, causa 10.000 de daño
-Reprobaton:   'r':
-Espina:       'e': hace daño por 3 turnos
+
+? debuffs:
+
+CAZADOR
+estocada-sangrado 's': realizar sangrado
+
+RUZALOS
+espina 'e': hace daño por 3 turnos
+
+CAZADOR
+distraer 'd': forzar ataque por distracción
+
+RUIZ
+reprobaton 'r': enemigo recibe 50% más y hace 50% menos (curar y dañar)
+
+
+? buffs:
+
+HACKER
+sql 'q': duplicar daño de aliado
+
+? raros:
+
+HACKER
+bruteforce: 'b' debe contar 3 veces para usarse 
+
+RUZALOS
+salto: se debe usar interacalado
+
 */
