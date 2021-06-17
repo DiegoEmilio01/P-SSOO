@@ -387,8 +387,10 @@ int enemy_selector(Entity* yo, int len_enemigos){
   {
     printf("Se ataca al único enemigo disponible\n");
     enemy_pos = 0; // Solo hay un enemigo disponible
-  }else{
-    // enemy_pos = request_int(socket, 0, len_enemigos); 
+  }else {
+    /* en el caso que se haga el bonus donde el monstruo es un cliente: (necesitaría un if)
+    enemy_pos = request_int(socket, 0, len_enemigos); 
+    */
     enemy_pos = rand() % len_enemigos; 
     printf("Se eligió atacar a %i\n", enemy_pos);
   }
@@ -397,13 +399,43 @@ int enemy_selector(Entity* yo, int len_enemigos){
 }
 
 // TODO: concatenar strings para retornar
+
+// bleeds (1: 's' o 'e')
+// distraido (1: 'd')
+// reprobaton (??)
+// contadores (2: bruteforce y jump)
+// buff (1: sql)
+
 /* 
 
 EFECTOS ESPECIALES:
-Estocada:     's': realizar sangrado
-Distraer:     'd': forzar ataque por distracción
-SQL:          'q': duplicar daño de aliado
-FuerzaBruta:  'f': si se usa 3 veces, causa 10.000 de daño
-Reprobaton:   'r':
-Espina:       'e': hace daño por 3 turnos
+
+? debuffs:
+
+CAZADOR
+estocada-sangrado 's': realizar sangrado
+
+RUZALOS
+espina 'e': hace daño por 3 turnos
+
+CAZADOR
+distraer 'd': forzar ataque por distracción
+
+RUIZ
+reprobaton 'r': enemigo recibe 50% más y hace 50% menos (curar y dañar)
+
+
+? buffs:
+
+HACKER
+sql 'q': duplicar daño de aliado
+
+? raros:
+
+HACKER
+bruteforce: 'b' debe contar 3 veces para usarse 
+
+RUZALOS
+salto: se debe usar interacalado
+
 */
