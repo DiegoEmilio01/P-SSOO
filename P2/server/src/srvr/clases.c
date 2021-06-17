@@ -368,7 +368,7 @@ void extras_handler(Entity* aliados, int len_aliados, Entity* enemigos, int len_
       
     }
     //Si el aliado está distrayendo, el monstruo lo atacará a él en el próximo turno
-    if (aliados[n_aliado].distracting)
+    if (aliados[n_aliado].distracted)
     {
       //TODO: Setear en -1 cuando ya se haya usado.
       enemigos[0].target_id = n_aliado; // Le damos índice para que ataque después.

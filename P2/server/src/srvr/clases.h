@@ -39,7 +39,6 @@ typedef struct entity{
   int is_monster;
   int socket;
   int multiplier; // debe iniciar en 1, puede duplicarse o reducirse a la mitad
-  bool jumped;
 
   int accumulative_blood_counter; //multiplicador de daño por sangrado. Máximo 3
   int duracion_efecto; // Contador para la duración de los efectos de las habilidades 
