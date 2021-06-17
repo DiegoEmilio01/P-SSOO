@@ -30,4 +30,7 @@ void send_txt_exclude(Game game, char* msg, int socket_evict);
 
 //Retorna las opciones de movimientos del usuario
 char *objetivos_habilidad(Game game, int pos_jugador, int movimiento, char* buffer_aux);
+
 char *movimientos_jugador(int class, char *buffer_aux);
+
+void game_entities_init(Game game, int clientes_maximos);
