@@ -55,11 +55,7 @@ char* class_def(enum classname clases, Entity *entity){
       return "AAAAAA ERRORRRR MALA CLASE";
   }
 }
-/* 
-TODO:
-- cambiar las weas de null (arriba -> nombre de func)
-- avanzar en JAGRUZ
- */
+
       
 #pragma region CAZADOR
 // ------ FUNCIONES CAZADOR ------
@@ -134,7 +130,7 @@ char* f_destello(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   // entre 0 y 1250, luego le damos offset 750 para [750, 2000]
   int damage = rand() % 1251;
   int pos_to_heal = rand() % len_aliados;
-  int pos_to_dmg = rand() % len_enemigos;
+  int pos_to_dmg = enemy_selector(&aliados[posicion_yo], len_enemigos);
   damage += 750;
 
   // divide en la mitad y redondea hacia arriba (ej: 1001 / 2 + 1001 % 2 = 500 + 1 = 501)
@@ -293,9 +289,7 @@ char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
 char* f_copia(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   int enemy_pos = rand() % len_enemigos;
   int habilidad_a_elegir = rand() % 3;
-  // TODO: a quién ataca?
   ENT_FUNC fn = enemigos[enemy_pos].func[habilidad_a_elegir];
-  // TODO: concatenar strings para retornar
   fn(aliados, len_aliados, posicion_yo, enemigos, len_enemigos, auxiliar);
 
   return NULL;
@@ -384,6 +378,7 @@ void extras_handler(Entity* aliados, int len_aliados, Entity* enemigos, int len_
 }
 
 int enemy_selector(Entity* yo, int len_enemigos){
+
   if (!len_enemigos) printf("Va a fallar\n");
   // TODO: distraer
   int socket = yo->socket;
@@ -393,15 +388,16 @@ int enemy_selector(Entity* yo, int len_enemigos){
     printf("Se ataca al único enemigo disponible\n");
     enemy_pos = 0; // Solo hay un enemigo disponible
   }else{
-    enemy_pos = request_int(socket, 0, len_enemigos); 
+    // enemy_pos = request_int(socket, 0, len_enemigos); 
+    enemy_pos = rand() % len_enemigos; 
+    printf("Se eligió atacar a %i\n", enemy_pos);
   }
 
   return enemy_pos;
 }
 
+// TODO: concatenar strings para retornar
 /* 
-TODO: cambiar elección de enemigo (en caso que enemigos > 1) 
-TODO: que pasa con elegir enemigo si monstruo copia func (pide input), 3er arg en elegir_enemigo (bool forced)
 
 EFECTOS ESPECIALES:
 Estocada:     's': realizar sangrado
