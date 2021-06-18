@@ -8,7 +8,6 @@
 typedef struct game{
   // 1 si es jugador, -1 si es mounstro, 0 si no existe
   int active_players[5];
-  int dead_players[4];
   int n_alive;
   int n_dead; // jugadores muertos
   int rondas;
@@ -17,6 +16,7 @@ typedef struct game{
   int pos_admin;  // -1 si es mounstro
   int pos_monster;  // -1 si no existe
   Entity players[4];
+  Entity dead_players[4];
   Entity monsters[1];
   int jugadores_inicializados_totalmente;
   bool game_start; //regula el flujo

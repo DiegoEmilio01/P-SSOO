@@ -31,6 +31,7 @@ char* class_def(enum classname clases, Entity *entity){
       entity->max_hp = 2500;
       return x_c_hacker;
     case GreatJagRuz:
+      strncpy(entity->playername, "GreatJagRuz", 12);
       entity->func[0] = f_ruzgar;
       entity->func[1] = f_coletazo;
       entity->func[2] = NULL;
@@ -38,6 +39,7 @@ char* class_def(enum classname clases, Entity *entity){
       entity->max_hp = 10000;
       return x_c_gjr;
     case Ruzalos:
+      strncpy(entity->playername, "Ruzalos", 12);
       entity->func[0] = f_salto;
       entity->func[1] = f_espina;
       entity->func[2] = NULL;
@@ -45,6 +47,7 @@ char* class_def(enum classname clases, Entity *entity){
       entity->max_hp = 20000;
       return x_c_ruzalos;
     case Ruiz:
+      strncpy(entity->playername, "Ruiz", 12);
       entity->func[0] = f_copia;
       entity->func[1] = f_reprobaton;
       entity->func[2] = f_rm;
@@ -68,6 +71,10 @@ char* f_estocada(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   //int objective = rand() % len_enemigos; //Según enunciado creo que debería ser a un objetivo arbitrario.
   int objective = enemy_selector(&aliados[posicion_yo], len_enemigos); 
   enemigos[objective].hp -= 1000;
+  if (enemigos[objective].hp <= 0)
+  {
+    enemigos[objective].alive = false;
+  }
   if (enemigos[objective].effect_type != 's'){
     enemigos[objective].effect_contador = 0;
     enemigos[objective].effect_value = 0;
@@ -85,14 +92,20 @@ char* f_estocada(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
 char* f_corte_cruzado(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   if (!len_enemigos) printf("Va a fallar\n");
   //int objective = rand() % len_enemigos;
-  int objective = request_int(aliados[posicion_yo].socket, 0, len_enemigos); 
+  //int objective = request_int(aliados[posicion_yo].socket, 0, len_enemigos); 
+  int objective = 0;
   enemigos[objective].hp -= 1000;
+  if (enemigos[objective].hp <= 0)
+  {
+    enemigos[objective].alive = false;
+  }
 
   return NULL;
 }
 
 // CAZADOR n[2]
 // Distrae al monstruo, haciendo que este ataque al último cazador en distraerlo
+//TODO: FALTA IMPLEMENTAR
 char* f_distraer(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   if (!len_enemigos) printf("Va a fallar\n");
   //int objective = rand() % len_enemigos; 
@@ -110,6 +123,7 @@ char* f_distraer(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
 
 // MEDICO n[0]
 // Cura 2000 a aliado específico (puede ser sí mismo)
+//TODO: Falta implementar
 char* f_curar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
 
   if (!len_enemigos) printf("Va a fallar\n");
@@ -141,6 +155,10 @@ char* f_destello(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   if (aliado->hp > aliado->max_hp) aliado->hp = aliado->max_hp;
   // dañamos al enemigo
   enemigos[pos_to_dmg].hp -= damage;
+  if (enemigos[pos_to_dmg].hp <= 0)
+  {
+    enemigos[pos_to_dmg].alive = false;
+  }
 
   return NULL;
 }
@@ -154,6 +172,10 @@ char* f_descarga(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   //int enemy_pos = rand() % len_enemigos;
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos); 
   enemigos[enemy_pos].hp -= damage;
+  if (enemigos[enemy_pos].hp <= 0)
+  {
+    enemigos[enemy_pos].alive = false;
+  }
 
   return NULL;
 }
@@ -181,31 +203,24 @@ char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* ene
 char* f_ddos(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos); 
   enemigos[enemy_pos].hp -= 1500;
-  
+ 
   return NULL; 
-  
-  
-  
 }
 
 // HACKER n[2]
 // 
 char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  if (!len_enemigos) printf("Va a fallar\n");
   
   Entity* yo = &aliados[posicion_yo];
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos); 
 
-  if (yo->effect_type != 'f'){
-    yo->effect_contador = 1;
-    yo->effect_value = 0;
-  }
-  yo->effect_type = 'f'; // fuerzaBruta
-  yo->effect_contador += 1;
-  if (yo->effect_contador == 3){
+  if (yo->bruteforce < 3){
+    yo->bruteforce += 1;
+  } else {
     enemigos[enemy_pos].hp -= 10000;
-    yo->effect_contador = 0;
+    yo->bruteforce = 0;
   }
+  
   return NULL;
 }
 
@@ -218,9 +233,11 @@ char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* e
 // JAGRUZ n[0]
 // 
 char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  int enemy_pos = rand() % len_enemigos;
-  Entity* enemy = &enemigos[enemy_pos];
+
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
+  Entity* enemy = &aliados[enemy_pos];
   enemy->hp -= 1000;
+  
   return NULL;
 }
 
@@ -248,7 +265,7 @@ char* f_salto(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
     // print "no puedes usarla dos veces seguidas!"
     aliados[posicion_yo].jumped = false;
   } else {
-    int enemy_pos = rand() % len_enemigos;
+    int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
     Entity* enemy = &enemigos[enemy_pos];
     enemy->hp -= 1500;
     aliados[posicion_yo].jumped = true;
@@ -259,18 +276,17 @@ char* f_salto(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
 
 // RUZALOS n[1]
 char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  int enemy_pos = rand() % len_enemigos;
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
   Entity* enemy = &enemigos[enemy_pos];
 
   aliados[posicion_yo].jumped = false;
 
-  if (enemy->effect_type == 'e'){
+  if (enemy->bleed == 'e'){
     enemy->hp -= 500;
     enemy->effect_contador -= 1;
-  } else {
-    enemy->effect_type = 'e';
-    enemy->effect_value = 400;
-    enemy->effect_contador = 3;
+  }else {
+    enemy->bleed = 'e';
+    enemy->bleed_counter = 3;
   }
 
   return NULL;
@@ -287,23 +303,21 @@ char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
 // RUIZ n[0]
 // Copia una habilidad de un enemigo a elección, para usarla en contra
 char* f_copia(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  int enemy_pos = rand() % len_enemigos;
+  int enemy_pos = enemy_selector(&alados[posicion_yo], len_enemigos);
   int habilidad_a_elegir = rand() % 3;
   ENT_FUNC fn = enemigos[enemy_pos].func[habilidad_a_elegir];
-  fn(aliados, len_aliados, posicion_yo, enemigos, len_enemigos, auxiliar);
+  char* el_pepe = fn(aliados, len_aliados, posicion_yo, enemigos, len_enemigos, auxiliar);
 
   return NULL;
 }
 
 // RUIZ n[1]
 char* f_reprobaton(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  int enemy_pos = rand() % len_enemigos;
-
-  enemigos[enemy_pos].effect_type = 'r';
-  enemigos[enemy_pos].effect_contador = 0;
-  enemigos[enemy_pos].effect_value = 0;
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
+  aliados[enemy_pos].reprobado = true;
 
   return NULL;
+
 }
 
 // RUIZ n[2]
@@ -311,8 +325,8 @@ char* f_reprobaton(Entity* aliados, int len_aliados, int posicion_yo, Entity* en
 // RESETEAR AFUERA
 char* f_rm(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   int damage = auxiliar;
-  for(int pos_enemigo = 0; pos_enemigo < len_enemigos; pos_enemigo++){
-    Entity* enemigo = &enemigos[pos_enemigo];
+  for(int pos_enemigo = 0; pos_enemigo < len_aliados; pos_enemigo++){
+    Entity* enemigo = &aliados[pos_enemigo];
     enemigo->hp -= damage;
   }
 
@@ -396,6 +410,19 @@ int enemy_selector(Entity* yo, int len_enemigos){
   }
 
   return enemy_pos;
+}
+
+/**
+ *
+ * @return cantidad de daño realizado
+ */
+int atacar(Entity* atacante, Entity* objetivo, int dano_base){
+  int dano_final = dano_base;
+  if (atacante->buffed)
+    dano_final <<= 1; // duplica daño
+  if (atacante->reprobado)
+    dano_final >>= 1; // infinge mitad de daño
+  
 }
 
 // TODO: concatenar strings para retornar

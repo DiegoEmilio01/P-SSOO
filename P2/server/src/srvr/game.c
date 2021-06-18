@@ -72,17 +72,22 @@ int game_start(Game game, int maximo_clientes){
     char buffer[100];
     sprintf(buffer, "\e[0;93mNuevo turno, piensa cuidadosamente tu jugada...\n");
     send_txt_all(game, buffer, game.jugadores_inicializados_totalmente);
-    for(int i = 0; i < game.jugadores_inicializados_totalmente; i++)
+    
+    for(int i = 0; i < game.n_alive; i++)
     {
-      //Acá se muestra el estado a todos los jugadores, luego el admin hace el primer movimiento
-      
+      send_txt_all(game, "\n----------------------\n[ESTADOS ENEMIGOS] \n", game.jugadores_inicializados_totalmente);
+      sprintf(buffer, "- [%s] HP:%d/%d\n",game.monsters[0].playername, game.monsters[0].hp, game.monsters[0].max_hp);
+      send_txt_all(game, buffer, game.jugadores_inicializados_totalmente);    
+      send_txt_all(game, "[ESTADOS JUGADORES]\n", game.jugadores_inicializados_totalmente);
       for(int ply = 0; ply < game.jugadores_inicializados_totalmente; ply++ )
       {
-        char buffer_interfaz[100]; 
-        send_txt_all(game, "[ESTADOS JUGADORES]\n", game.jugadores_inicializados_totalmente);
-        sprintf(buffer_interfaz, "- [%s] HP:%d/%d ",game.players[ply].playername, game.players[ply].hp, game.players[ply].max_hp);
-        send_txt_all(game, buffer_interfaz, game.jugadores_inicializados_totalmente);
+        sprintf(buffer, "- [%s] HP:%d/%d\n",game.players[ply].playername, game.players[ply].hp, game.players[ply].max_hp);
+        send_txt_all(game, buffer, game.jugadores_inicializados_totalmente);
       }
+    
+      //Acá se muestra el estado a todos los jugadores, luego el admin hace el primer movimiento
+      char buffer_interfaz[100]; 
+      //game.players[i].hp -= 1000;
       if (game.players[i].hp <= 0)
       {
         send_txt(game.players[i].socket, "Tas muerto, ahora solo te queda mirar sentado uwu.\n");
@@ -96,9 +101,29 @@ int game_start(Game game, int maximo_clientes){
         
         send_txt(game.players[i].socket, objetivos_habilidad(game, i, movimiento, buffer_aux));
 
-        int objetivo = request_int(game.players[i].socket, 0, 2);
+        int objetivo = request_int(game.players[i].socket, -1, 2);
         //TODO: Colocar interacción con funciones de cada clase!
-        //ejecutar_movimiento()
+        if(objetivo == -1)
+        {
+          game.players[i].hp = 0;
+          game.players[i].alive = false;
+
+          game.dead_players[game.n_dead] = game.players[i];
+          game.n_dead += 1;
+
+          int i_aux = 0;
+          for (int j; j < game.n_alive; j++){
+            if (game.players[j].alive){
+              game.players[i_aux] = game.players[j];
+              i_aux += 1;
+            }
+          }
+          game.n_alive -= 1;
+          game.jugadores_inicializados_totalmente -= 1;
+        }else{
+          game.players[i].func[movimiento](game.players, game.n_alive, i, game.monsters, 1, 1);
+        }
+          
       }
       if (!game.monsters[0].alive)
       {
@@ -112,7 +137,13 @@ int game_start(Game game, int maximo_clientes){
           game.players[numero_jugador].socket = 0;
         }
       }
-      //Revisamos si ya no quedan jugadores y si es así, se termina el juego
+      
+      if (game.players[i].hp <= 0 && game.players[i].alive)
+      {
+        game.n_alive -= 1;
+        game.players[i].alive = false;
+      }
+      
       if(game.n_alive <= 0)
       {
         printf("Todos se murieron, na que hacerle \n");
@@ -128,6 +159,14 @@ int game_start(Game game, int maximo_clientes){
       
 
     }
+    //Revisamos si ya no quedan jugadores y si es así, se termina el juego
+    // for (int j = 0; j < game.jugadores_inicializados_totalmente; j++)
+    // {
+    //   game.players
+    // }
+    //MOVIMIENTO DEL MONSTRUO
+    int movimiento_enemigo = rand() % 2;
+    game.monsters[0].func[movimiento_enemigo](game.monsters, 1, 0, game.players, game.jugadores_inicializados_totalmente, 1);
   }
 }
 
@@ -183,13 +222,13 @@ char *movimientos_jugador(int class, char *buffer_aux)
   {
   
   case Cazador:
-    sprintf(buffer_aux, "[0] Estocada\n[1] Corte Cruzado\n[2]Distraer\n");
+    sprintf(buffer_aux, "[0] Estocada\n[1] Corte Cruzado\n[2] Distraer\n[-1] Rendirse\n");
     return buffer_aux;
   case Medico:
-    sprintf(buffer_aux, "[0] Curar\n[1] Destello\n[2] Descarga\n");
+    sprintf(buffer_aux, "[0] Curar\n[1] Destello\n[2] Descarga\n[-1] Rendirse\n");
     return buffer_aux;
   case Hacker:
-    sprintf(buffer_aux, "[0] Sql Injection\n[1] DDos Attack\n[2] Bruteforce\n");
+    sprintf(buffer_aux, "[0] Sql Injection\n[1] DDos Attack\n[2] Bruteforce\n[-1] Rendirse\n");
     return buffer_aux;
   default:
     sprintf(buffer_aux, "Esta clase no existe?\n");
@@ -220,3 +259,21 @@ void game_entities_init(Game game, int clientes_maximos)
   }
 }
 
+//Esta función ya no va. Puede servir para printearle al jugador?
+void ejecutar_movimiento(Entity *jugador, int eleccion, Game game, int pos_jugador)
+{
+  switch (eleccion)
+  {
+  case 0:
+    jugador->func[0](game.players, game.jugadores_inicializados_totalmente, pos_jugador, game.monsters, 1, 1);
+    break;
+  case 1:
+    jugador->func[1](game.players, game.jugadores_inicializados_totalmente, pos_jugador, game.monsters, 1, 1);
+    break;
+  case 2:
+    jugador->func[1](game.players, game.jugadores_inicializados_totalmente, pos_jugador, game.monsters, 1, 1);
+    break;
+  default:
+    break;
+  }
+}

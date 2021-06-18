@@ -20,20 +20,24 @@ typedef char* (*ENT_FUNC) (struct entity*, int, int, struct entity*, int, int);
 typedef struct entity{
   int hp;
   int max_hp;
-  int self_contador;  // contador de habilidades propias, que cambian con su cantidad de usos
+/*   int self_contador;  // contador de habilidades propias, que cambian con su cantidad de usos
   int effect_contador;  // contador de cambios de status
   int effect_value;  // valor del efecto
-  char effect_type;  // que fue afectado (puede ser en vez un enum)
+  char effect_type;  // que fue afectado (puede ser en vez un enum) */
   ENT_FUNC func[3];
   int n_funciones;
   bool has_name; //Para no preguntar más de una vez
   int class;
 
   /* efectos especiales */
-  char bleed; // sangrado por estocada o espinas
-  bool distracted; //Si fue distraido por el cazador o no.
+  int pos_focused;
+  char bleed; // sangrado por estocada 's', o espinas 'e'
+  int bleed_counter;
+  bool distracted; // Si fue distraido por el cazador o no.
   int bruteforce; // contador de veces ejecutadas por fuerzabruta
-  bool jumped; // intercalador de jump
+  bool jumped; // intercalador de jump (no se resetea en main)
+  int buffed; //  >0 si hay efecto activo por hacker, parte en 2 y se resta 1 cada fun de turno
+  int reprobado; // >0 si hay efecto activo por reprobaton, parte en 2 y se resta 1 cada fun de turno
 
   char playername[13];
   int is_monster;
@@ -42,7 +46,7 @@ typedef struct entity{
 
   int accumulative_blood_counter; //multiplicador de daño por sangrado. Máximo 3
   int duracion_efecto; // Contador para la duración de los efectos de las habilidades 
-   
+
   int target_id; //id del jugador que distrajo en el último turno.
   bool alive; //Variable para descartar que hagan algo cuando se tenga que revisar los efectos especiales.
 } Entity;

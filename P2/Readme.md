@@ -7,10 +7,12 @@
 - Maximiliano Narea - 17626463
 
 # Supuestos
-* personajes solo son afectados por la ultima habilidad que les afecta algun stat o alguna alteración a sus status.
+* Duración de efectos se mide en rondas  ( https://github.com/IIC2333/Foro-2021-1/discussions/282 )
+* Si alguien es afectado por el otro tipo de veneno, se sobreescribe
 * El mounstro ataca un objetivo al azar.
 * El ID se usa para no enviar mas de un tipo de información en el payload, por lo que si se envía un tipo de información, y sabe quien la recibe quien es, no es necesarioenviar todo en el ID (Esto es solo para justificar el motivo de que el cliente usa solo un bit del ID, ya que todo texto de respuesta, en caso de ser necesaria, se envía en el payload)
 * Asumimos que en el caso donde el monstruo intente saltar dos veces seguidas, el turno se consume y se imprime un mensaje
+* El envenenamiento hace su efecto al final del turno
 
 # Protocolos
 ## cliente -> servidor:
