@@ -7,12 +7,14 @@
 - Maximiliano Narea - 17626463
 
 # Supuestos
+* Reprobatón-9000 afecta tanto al recibir como dar healing (en ambos casos se disminuye la cantidad a la mitad, por lo que si están ambas, se reduce al cuarto)
 * Duración de efectos se mide en rondas  ( https://github.com/IIC2333/Foro-2021-1/discussions/282 )
 * Si alguien es afectado por el otro tipo de veneno, se sobreescribe
 * El mounstro ataca un objetivo al azar.
 * El ID se usa para no enviar mas de un tipo de información en el payload, por lo que si se envía un tipo de información, y sabe quien la recibe quien es, no es necesarioenviar todo en el ID (Esto es solo para justificar el motivo de que el cliente usa solo un bit del ID, ya que todo texto de respuesta, en caso de ser necesaria, se envía en el payload)
 * Asumimos que en el caso donde el monstruo intente saltar dos veces seguidas, el turno se consume y se imprime un mensaje
-* El envenenamiento hace su efecto al final del turno
+* El envenenamiento hace su efecto al final del turno, y en caso de tratar de envenar al ya envenenado, se realiza 500 de daño EXTRA.
+* Destello regenerador hacel el heal según el daño realizado al enemigo (inlcuyendo bufs, entre otras cosas)
 
 # Protocolos
 ## cliente -> servidor:

@@ -12,13 +12,25 @@
 
 char *NO_TXT = "\0";
 const uint8_t TXT_ONLY = 0;
-char texto_opciones[] = "\e[0;93m¿Qué desea hacer?\n   \e[0m[1]Enviar mensaje al servidor\n   [2]agregar otro cliente\n";
 
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
   // Se define una IP y un puerto
-  Game game = (Game){
+  Game game;
+  // todo: memset
+  memset(&game, 0, sizeof(Game));
+  //game.active_players = {false, false, false, false, false};
+  //game.dead_players = {false, false, false, false};
+  game.n_alive = 1;
+  game.n_dead = 0;
+  game.rondas = 0;
+  game.can_have_monster = false;
+  game.pos_admin = 0;
+  game.jugadores_inicializados_totalmente = 1;
+  game.game_start = false;
+  game.pos_monster = -1;
+/*   Game game = {
     .active_players = {false, false, false, false, false},
     .dead_players = {false, false, false, false},
     .n_alive = 1,
@@ -28,8 +40,8 @@ int main(int argc, char *argv[])
     .pos_admin = 0,
     .jugadores_inicializados_totalmente = 1,
     .game_start = false,
-    .pos_monster = -1 
-  };
+    .pos_monster = -1
+  }; */
   char *IP = "0.0.0.0";
   int PORT = 8080;
   printf("\e[0;94mServidor encendido\n");
@@ -133,197 +145,194 @@ int main(int argc, char *argv[])
       
       // Acá se inicializan atributos del admin, preguntar NOMBRE - CLASE y nada más. Hasta acá hay un if sin cerrar.
       if(game.players[0].has_name == false)
-        {
-          game.players[0].has_name = true;
-          send_txt(game.players[0].socket, x_req_nombre);
-          char *pname = request_txt(game.players[0].socket);
-          strncpy(game.players[0].playername, pname, 12);
-          free(pname);
-          game.players[0].playername[12] = '\0';
-          printf("nombre usuario: %s\n", game.players[0].playername);
-        }
+      {
+        game.players[0].has_name = true;
+        send_txt(game.players[0].socket, x_req_nombre);
+        char *pname = request_txt(game.players[0].socket);
+        strncpy(game.players[0].playername, pname, 12);
+        free(pname);
+        game.players[0].playername[12] = '\0';
+        printf("nombre usuario: %s\n", game.players[0].playername);
+      }
         
-        // le preguntamos por su clase al cliente
-        if (game.players[0].class == -1)
+      // le preguntamos por su clase al cliente
+      if (game.players[0].class == -1)
+      {
+        int option_high_b = 2;
+        send_txt(game.players[0].socket, x_req_class);
+        if (game.can_have_monster && (game.pos_monster == -1))
         {
-          int option_high_b = 2;
-          send_txt(game.players[0].socket, x_req_class);
-          if (game.can_have_monster && (game.pos_monster == -1))
-          {
-            send_txt(game.players[0].socket, x_req_class_ex);
-            option_high_b++;
-          }
-          choice = request_int(game.players[0].socket, 0, option_high_b);
-          game.players[0].class = choice; //Clase seteada
-          //Ahora inicializamos la clase correspondiente para el jugador
-          class_def(choice, &game.players[0]);
-          printf("\e[1;91m[DEBUG]: VIDA DEL RECIEN CREADO %d\n", game.players[0].hp);
+          send_txt(game.players[0].socket, x_req_class_ex);
+          option_high_b++;
         }
-                
-
-
+        choice = request_int(game.players[0].socket, 0, option_high_b);
+        game.players[0].class = choice; //Clase seteada
+        //Ahora inicializamos la clase correspondiente para el jugador
+        class_def(choice, &game.players[0]);
+        printf("\e[1;91m[DEBUG]: VIDA DEL RECIEN CREADO %d\n", game.players[0].hp);
+      }
 
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// Borrar esto luego
       while (clientes < maximo_clientes && game.game_start == false ) //Cantidad máxima clientes 
       {
-      for (int i = 0; i < maximo_clientes; i++)
-      {
-        //printf("Iterando aca\n");
-        //if position is empty
-        
-        if (game.players[i].socket == 0)
+        for (int i = 0; i < maximo_clientes; i++)
         {
-          if (FD_ISSET(server_socket, &readfds))
+          //printf("Iterando aca\n");
+          //if position is empty
+          
+          if (game.players[i].socket == 0)
           {
-            if ((new_socket = accept(server_socket,
-                                     (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
+            if (FD_ISSET(server_socket, &readfds))
             {
-              perror("accept");
-              exit(EXIT_FAILURE);
+              if ((new_socket = accept(server_socket,
+                                      (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
+              {
+                perror("accept");
+                exit(EXIT_FAILURE);
+              }
+
+              //inform user of socket number - used in send and receive commands
+              printf("\e[0;94mNew connection , socket fd is %d , ip is : %s , port : %d\n " , new_socket , inet_ntoa(address.sin_addr) , ntohs
+                    (address.sin_port));
+
+              //send new connection greeting message
+              char welcome[1024];
+              sprintf(welcome, "\e[0;93mBienvenido Cliente %d!!\n", clientes);
+              clientes += 1;
+              // printf("cliente conectado\n");
+              send_txt(new_socket, welcome);
+              // if (send(new_socket, welcome, strlen(welcome), 0) != strlen(welcome))
+              // {
+              //   perror("send");
+              // }
+
+              puts("\e[0;94mWelcome message sent successfully");
+            
+              //add new socket to array of sockets
+              for (int i = 0; i < maximo_clientes; i++)
+              {
+                //if position is empty
+                if (game.players[i].socket == 0)
+                {
+                  game.players[i].socket = new_socket;
+                  printf("\e[0;94mAdding to list of sockets as %d\n", i);
+                  // le preguntamos por su nombre al cliente
+                  if(game.players[i].has_name == false)
+                  {
+                    game.players[i].has_name = true;
+                    send_txt(game.players[i].socket, x_req_nombre);
+                    char *pname = request_txt(game.players[i].socket);
+                    strncpy(game.players[i].playername, pname, 12);
+                    free(pname);
+                    game.players[i].playername[12] = '\0';
+                    printf("Nombre usuario: %s\n", game.players[i].playername);
+                  }
+                  
+                  // le preguntamos por su clase al cliente
+                  printf("NOMBRE: %s\n", game.players[i].playername);
+                  printf("CLASE: %d\n", game.players[i].class);
+                  
+                  int option_high_b = 2;
+                  send_txt(game.players[i].socket, x_req_class);
+                  if (game.can_have_monster && (game.pos_monster == -1))
+                  {
+                    send_txt(game.players[i].socket, x_req_class_ex);
+                    option_high_b++;
+                  }
+                  choice = request_int(game.players[i].socket, 0, option_high_b);
+                  game.players[i].class = choice; //Clase seteada
+                  //Ahora inicializamos la clase correspondiente para el jugador
+                  class_def(choice, &game.players[i]);
+                  printf("\e[1;91m[DEBUG]: VIDA DEL RECIEN CREADO %d\n", game.players[i].hp);
+                  
+
+                  if(i > 0){
+                    //Enviamos la información al admin
+                    char auxiliar[100];
+
+                    sprintf(auxiliar, "\e[1;35mEl jugador %s ha escogido la clase <%s>\n", game.players[i].playername, class_def(choice, &game.players[i]));
+                    send_txt(game.players[0].socket, auxiliar);
+                  }
+                  
+                  game.jugadores_inicializados_totalmente += 1;
+                  game.n_alive += 1;
+                  break;
+                  
+                }
+              }
             }
 
-            //inform user of socket number - used in send and receive commands
-            printf("\e[0;94mNew connection , socket fd is %d , ip is : %s , port : %d\n " , new_socket , inet_ntoa(address.sin_addr) , ntohs
-                   (address.sin_port));
-
-            //send new connection greeting message
-            char welcome[1024];
-            sprintf(welcome, "\e[0;93mBienvenido Cliente %d!!\n", clientes);
-            clientes += 1;
-            // printf("cliente conectado\n");
-            send_txt(new_socket, welcome);
-            // if (send(new_socket, welcome, strlen(welcome), 0) != strlen(welcome))
-            // {
-            //   perror("send");
-            // }
-
-            puts("\e[0;94mWelcome message sent successfully");
-          
-            //add new socket to array of sockets
+            //else its some IO operation on some other socket
             for (int i = 0; i < maximo_clientes; i++)
             {
-              //if position is empty
-              if (game.players[i].socket == 0)
+              if (FD_ISSET(game.players[i].socket, &readfds))
               {
-                game.players[i].socket = new_socket;
-                printf("\e[0;94mAdding to list of sockets as %d\n", i);
-                // le preguntamos por su nombre al cliente
-                if(game.players[i].has_name == false)
+                //Check if it was for closing , and also read the
+                //incoming message
+                if ((valread = read(game.players[i].socket, buffer, 1024)) == 0)
                 {
-                  game.players[i].has_name = true;
-                  send_txt(game.players[i].socket, x_req_nombre);
-                  char *pname = request_txt(game.players[i].socket);
-                  strncpy(game.players[i].playername, pname, 12);
-                  free(pname);
-                  game.players[i].playername[12] = '\0';
-                  printf("Nombre usuario: %s\n", game.players[i].playername);
+                  //Somebody disconnected , get his details and print
+                  getpeername(game.players[i].socket, (struct sockaddr *)&address,
+                              (socklen_t *)&addrlen);
+                  printf("\e[0;94mHost disconnected , ip %s , port %d \n",
+                        inet_ntoa(address.sin_addr), ntohs(address.sin_port));
+
+                  //Close the socket and mark as 0 in list for reuse
+                  close(game.players[i].socket);
+                  game.players[i].socket = 0;
                 }
-                
-                // le preguntamos por su clase al cliente
-                printf("NOMBRE: %s\n", game.players[i].playername);
-                printf("CLASE: %d\n", game.players[i].class);
-                
-                int option_high_b = 2;
-                send_txt(game.players[i].socket, x_req_class);
-                if (game.can_have_monster && (game.pos_monster == -1))
+
+                //Echo back the message that came in
+                else
                 {
-                  send_txt(game.players[i].socket, x_req_class_ex);
-                  option_high_b++;
+                  //set the string terminating NULL byte on the end
+                  //of the data read
+                  buffer[valread] = '\0';
+                  send(game.players[i].socket, buffer, strlen(buffer), 0);
                 }
-                choice = request_int(game.players[i].socket, 0, option_high_b);
-                game.players[i].class = choice; //Clase seteada
-                //Ahora inicializamos la clase correspondiente para el jugador
-                class_def(choice, &game.players[i]);
-                printf("\e[1;91m[DEBUG]: VIDA DEL RECIEN CREADO %d\n", game.players[i].hp);
-                
-
-                if(i > 0){
-                  //Enviamos la información al admin
-                  char auxiliar[100];
-
-                  sprintf(auxiliar, "\e[1;35mEl jugador %s ha escogido la clase <%s>\n", game.players[i].playername, class_def(choice, &game.players[i]));
-                  send_txt(game.players[0].socket, auxiliar);
-                }
-                
-                game.jugadores_inicializados_totalmente += 1;
-                game.n_alive += 1;
-                break;
-                
               }
-            }
+            
+            
+            break;
+          }
           }
 
-          //else its some IO operation on some other socket
-          for (int i = 0; i < maximo_clientes; i++)
+          
+          char auxiliar[300];
+          sprintf(auxiliar, "\e[0;93m¿Iniciar partida?\n\e[0m[0] Esperar\n[1] Iniciar\n");
+          send_txt(game.players[0].socket, auxiliar);
+          int begin = request_int(game.players[0].socket, 0, 1);
+          printf("CLIENTES %d| JUGADORES %d\n", clientes, game.jugadores_inicializados_totalmente);
+          if( clientes != game.jugadores_inicializados_totalmente  && begin == 1)
           {
-            if (FD_ISSET(game.players[i].socket, &readfds))
-            {
-              //Check if it was for closing , and also read the
-              //incoming message
-              if ((valread = read(game.players[i].socket, buffer, 1024)) == 0)
-              {
-                //Somebody disconnected , get his details and print
-                getpeername(game.players[i].socket, (struct sockaddr *)&address,
-                            (socklen_t *)&addrlen);
-                printf("\e[0;94mHost disconnected , ip %s , port %d \n",
-                       inet_ntoa(address.sin_addr), ntohs(address.sin_port));
-
-                //Close the socket and mark as 0 in list for reuse
-                close(game.players[i].socket);
-                game.players[i].socket = 0;
-              }
-
-              //Echo back the message that came in
-              else
-              {
-                //set the string terminating NULL byte on the end
-                //of the data read
-                buffer[valread] = '\0';
-                send(game.players[i].socket, buffer, strlen(buffer), 0);
-              }
-            }
-          
-          
-          break;
-        }
-        }
-
+            sprintf(auxiliar, "Aún no se puede iniciar partida, faltan jugadores!\n");
+            send_txt(game.players[0].socket, auxiliar);
+            game.game_start = false;
+            
+          }
+          else if(clientes == game.jugadores_inicializados_totalmente  && begin == 0)
+          {
+            sprintf(auxiliar, "Esperando.\n");
+            send_txt(game.players[0].socket, auxiliar);
+            game.game_start = false;
+          }else if(clientes == game.jugadores_inicializados_totalmente && begin == 1)
+          {
+            sprintf(auxiliar, "Iniciando partida!\n");
+            send_txt(game.players[0].socket, auxiliar);
+            game.game_start = true;
+            break;
+          }else if(clientes == game.jugadores_inicializados_totalmente && begin == 0)
+          {
+            sprintf(auxiliar, "A quién vas a esperar we, ya están todos...\n");
+            send_txt(game.players[0].socket, auxiliar);
+            game.game_start = false;
+          }
         
-        char auxiliar[300];
-        sprintf(auxiliar, "\e[0;93m¿Iniciar partida?\n\e[0m[0] Esperar\n[1] Iniciar\n");
-        send_txt(game.players[0].socket, auxiliar);
-        int begin = request_int(game.players[0].socket, 0, 1);
-        printf("CLIENTES %d| JUGADORES %d\n", clientes, game.jugadores_inicializados_totalmente);
-        if( clientes != game.jugadores_inicializados_totalmente  && begin == 1)
-        {
-          sprintf(auxiliar, "Aún no se puede iniciar partida, faltan jugadores!\n");
-          send_txt(game.players[0].socket, auxiliar);
-          game.game_start = false;
-          
+          if(game.game_start){
+            break;
+          }
         }
-        else if(clientes == game.jugadores_inicializados_totalmente  && begin == 0)
-        {
-          sprintf(auxiliar, "Esperando.\n");
-          send_txt(game.players[0].socket, auxiliar);
-          game.game_start = false;
-        }else if(clientes == game.jugadores_inicializados_totalmente && begin == 1)
-        {
-          sprintf(auxiliar, "Iniciando partida!\n");
-          send_txt(game.players[0].socket, auxiliar);
-          game.game_start = true;
-          break;
-        }else if(clientes == game.jugadores_inicializados_totalmente && begin == 0)
-        {
-          sprintf(auxiliar, "A quién vas a esperar we, ya están todos...\n");
-          send_txt(game.players[0].socket, auxiliar);
-          game.game_start = false;
-        }
-      
-        if(game.game_start){
-          break;
-        }
-      }
       }
     }
 
@@ -333,13 +342,13 @@ int main(int argc, char *argv[])
     {
 
     
-    for (int i = 0; i < maximo_clientes; i++)
-    {
-      // BuildPlayer.socket ==
-      
-      //printf("ITERANDO ACÁ\n");
-      
-      //Pregunta por monstruo  
+      for (int i = 0; i < maximo_clientes; i++)
+      {
+        // BuildPlayer.socket ==
+        
+        //printf("ITERANDO ACÁ\n");
+        
+        //Pregunta por monstruo  
         send_txt(game.players[i].socket, x_admin_req_monster);
         choice = request_int(game.players[i].socket, 1, 2);
         printf("choice: %d\n", choice);
@@ -357,55 +366,55 @@ int main(int argc, char *argv[])
         }
         else{
           send_txt(game.players[i].socket, x_admin_req_monster_fail);
-         
+        
         }
       
+          
         
-      
-      
-      printf("Terminé todas las opciones\n");
-      
-      if (FD_ISSET(game.players[i].socket, &readfds))
-      {
-        //Check if it was for closing , and also read the
-        //incoming message
-        if ((valread = read(game.players[i].socket, buffer, 1024)) == 0)
+        
+        printf("Terminé todas las opciones\n");
+        
+        if (FD_ISSET(game.players[i].socket, &readfds))
         {
-          //Somebody disconnected , get his details and print
-          getpeername(game.players[i].socket, (struct sockaddr *)&address,
-                      (socklen_t *)&addrlen);
-          printf("\e[0;94mHost disconnected , ip %s , port %d \n",
-                 inet_ntoa(address.sin_addr), ntohs(address.sin_port));
+          //Check if it was for closing , and also read the
+          //incoming message
+          if ((valread = read(game.players[i].socket, buffer, 1024)) == 0)
+          {
+            //Somebody disconnected , get his details and print
+            getpeername(game.players[i].socket, (struct sockaddr *)&address,
+                        (socklen_t *)&addrlen);
+            printf("\e[0;94mHost disconnected , ip %s , port %d \n",
+                  inet_ntoa(address.sin_addr), ntohs(address.sin_port));
 
-          //Close the socket and mark as 0 in list for reuse
-          close(game.players[i].socket);
-          game.players[i].socket = 0;
-        }
+            //Close the socket and mark as 0 in list for reuse
+            close(game.players[i].socket);
+            game.players[i].socket = 0;
+          }
 
-        //Echo back the message that came in
-        else
-        {
-          //set the string terminating NULL byte on the end
-          //of the data read
-          buffer[valread] = '\0';
-          send(game.players[i].socket, buffer, strlen(buffer), 0);
+          //Echo back the message that came in
+          else
+          {
+            //set the string terminating NULL byte on the end
+            //of the data read
+            buffer[valread] = '\0';
+            send(game.players[i].socket, buffer, strlen(buffer), 0);
+          }
         }
-      }
-    
-      //Si Pone que sí, y todo bien, entonces empezamos la lógica the rial
-      printf("GAME START %d\n", game.game_start);
-      if(game.game_start == true)
-      {
-        if (!game_start(game, maximo_clientes))
+      
+        //Si Pone que sí, y todo bien, entonces empezamos la lógica the rial
+        printf("GAME START %d\n", game.game_start);
+        if(game.game_start == true)
         {
-          printf("Juego Terminado, shao.\n");
+          if (!game_start(game, maximo_clientes))
+          {
+            printf("Juego Terminado, shao.\n");
+          }
+          
+          
+          printf("\e[0;94mJugando\n");
         }
-        
-        
-        printf("\e[0;94mJugando\n");
+        printf("Terminé todas las opciones FINAL\n");
       }
-      printf("Terminé todas las opciones FINAL\n");
-    }
     }
 
    

@@ -1,5 +1,6 @@
 #pragma once
 #include <stdlib.h>
+#include <assert.h>
 
 #include "clases.h"
 #include "comunication.h"
@@ -65,53 +66,36 @@ char* class_def(enum classname clases, Entity *entity){
 
 // CAZADOR n[0]
 // Sangrado se stackea, hasta 3 veces
-// Daña 1000 a enemigo aleatorio, y deja sangrado de 500 infinito
+// Daña 1000 a enemigo, y deja sangrado de 500 infinito
 char* f_estocada(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  if (!len_enemigos) printf("Va a fallar\n");
-  //int objective = rand() % len_enemigos; //Según enunciado creo que debería ser a un objetivo arbitrario.
   int objective = enemy_selector(&aliados[posicion_yo], len_enemigos); 
-  enemigos[objective].hp -= 1000;
-  if (enemigos[objective].hp <= 0)
-  {
-    enemigos[objective].alive = false;
+  attack(&aliados[posicion_yo], &enemigos[objective], 1000);
+  
+  if (enemigos[objective].bleed != 's'){
+    enemigos[objective].bleed_counter = 0;
   }
-  if (enemigos[objective].effect_type != 's'){
-    enemigos[objective].effect_contador = 0;
-    enemigos[objective].effect_value = 0;
-  }else if (enemigos[objective].effect_contador == 3){
-    return NULL;
-  }
-  enemigos[objective].effect_type = 's';  // sangrado
-  enemigos[objective].effect_value += 500;
-  enemigos[objective].effect_contador += 1;
+  enemigos[objective].bleed_counter += 1;
+
   return NULL;
 }
 
 // CAZADOR n[1]
-// Daña 3000 a enemigo aleatorio
+// Daña 3000 a enemigo
 char* f_corte_cruzado(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  if (!len_enemigos) printf("Va a fallar\n");
-  //int objective = rand() % len_enemigos;
-  //int objective = request_int(aliados[posicion_yo].socket, 0, len_enemigos); 
-  int objective = 0;
-  enemigos[objective].hp -= 1000;
-  if (enemigos[objective].hp <= 0)
-  {
-    enemigos[objective].alive = false;
-  }
+  int objective = enemy_selector(&aliados[posicion_yo], len_enemigos);
+  
+  attack(&aliados[posicion_yo], &enemigos[objective], 3000);
 
   return NULL;
 }
 
 // CAZADOR n[2]
 // Distrae al monstruo, haciendo que este ataque al último cazador en distraerlo
-//TODO: FALTA IMPLEMENTAR
 char* f_distraer(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  if (!len_enemigos) printf("Va a fallar\n");
-  //int objective = rand() % len_enemigos; 
-  int objective = request_int(aliados[posicion_yo].socket, 0, len_enemigos); 
-  enemigos[objective].effect_type = 'd';  // distraer
-  enemigos[objective].effect_value = posicion_yo;
+  int objective = enemy_selector(&aliados[posicion_yo], len_enemigos);
+  enemigos[objective].distracted = true;  // distraer
+  enemigos[objective].pos_focused = posicion_yo;
+
   return NULL;
 }
 
@@ -123,17 +107,13 @@ char* f_distraer(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
 
 // MEDICO n[0]
 // Cura 2000 a aliado específico (puede ser sí mismo)
-//TODO: Falta implementar
 char* f_curar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
 
-  if (!len_enemigos) printf("Va a fallar\n");
-  int objective = len_aliados;
-  if (objective != 1){
-    objective = (int)request_int(aliados[posicion_yo].socket, 0, objective - 1);
-  }
-  aliados[objective].hp += 2000;
-  if (aliados[objective].hp > aliados[objective].max_hp)
-    aliados[objective].hp = aliados[objective].max_hp;
+  // elige al aliado, con la func del selector
+  int objective = enemy_selector(&aliados[posicion_yo], len_aliados);
+  
+  heal(&aliados[posicion_yo], &aliados[objective], 2000);
+
   return NULL;
 }
 
@@ -143,22 +123,18 @@ char* f_curar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
 char* f_destello(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   // entre 0 y 1250, luego le damos offset 750 para [750, 2000]
   int damage = rand() % 1251;
-  int pos_to_heal = rand() % len_aliados;
-  int pos_to_dmg = enemy_selector(&aliados[posicion_yo], len_enemigos);
   damage += 750;
 
+  int pos_to_heal = rand() % len_aliados;
+  int pos_to_dmg = enemy_selector(&aliados[posicion_yo], len_enemigos);
+
+  // ! dañamos al enemigo
+  damage = attack(&aliados[posicion_yo], &enemigos[pos_to_dmg], damage);
+
   // divide en la mitad y redondea hacia arriba (ej: 1001 / 2 + 1001 % 2 = 500 + 1 = 501)
-  int heal = damage / 2 + (damage % 2);
-  // curamos al aliado
-  Entity* aliado = &aliados[pos_to_heal];
-  aliado->hp += heal;
-  if (aliado->hp > aliado->max_hp) aliado->hp = aliado->max_hp;
-  // dañamos al enemigo
-  enemigos[pos_to_dmg].hp -= damage;
-  if (enemigos[pos_to_dmg].hp <= 0)
-  {
-    enemigos[pos_to_dmg].alive = false;
-  }
+  int healing = damage / 2 + (damage % 2);
+  // ! curamos al aliado
+  healing = heal(&aliados[posicion_yo], &aliados[pos_to_heal], healing);
 
   return NULL;
 }
@@ -171,11 +147,7 @@ char* f_descarga(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   int damage = (aliado->max_hp - aliado->hp) * 2;
   //int enemy_pos = rand() % len_enemigos;
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos); 
-  enemigos[enemy_pos].hp -= damage;
-  if (enemigos[enemy_pos].hp <= 0)
-  {
-    enemigos[enemy_pos].alive = false;
-  }
+  attack(&aliados[posicion_yo], &enemigos[enemy_pos], damage);
 
   return NULL;
 }
@@ -193,8 +165,8 @@ char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* ene
 
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos); 
   Entity* aliado = &aliados[enemy_pos];
-  aliado->effect_type = 'q'; // S'Q'L
-  aliado->duracion_efecto = 2;
+  aliado->buffed = 2; // S'Q'L
+
   return NULL;
 }
 
@@ -214,11 +186,12 @@ char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* e
   Entity* yo = &aliados[posicion_yo];
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos); 
 
-  if (yo->bruteforce < 3){
-    yo->bruteforce += 1;
-  } else {
+  // en la práctica, == 2 es la tercera vez en ejecutar
+  if (yo->bruteforce == 2){
     enemigos[enemy_pos].hp -= 10000;
     yo->bruteforce = 0;
+  } else {
+    yo->bruteforce += 1;
   }
   
   return NULL;
@@ -281,9 +254,8 @@ char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
 
   aliados[posicion_yo].jumped = false;
 
-  if (enemy->bleed == 'e'){
+  if (enemy->bleed == 'e' && enemy->bleed_counter > 0){
     enemy->hp -= 500;
-    enemy->effect_contador -= 1;
   }else {
     enemy->bleed = 'e';
     enemy->bleed_counter = 3;
@@ -303,7 +275,7 @@ char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
 // RUIZ n[0]
 // Copia una habilidad de un enemigo a elección, para usarla en contra
 char* f_copia(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  int enemy_pos = enemy_selector(&alados[posicion_yo], len_enemigos);
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
   int habilidad_a_elegir = rand() % 3;
   ENT_FUNC fn = enemigos[enemy_pos].func[habilidad_a_elegir];
   char* el_pepe = fn(aliados, len_aliados, posicion_yo, enemigos, len_enemigos, auxiliar);
@@ -335,60 +307,29 @@ char* f_rm(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, 
 
 #pragma endregion RUIZ
 
-// Debe ser ejecutado DESPUES del turno
-void extras_handler(Entity* aliados, int len_aliados, Entity* enemigos, int len_enemigos){
-  /*
-  Para
-  */
-  for (int n_enemigo = 0; n_enemigo < len_enemigos; n_enemigo++){
-    //Verificamos si es que el monstrue posee sangrado. Si lo tiene multiplicamos por el núm
-    if (enemigos[n_enemigo].effect_type == 's'){
-      Entity* enemigo = &enemigos[n_enemigo];
-      enemigo->hp -= (enemigo->effect_value) * (enemigos[n_enemigo].accumulative_blood_counter); 
-      enemigo->duracion_efecto -= 1;
-    }
-    if (enemigos[n_enemigo].hp <= 0)
-    {
-      enemigos[n_enemigo].alive = false;
-      printf("Ete m3n ya murió\n");
-      continue;
-    }
-    if(enemigos[n_enemigo].effect_type == 'd' && enemigos[n_enemigo].target_id >= 0 ){
-      printf("Enemigo distraído, debe atacar al jugador con índice %d\n", enemigos[n_enemigo].target_id);
-      //TODO: Atacar al aliando con índice target_id
-      enemigos[n_enemigo].target_id = -1; //Volvemos a setear el target_id en -1 para que no entre a la condición
-    }
-  }
-  //Ahora iteramos sobre los aliados para definir sus efectos
-  for (int n_aliado = 0; n_aliado < len_aliados; n_aliado++)
-  {
-    if (aliados[n_aliado].hp <= 0)
-    {
-      aliados[n_aliado].alive = false;
-      printf("Ete m3n ya murió\n");
-      continue;
-    }
-    // Ahora verificamos si ya pasaron los turnos que duraba el efecto y v
-    if(aliados[n_aliado].effect_type == 'q' && aliados[n_aliado].duracion_efecto <= 0)
-    {
-      aliados[n_aliado].multiplier = 1; //Volvemos a setear el multiplicador en 1
-    }
-    //Primero revisamos si es que el personaje posee efecto de intección SQL
-    if (aliados[n_aliado].effect_type == 'q' && aliados[n_aliado].duracion_efecto > 0)
-    {
-      // Si tenía multiplicador, entonces determinamos que su multiplicador será == 2
-      aliados[n_aliado].multiplier = 2; //TODO:Estoy asumiendo que este multiplicador es para esto, checkear con Chris
-      aliados[n_aliado].duracion_efecto -= 1; //Restamos 1 a la cantidad de turnos que durará el efecto
+/** Aplica funciones necesarias al final del turno, se debe llamar una vez por cada lista de entidades (una aliada y una enemigia)
+ * @param entes Lista de entes, puede ser aliado o enemigo
+ * @param len_estes Largo de la lista de entes
+*/
+void extras_handler(Entity* entes, int len_entes){
+
+  for (int n_ente = 0; n_ente < len_entes; n_ente++){
+    Entity* ente = &entes[n_ente];
+    // bleed por estocada
+    if (ente->bleed == 's'){
       
+      ente->hp -= (ente->bleed_counter) * 500;
     }
-    //Si el aliado está distrayendo, el monstruo lo atacará a él en el próximo turno
-    if (aliados[n_aliado].distracted)
-    {
-      //TODO: Setear en -1 cuando ya se haya usado.
-      enemigos[0].target_id = n_aliado; // Le damos índice para que ataque después.
+    // bleed por espina
+    if(ente->bleed == 'e' && ente->bleed_counter > 0){
+      ente->hp -= 400;
+      ente->bleed_counter--;
     }
+    // disminuir la duplicación de daño por sql
+    if (ente->buffed) ente->buffed--;
+    // disminuir el debuff por reprobado
+    if (ente->reprobado) ente->reprobado--;
   }
-  
 }
 
 int enemy_selector(Entity* yo, int len_enemigos){
@@ -412,26 +353,56 @@ int enemy_selector(Entity* yo, int len_enemigos){
   return enemy_pos;
 }
 
-/**
- *
+/** Realiza ataque
+ * @param dano_base es el daño que se haría sin ningun cambio de status
  * @return cantidad de daño realizado
  */
-int atacar(Entity* atacante, Entity* objetivo, int dano_base){
+int attack(Entity* atacante, Entity* objetivo, int dano_base){
   int dano_final = dano_base;
   if (atacante->buffed)
-    dano_final <<= 1; // duplica daño
+    dano_final *= 2; // duplica daño
   if (atacante->reprobado)
-    dano_final >>= 1; // infinge mitad de daño
-  
+    dano_final /= 2; // inflige mitad de daño
+  if (objetivo->reprobado)
+    dano_final *= 2; // duplica daño
+  // ver si se pasa del daño
+  if (objetivo->hp < dano_final)
+    dano_final = objetivo->hp;
+  objetivo->hp -= dano_final;
+  return dano_final;
 }
 
-// TODO: concatenar strings para retornar
+/** Realiza curación
+ * @param heal_base es el daño que se haría sin ningun cambio de status
+ * @return cantidad de daño realizado
+ */
+int heal(Entity* healer, Entity* objetivo, int heal_base){
+  int heal_final = heal_base;
+  assert (objetivo->hp > 0);
+  int heal_max = objetivo->max_hp - objetivo->hp;
+  if (healer->reprobado){
+    heal_final /= 2; // inflige mitad de heal
+  }
+  if (objetivo->reprobado){
+    heal_final /= 2; // recibe mitad heal
+  }
+  if (heal_final > heal_max){
+    heal_final = heal_max;
+    objetivo->hp += heal_final;
+  }
+  return heal_final;
+}
 
-// bleeds (1: 's' o 'e')
-// distraido (1: 'd')
-// reprobaton (??)
-// contadores (2: bruteforce y jump)
-// buff (1: sql)
+
+
+// TODO: concatenar strings para retornar
+// TODO: init de variables
+
+// bleeds (1: bleed ('s' 'e'))                                             
+// distraido (2: distraido, pos_focused)                                             
+// reprobaton (1: reprobado)                                             
+// contadores (2: bruteforce y jumped)
+// buff (1: buffed)
 
 /* 
 

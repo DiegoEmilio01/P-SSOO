@@ -20,7 +20,7 @@ typedef char* (*ENT_FUNC) (struct entity*, int, int, struct entity*, int, int);
 typedef struct entity{
   int hp;
   int max_hp;
-/*   int self_contador;  // contador de habilidades propias, que cambian con su cantidad de usos
+/*int self_contador;  // contador de habilidades propias, que cambian con su cantidad de usos
   int effect_contador;  // contador de cambios de status
   int effect_value;  // valor del efecto
   char effect_type;  // que fue afectado (puede ser en vez un enum) */
@@ -36,18 +36,13 @@ typedef struct entity{
   bool distracted; // Si fue distraido por el cazador o no.
   int bruteforce; // contador de veces ejecutadas por fuerzabruta
   bool jumped; // intercalador de jump (no se resetea en main)
-  int buffed; //  >0 si hay efecto activo por hacker, parte en 2 y se resta 1 cada fun de turno
+  int buffed; //  >0 si hay efecto activo por hacker, parte en 2 y se resta 1 cada fin de turno
   int reprobado; // >0 si hay efecto activo por reprobaton, parte en 2 y se resta 1 cada fun de turno
 
   char playername[13];
   int is_monster;
   int socket;
-  int multiplier; // debe iniciar en 1, puede duplicarse o reducirse a la mitad
 
-  int accumulative_blood_counter; //multiplicador de daño por sangrado. Máximo 3
-  int duracion_efecto; // Contador para la duración de los efectos de las habilidades 
-
-  int target_id; //id del jugador que distrajo en el último turno.
   bool alive; //Variable para descartar que hagan algo cuando se tenga que revisar los efectos especiales.
 } Entity;
 
@@ -88,8 +83,11 @@ char* f_rm(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, 
 
 
 /* ----- EXTRAS ----- */
-void extras_handler(Entity* aliados, int len_aliados, Entity* enemigos, int len_enemigos);
+
+void extras_handler(Entity* entes, int len_entes);
 int enemy_selector(Entity* yo, int len_enemigos);
 
 
 char* class_def(enum classname clases, Entity *entity);
+int heal(Entity* healer, Entity* objetivo, int heal_base);
+int attack(Entity* atacante, Entity* objetivo, int dano_base);

@@ -25,7 +25,7 @@ typedef struct game{
 
 int game_start(Game game, int maximo_clientes);
 
-void send_txt_all(Game game, char* msg, int maximo_clientes);
+void send_txt_all(Game game, char* msg);
 
 void send_txt_exclude(Game game, char* msg, int socket_evict);
 
