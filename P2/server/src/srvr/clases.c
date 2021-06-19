@@ -163,7 +163,7 @@ char* f_descarga(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
 // Duplica el daño de un aliado, por 2 turnos
 char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
 
-  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos); 
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_aliados);
   Entity* aliado = &aliados[enemy_pos];
   aliado->buffed = 2; // S'Q'L
 
@@ -173,8 +173,8 @@ char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* ene
 // HACKER n[1]
 // Daña 1500 a enemigo aleatorio
 char* f_ddos(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos); 
-  enemigos[enemy_pos].hp -= 1500;
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
+  attack(&aliados[posicion_yo], &enemigos[enemy_pos], 1500);
  
   return NULL; 
 }
@@ -188,7 +188,7 @@ char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* e
 
   // en la práctica, == 2 es la tercera vez en ejecutar
   if (yo->bruteforce == 2){
-    enemigos[enemy_pos].hp -= 10000;
+    attack(yo, &enemigos[enemy_pos], 10000);
     yo->bruteforce = 0;
   } else {
     yo->bruteforce += 1;
@@ -208,8 +208,8 @@ char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* e
 char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
 
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
-  Entity* enemy = &aliados[enemy_pos];
-  enemy->hp -= 1000;
+  Entity* enemy = &enemigos[enemy_pos];
+  attack(&aliados[posicion_yo], enemy, 1000);
   
   return NULL;
 }
@@ -219,7 +219,7 @@ char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
 char* f_coletazo(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   for (int n_enemy = 0; n_enemy < len_enemigos; n_enemy++){
     Entity* enemy = &enemigos[n_enemy];
-    enemy->hp -= 500;
+    attack(&aliados[posicion_yo], enemy, 500);
   }
   return NULL;
 }
@@ -240,7 +240,7 @@ char* f_salto(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
   } else {
     int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
     Entity* enemy = &enemigos[enemy_pos];
-    enemy->hp -= 1500;
+    attack(&aliados[posicion_yo], enemy, 1500);
     aliados[posicion_yo].jumped = true;
   }
 
@@ -255,7 +255,7 @@ char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
   aliados[posicion_yo].jumped = false;
 
   if (enemy->bleed == 'e' && enemy->bleed_counter > 0){
-    enemy->hp -= 500;
+    attack(&aliados[posicion_yo], enemy, 500);
   }else {
     enemy->bleed = 'e';
     enemy->bleed_counter = 3;
@@ -286,7 +286,7 @@ char* f_copia(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
 // RUIZ n[1]
 char* f_reprobaton(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
-  aliados[enemy_pos].reprobado = true;
+  aliados[enemy_pos].reprobado = 2;
 
   return NULL;
 
@@ -296,10 +296,10 @@ char* f_reprobaton(Entity* aliados, int len_aliados, int posicion_yo, Entity* en
 // TODO: resetear contador de rondas a 0
 // RESETEAR AFUERA
 char* f_rm(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  int damage = auxiliar;
-  for(int pos_enemigo = 0; pos_enemigo < len_aliados; pos_enemigo++){
-    Entity* enemigo = &aliados[pos_enemigo];
-    enemigo->hp -= damage;
+  int damage = auxiliar*100;
+  for(int pos_enemigo = 0; pos_enemigo < len_enemigos; pos_enemigo++){
+    Entity* enemigo = &enemigos[pos_enemigo];
+    attack(&aliados[posicion_yo], enemigo, damage);
   }
 
   return NULL;
