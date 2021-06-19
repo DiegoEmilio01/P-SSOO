@@ -10,6 +10,16 @@
 #include "clases.h"
 #include "game.h"
 
+/**
+ * Después sacar:
+ * AZUL: \e[0;94m
+ * RESET: \e[0m
+ * AMARILLO: \e[0;93m
+ * MORADO: \e[1;35m
+ * ROJO: \e[1;91m
+*/
+
+
 char *NO_TXT = "\0";
 const uint8_t TXT_ONLY = 0;
 

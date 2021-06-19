@@ -79,10 +79,10 @@ int game_start(Game game, int maximo_clientes){
     
     for(int i = 0; i < game.n_alive; i++)
     {
-      send_txt_all(game, "\n----------------------\n[ESTADOS ENEMIGOS] \n");
+      send_txt_all(game, "\e[0m\n----------------------\n\e[1;35m[ENEMIGOS]\e[0m\n");
       sprintf(buffer, "- [%s] HP:%d/%d\n",game.monsters[0].playername, game.monsters[0].hp, game.monsters[0].max_hp);
       send_txt_all(game, buffer);    
-      send_txt_all(game, "[ESTADOS JUGADORES]\n");
+      send_txt_all(game, "\e[1;35m[JUGADORES]\e[0m\n");
       for(int ply = 0; ply ; ply++ )
       {
         sprintf(buffer, "- [%s] HP:%d/%d\n",game.players[ply].playername, game.players[ply].hp, game.players[ply].max_hp);
@@ -138,9 +138,9 @@ int game_start(Game game, int maximo_clientes){
           }
           game.n_alive -= 1;
           game.jugadores_inicializados_totalmente -= 1;
-          send_txt(game.players[i].socket, "Te has rendido, ahora solo te queda mirar sentado uwu.\n");
+          send_txt(game.players[i].socket, "\e[0;93mTe has rendido, ahora solo te queda mirar sentado uwu.\e[0m\n");
           char buffer[80];
-          sprintf(buffer, "\e[0;93mEl jugador %s se ha rendido!\n", game.players[i].playername);
+          sprintf(buffer, "\e[0;93mEl jugador %s se ha rendido!\e[0m\n", game.players[i].playername);
           send_txt_all(game, buffer);
         }else{
           game.players[i].func[movimiento](game.players, game.n_alive, i, game.monsters, 1, 1);
@@ -149,9 +149,9 @@ int game_start(Game game, int maximo_clientes){
       }
       if (!game.monsters[0].alive)
       {
-        send_txt_all(game, "Felicidades, vencieron al monstruo!\n");
+        send_txt_all(game, "\e[0;93mFelicidades, vencieron al monstruo!\e[0m\n");
         printf("Ganaron uwu.\n");
-        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA -\n");
+        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA -\e[0m\n");
         for (int numero_jugador = 0; i < game.jugadores_inicializados_totalmente; numero_jugador++)
         {
           //Desconectamos a los jugadores y seteamos su socket en 0
@@ -168,7 +168,7 @@ int game_start(Game game, int maximo_clientes){
       
       if(game.n_alive <= 0)
       {
-        printf("Todos se murieron, na que hacerle \n");
+        printf("\e[0;93mTodos se murieron, na que hacerle \e[0m\n");
         send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA -\n");
         for (int numero_jugador = 0; i < game.jugadores_inicializados_totalmente; numero_jugador++)
         {
@@ -199,7 +199,7 @@ char *objetivos_habilidad(Game game, int pos_jugador, int movimiento, char* buff
   switch (game.players[pos_jugador].class)
   {
   case Cazador:
-    sprintf(buffer_aux, "\e[0;93mEjercerás tu habilidad sobre el monstruo.\nEnvía un 1 para atacar.");
+    sprintf(buffer_aux, "\e[0;93mEjercerás tu habilidad sobre el monstruo.\e[0m\nEnvía un 1 para atacar.");
     return buffer_aux;
   case Medico:
     if (movimiento == 0) // Va a curar a alguno de los aliados
@@ -214,7 +214,7 @@ char *objetivos_habilidad(Game game, int pos_jugador, int movimiento, char* buff
       sprintf(buffer_aux, "[%i]> %s\n", i, game.players[i].playername);
       return buffer_aux;
     }
-    sprintf(buffer_aux, "\e[0;93mEjercerás tu habilidad sobre el monstruo.\nEnvía un 1 para atacar.");
+    sprintf(buffer_aux, "\e[0;93mEjercerás tu habilidad sobre el monstruo.\e[0m\nEnvía un 1 para atacar.");
     return buffer_aux;
   case Hacker:
     if (movimiento == 0) // Duplicar la habilidad de alguno de los aliados
@@ -230,9 +230,9 @@ char *objetivos_habilidad(Game game, int pos_jugador, int movimiento, char* buff
       return buffer_aux;
     }
     if (movimiento == 1) {
-      return buffer_aux = "\e[0;93mEjercerás tu habilidad sobre el monstruo.\nEnvía un 1 para atacar.";
+      return buffer_aux = "\e[0;93mEjercerás tu habilidad sobre el monstruo.\e[0m\nEnvía un 1 para atacar.";
     }
-    return buffer_aux = "\e[0;93mHas ocupado FUERZA BRUTA.\nEnvía un 1 para sumar una carga de esta habilidad.";
+    return buffer_aux = "\e[0;93mHas ocupado FUERZA BRUTA.\e[0m\nEnvía un 1 para sumar una carga de esta habilidad.";
   default:
     return NULL;
   }
