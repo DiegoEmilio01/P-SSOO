@@ -20,6 +20,16 @@ char * get_input(){
   return response;
 }
 
+char get_char(){
+  char response = 'A';
+  for(;;){
+    char c = getchar();
+    if (c == '\n') break;
+    response = c;
+  }
+  return response;
+}
+
 
 int main (int argc, char *argv[]){
   //Se obtiene la ip y el puerto donde está escuchando el servidor (la ip y puerto de este cliente da igual)
@@ -41,9 +51,8 @@ int main (int argc, char *argv[]){
       free(message);
 
       char option[2];
-      option[0] = getchar();
+      option[0] = get_char();
       option[1] = '\0';
-      getchar();
       
       client_send_message(server_socket, (uint8_t)0, option);      
     }
