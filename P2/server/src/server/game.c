@@ -249,13 +249,13 @@ char *movimientos_jugador(int class, char *buffer_aux)
   switch (class)
   {
   case Cazador:
-    sprintf(buffer_aux, "[1] Estocada\n[2] Corte Cruzado\n[3] Distraer\n[0] Rendirse\n");
+    sprintf(buffer_aux, "\e[0;93m\nSelecciona una habilidad para utilizar\n\e[0m[1] Estocada\n[2] Corte Cruzado\n[3] Distraer\n[0] Rendirse\n");
     return buffer_aux;
   case Medico:
-    sprintf(buffer_aux, "[1] Curar\n[2] Destello\n[3] Descarga\n[0] Rendirse\n");
+    sprintf(buffer_aux, "\e[0;93m\nSelecciona una habilidad para utilizar\n\e[0m[1] Curar\n[2] Destello\n[3] Descarga\n[0] Rendirse\n");
     return buffer_aux;
   case Hacker:
-    sprintf(buffer_aux, "[1] Sql Injection\n[2] DDos Attack\n[3] Bruteforce\n[0] Rendirse\n");
+    sprintf(buffer_aux, "\e[0;93m\nSelecciona una habilidad para utilizar\n\e[0m[1] Sql Injection\n[2] DDos Attack\n[3] Bruteforce\n[0] Rendirse\n");
     return buffer_aux;
   default:
     sprintf(buffer_aux, "Esta clase no existe?\n");
@@ -306,5 +306,60 @@ void kill_player(Game *_game, int player_id, int mode)
     sprintf(buffer, "\e[0;93mEl jugador %s se ha rendido!\e[0m\n", game.players[player_id].playername);
   }
   send_txt_all(game, buffer);
+  *_game = game;
+}
+
+void play_again(Game *_game)
+{
+  Game game = *_game;
+  char mensaje[100];
+  sprintf(mensaje, "Ahora que el enemigo está muerto, ¿quieres jugar otra partida?\n");
+  send_text_all(game, mensaje);
+  int contador = 0;
+  //Por comodidad, vamos a pasar los jugadores muertos a los jugadores vivos
+  for (int j = 0; j < game.n_dead; j++)
+  {//Si el jugador estaba muerto (debería), lo pasamos a la lista de los vivos
+    if (!game.dead_players[j].alive){
+      game.players[game.n_alive] = game.dead_players[j];
+      game.players[game.n_alive].alive = true;
+      contador += 1;
+      game.n_alive += 1;
+    }
+  }
+  game.n_dead -= contador;
+  
+  // Ahora le preguntamos a cada jugador si quiere seguir jugando, y si sí le damos a escoger su clase
+  for (int jugador = 0; jugador < game.jugadores_inicializados_totalmente; jugador++)
+  {
+    sprintf(mensaje, "[0] Jugar otra partida\n[1]Desconectarme\n");
+    int eleccion = request_int(game.players[jugador].socket, 0, 1);
+    if (eleccion == 0) 
+    { //Si juega otra partida, le preguntamos por su clase
+      send_txt(game.players[jugador].socket, "\e[0;93m¿Qué clases deseas ser?\n \e[0m[0]>Cazador\n [1]>Médico\n [2]>Hacker\n");
+      eleccion = request_int(game.players[jugador].socket, 0, 2);
+      game.players[jugador].class = eleccion; //Clase seteada
+      //Ahora inicializamos la clase correspondiente para el jugador
+      class_def(eleccion, &game.players[jugador]);
+    }else{
+      //Si no, lo desconectamos
+      send_txt(game.players[jugador].socket, "Shao %s, gracias por jugar!\n", game.players[jugador].playername);
+      send_signal(game.players[jugador].socket, 6);
+      close(game.players[jugador].socket);
+      game.players[jugador].socket = 0;
+    }
+    
+  }
+  //Ahora verificamos si el admin salió, y en caso de que eso haya sucedido, le damos el admin a otro
+  if(game.players[0].socket == 0) //Desconectado
+  {
+    for (int jugador = 1; jugador < game.jugadores_inicializados_totalmente; jugador++)
+    {
+      if (game.players[jugador].socket > 0)
+      {
+        game.players[0] = game.players[jugador]; //Lo cambiamos ed lugar, ahora falta reacomodar los es
+      }
+    }
+  }
+  
   *_game = game;
 }

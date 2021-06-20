@@ -81,13 +81,5 @@ char* f_copia(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
 char* f_reprobaton(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar);
 char* f_rm(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar);
 
-
-/* ----- EXTRAS ----- */
-
-void extras_handler(Entity* entes, int len_entes);
-// int enemy_selector(Entity* yo, int len_enemigos, bool is_attack);
-
-
+/* ---- Extras ---- */
 char* class_def(enum classname clases, Entity *entity);
-// int heal(Entity* healer, Entity* objetivo, int heal_base);
-// int attack(Entity* atacante, Entity* objetivo, int dano_base);

@@ -1,5 +1,6 @@
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "conection.h"
 #include "comunication.h"
 #include "bits.h"
@@ -33,8 +34,12 @@ char get_char(){
 
 int main (int argc, char *argv[]){
   //Se obtiene la ip y el puerto donde está escuchando el servidor (la ip y puerto de este cliente da igual)
-  char * IP = "0.0.0.0";
-  int PORT = 8080;
+  if (argc != 5 || argv[2] != "-i" || argv[3] != "-p"){
+    printf("\e[1;91mERROR: INPUT INVÁLIDO.\nEl correcto uso del programa es: %s -i <IP> -p [PORT]\e[0m\n", argv[0]);
+    return 1;
+  }
+  char * IP = argv[2];
+  int PORT = atoi(argv[4]);
 
   // Se prepara el socket
   int server_socket = prepare_socket(IP, PORT);

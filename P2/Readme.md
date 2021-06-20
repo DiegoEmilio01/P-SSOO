@@ -16,6 +16,8 @@
 * El envenenamiento hace su efecto al final del turno, y en caso de tratar de envenar al ya envenenado, se realiza 500 de daño EXTRA.
 * Destello regenerador hacel el heal según el daño realizado al enemigo (inlcuyendo bufs, entre otras cosas)
 * El jugador al rendirse queda como expectador
+* El numero de habilidad en consola parten de 1. En código, de 0.
+* Los status decementan su contador al fin del turno.
 
 # Protocolos
 ## cliente -> servidor:

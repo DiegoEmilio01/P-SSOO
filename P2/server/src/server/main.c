@@ -36,6 +36,13 @@ char
 int main(int argc, char **argv)
 {
   // Se define una IP y un puerto
+  if (argc != 5 || argv[2] != "-i" || argv[3] != "-p"){
+    printf("\e[1;91mERROR: INPUT INVÁLIDO.\nEl correcto uso del programa es: %s -i <IP> -p [PORT]\e[0m\n", argv[0]);
+    return 1;
+  }
+  char * IP = argv[2];
+  int PORT = atoi(argv[4]);
+
   Game game;
   // todo: memset
   memset(&game, 0, sizeof(Game));
@@ -61,8 +68,7 @@ int main(int argc, char **argv)
     .game_start = false,
     .pos_monster = -1
   }; */
-  char *IP = "0.0.0.0";
-  int PORT = 8080;
+  
   printf("\e[0;94mServidor encendido\n");
   
   // Cosas X
@@ -185,7 +191,7 @@ int main(int argc, char **argv)
         game.players[0].class = choice; //Clase seteada
         //Ahora inicializamos la clase correspondiente para el jugador
         class_def(choice, &game.players[0]);
-        printf("\e[1;91m[DEBUG]: VIDA DEL RECIEN CREADO %d\n", game.players[0].hp);
+        //printf("\e[1;91m[DEBUG]: VIDA DEL RECIEN CREADO %d\n", game.players[0].hp);
       }
 
 
@@ -204,7 +210,7 @@ int main(int argc, char **argv)
               if ((new_socket = accept(server_socket,
                                       (struct sockaddr *)&address, (socklen_t *)&addrlen)) < 0)
               {
-                perror("accept");
+                //perror("accept");
                 exit(EXIT_FAILURE);
               }
 
@@ -259,7 +265,7 @@ int main(int argc, char **argv)
                   game.players[i].class = choice; //Clase seteada
                   //Ahora inicializamos la clase correspondiente para el jugador
                   class_def(choice, &game.players[i]);
-                  printf("\e[1;91m[DEBUG]: VIDA DEL RECIEN CREADO %d\n", game.players[i].hp);
+                  //printf("\e[1;91m[DEBUG]: VIDA DEL RECIEN CREADO %d\n", game.players[i].hp);
                   
 
                   if(i > 0){
@@ -330,7 +336,7 @@ int main(int argc, char **argv)
             game.game_start = false;
           }else if(clientes == game.jugadores_inicializados_totalmente && begin == 1)
           {
-            sprintf(auxiliar, "Iniciando partida!\n");
+            sprintf(auxiliar, "\e[1;91mIniciando partida!\e[0m\n");
             send_txt(game.players[0].socket, auxiliar);
             game.game_start = true;
             break;
@@ -364,7 +370,7 @@ int main(int argc, char **argv)
         int opcion_monstruo = request_int(game.players[i].socket, 3, 5);
         class_def(opcion_monstruo, &game.monsters[0]);
 
-        printf("Terminé todas las opciones\n");
+        //printf("Terminé todas las opciones\n");
         
         if (FD_ISSET(game.players[i].socket, &readfds))
         {
@@ -399,11 +405,11 @@ int main(int argc, char **argv)
         {
           printf("\e[0;94mJugando\n");
           game_start(&game);
-          printf("Juego Terminado, shao.\n");          
+          //printf("Juego Terminado, shao.\n");          
           return 1;
         }
         
-        printf("Terminé todas las opciones FINAL\n");
+        //printf("Terminé todas las opciones FINAL\n");
       }
     }
  
