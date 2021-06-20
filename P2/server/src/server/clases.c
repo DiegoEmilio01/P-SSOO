@@ -405,8 +405,6 @@ char* f_rm(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, 
   return sms;
 }
 
-// TODO: init de variables
-// TODO: cambiar makefile a versión horrible
 // bleeds (1: bleed ('s' 'e'))                                             
 // distraido (2: distraido, pos_focused)                                             
 // reprobaton (1: reprobado)                                             

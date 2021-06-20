@@ -43,7 +43,6 @@ int main(int argc, char **argv)
   int PORT = atoi(argv[4]);
 
   Game game;
-  // todo: memset
   memset(&game, 0, sizeof(Game));
   game.n_alive = 1;
   game.n_dead = 0;
@@ -387,14 +386,18 @@ int main(int argc, char **argv)
       
         //Si Pone que sí, y todo bien, entonces empezamos la lógica the rial
         printf("GAME START %d\n", game.game_start);
-        if(game.game_start == true)
-        {
-          printf("\e[0;94mJugando\n");
-          game_start(&game);
-          if(game.n_alive <= 0)
-            printf("Juego terminado\n");
-          //printf("Juego Terminado, shao.\n");          
-          return 1;
+        for(;;){
+          if(game.game_start == true)
+          {
+            printf("\e[0;94mJugando\n");
+            game_start(&game);
+            printf("JUGADORES ALIVE: %d\n", game.n_alive);
+            if(game.n_alive <= 0){
+              printf("Juego terminado\n");
+              //printf("Juego Terminado, shao.\n");          
+              return 0;
+            }
+          }else break;          
         }
         
         //printf("Terminé todas las opciones FINAL\n");

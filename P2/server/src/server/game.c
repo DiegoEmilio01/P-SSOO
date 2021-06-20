@@ -42,16 +42,6 @@ void send_txt_exclude(Game game, char* msg, int socket_evict){
   }
 }
 
-/*
-//TODO:
-- Darle opciones para monstruo al admin en inicio.
-- Interfaz que muestre el estado de los jugadores
-
-- opciones de ataque de admin, luego por turno opciones opara demás jugadores
-- Seleccionar ataque para monstruo
-- actualizar todos los estados
-
-*/
 
 /*El líder del grupo es el primero en jugar*/
 void game_start(Game *_game){
@@ -92,8 +82,6 @@ void game_start(Game *_game){
         //char *nuevo = objetivos_habilidad(game, i, movimiento, buffer_aux);
         //send_txt(game.players[i].socket, movimientos_jugador(game.players[i].class, nuevo));
 
-        //TODO: Colocar interacción con funciones de cada clase!
-        
         if(movimiento == 0)
         {
           kill_player(&game, i, 0);
@@ -329,8 +317,7 @@ void kill_player(Game *_game, int player_id, int mode)
   *_game = game;
 }
 
-void play_again(Game *_game)
-{
+void play_again(Game *_game){
   Game game = *_game;
   char mensaje[100];
   sprintf(mensaje, "\e[0;93mAhora que el enemigo está muerto, ¿quieres jugar otra partida?\e[0m\n");
@@ -349,8 +336,7 @@ void play_again(Game *_game)
   game.n_dead -= contador;
   
   // Ahora le preguntamos a cada jugador si quiere seguir jugando, y si sí le damos a escoger su clase
-  for (int jugador = 0; jugador < game.n_alive; jugador++)
-  {
+  for (int jugador = 0; jugador < game.n_alive; jugador++){
     if(game.players[jugador].socket != 0)
     {
       sprintf(mensaje, "\n[0] Jugar otra partida\n[1] Desconectarme\n");
@@ -390,25 +376,24 @@ void play_again(Game *_game)
   }
   game.jugadores_inicializados_totalmente -= contador_aux;
   contador_aux = 0;
-  for (int jugador = 0; jugador < game.jugadores_inicializados_totalmente; jugador++)
+  for (int jugador = 0; jugador < game.jugadores_inicializados_totalmente; jugador++){
+    if (game.players[jugador].socket == 0)
     {
-      if (game.players[jugador].socket == 0)
+      game.n_alive -= 1;
+      game.players[jugador].alive = false;
+      for (int juga2 = jugador; juga2 < game.jugadores_inicializados_totalmente; juga2++)
       {
-        game.n_alive -= 1;
-        game.players[jugador].alive = false;
-        for (int juga2 = jugador; juga2 < game.jugadores_inicializados_totalmente; juga2++)
-        {
-          if(game.players[juga2].socket > 0)
-            game.players[jugador] = game.players[juga2]; //Lo cambiamos de lugar, ahora falta reacomodar los espacios
-        }
-        
+        if(game.players[juga2].socket > 0)
+          game.players[jugador] = game.players[juga2]; //Lo cambiamos de lugar, ahora falta reacomodar los espacios
       }
+      
     }
+  }
   //Ahora preguntamos al admin por el nuevo monstruo
   if(game.n_alive > 0)
   {
     char buffer_monstruo[100];
-    sprintf(buffer_monstruo, "[3] GreatJagRuz\n[4] Ruzalos\n[5] Ruiz\n");
+    sprintf(buffer_monstruo, "Escoge un mounstro:\n[3] GreatJagRuz\n[4] Ruzalos\n[5] Ruiz\n");
     send_txt(game.players[0].socket, buffer_monstruo);
     int opcion_monstruo = request_int(game.players[0].socket, 3, 5);
     class_def(opcion_monstruo, &game.monsters[0]);
