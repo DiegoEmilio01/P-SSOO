@@ -6,18 +6,24 @@
 - Macarena Muñoz - 18637086
 - Maximiliano Narea - 17626463
 
+# Ejecución
+* Ejecutar `make` dentro de las carpetas `client` y `server`.
+* Ejecutar el servidor como se especifica en el enunciado.
+* Ejecutar el cliente como se especifica en el enunciado utilizando los mismos argumentos que con el servidor.
+* Seguir las instrucciones de la interfaz.
+
 # Supuestos y Consideraciones
-* Reprobatón-9000 afecta tanto al recibir como dar healing (en ambos casos se disminuye la cantidad a la mitad, por lo que si están ambas, se reduce al cuarto)
-* Duración de efectos se mide en rondas  ( https://github.com/IIC2333/Foro-2021-1/discussions/282 )
-* Si alguien es afectado por el otro tipo de veneno, se sobreescribe
-* El mounstro ataca un objetivo al azar.
-* El ID se usa para no enviar mas de un tipo de información en el payload, por lo que si se envía un tipo de información, y sabe quien la recibe quien es, no es necesarioenviar todo en el ID (Esto es solo para justificar el motivo de que el cliente usa solo un bit del ID, ya que todo texto de respuesta, en caso de ser necesaria, se envía en el payload)
-* Asumimos que en el caso donde el monstruo intente saltar dos veces seguidas, el turno se consume y se imprime un mensaje
-* El envenenamiento hace su efecto al final del turno, y en caso de tratar de envenar al ya envenenado, se realiza 500 de daño EXTRA.
-* Destello regenerador hacel el heal según el daño realizado al enemigo (inlcuyendo bufs, entre otras cosas)
-* El jugador al rendirse queda como expectador
-* El numero de habilidad en consola parten de 1. En código, de 0.
-* Los status decementan su contador al fin del turno.
+* Reprobatón-9000 afecta tanto al recibir como dar healing (en ambos casos se disminuye la cantidad a la mitad, por lo que si están ambas, se reduce al cuarto).
+* Duración de efectos se mide en rondas ( https://github.com/IIC2333/Foro-2021-1/discussions/282 ).
+* Si alguien que esta afectado por un tipo de veneno es afectado por el otro tipo de veneno, se sobreescribe.
+* El monstruo ataca un objetivo al azar.
+* El ID se usa para no enviar más de un tipo de información en el payload, por lo que sí se envía un tipo de información, y sabe quién la recibe quién es, no es necesario enviar todo en el ID (Esto es solo para justificar el motivo de que el cliente usa solo un bit del ID, ya que todo texto de respuesta, en caso de ser necesaria, se envía en el payload).
+* Asumimos que en el caso donde el monstruo intente saltar dos veces seguidas, el turno se consume y se imprime un mensaje.
+* El envenenamientod del ataque Espina Venenosa hace su efecto al final del turno, y en caso de tratar de envenar al ya envenenado, se realiza 500 de daño extra.
+* Destello regenerador hace el heal según el daño realizado al enemigo (inlcuyendo bufs, entre otras cosas).
+* El jugador al rendirse queda como expectador.
+* El número de habilidad en consola parte desde el 1, pero en código de 0 y se hace la traducción.
+* Los status que se utilizan en los pasivos decrementan su contador al fin del turno.
 
 # Protocolos
 ## cliente -> servidor:
@@ -126,4 +132,4 @@ Solo un byte indicando el char de respuesta al input es lo esperado. Se puede en
 </table>
 
 ### Payload
-Texto que se deberá mostrar en consola del cliente. O los bytes de la imágen
+Texto que se deberá mostrar en consola del cliente. O los bytes de la imagen.
