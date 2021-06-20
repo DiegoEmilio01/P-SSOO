@@ -11,15 +11,17 @@ char
   *x_c_hacker = "Hacker",
   *x_c_gjr = "GreatJagRuz",
   *x_c_ruzalos = "Ruzalos",
-  *x_c_ruiz = "Ruiz"
+  *x_c_ruiz = "Ruiz",
+  *x_err = "[!] ERROR"
 ;
 
 char* class_def(enum classname clases, Entity *entity){
+  entity->bruteforce = 0;
   switch (clases)
   {
     case Cazador:
       entity->pos_focused = -1;
-     entity->buffed = 0;
+      entity->buffed = 0;
       entity->bleed_counter = 0;
       entity->bleed = 'k';
       entity->jumped = false;
@@ -99,7 +101,7 @@ char* class_def(enum classname clases, Entity *entity){
       entity->max_hp = 25000;
       return x_c_ruiz;
     default:
-      return "AAAAAA ERRORRRR MALA CLASE";
+      return x_err;
   }
 }
 
@@ -116,6 +118,7 @@ char* f_estocada(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   if (enemigos[objective].bleed != 's'){
     enemigos[objective].bleed_counter = 0;
   }
+  enemigos[objective].bleed = 's';
   enemigos[objective].bleed_counter += 1;
 
   char* sms_raw = "\e[1;35m%s ha dado una estocada a %s y lo ha dejado sangrando con nivel %d.\nHa realizado %d de daño\n\e[0m";
@@ -260,7 +263,7 @@ char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* e
     sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, damage);
     yo->bruteforce = 0;
   } else {
-    char* sms_raw = "\e[1;35m%s ha utilizado Fuerza Bruta contra %s.\nNo realiza daño, al necesitar %d más usos.\e[0m";
+    char* sms_raw = "\e[1;35m%s ha utilizado Fuerza Bruta contra %s.\nNo realiza daño, al necesitar %d más usos.\n\e[0m";
     sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, 3 - yo->bruteforce);
   }
   

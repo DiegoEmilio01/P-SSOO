@@ -361,32 +361,32 @@ void play_again(Game *_game){
     }
   }
   //Ahora verificamos si el admin salió, y en caso de que eso haya sucedido, le damos el admin a otro
-  int contador_aux = 0;
-  if(game.players[0].socket == 0) //Desconectado
-  {
-    for (int jugador = 1; jugador < game.jugadores_inicializados_totalmente; jugador++)
-    {
-      if (game.players[jugador].socket > 0)
-      {
-        game.players[0] = game.players[jugador]; //Lo cambiamos de lugar, ahora falta reacomodar los espacios
-        contador_aux -= 1;
-        
-      }
-    }
-  }
-  game.jugadores_inicializados_totalmente -= contador_aux;
-  contador_aux = 0;
+  // int contador_aux = 0;
+  // for (int jugador = 1; jugador < game.jugadores_inicializados_totalmente; jugador++)
+  // {
+  //   if (game.players[jugador].socket > 0)
+  //   {
+  //     game.players[contador_aux] = game.players[jugador]; //Lo cambiamos de lugar, ahora falta reacomodar los espacios
+  //     contador_aux += 1;
+  //   }
+  // }
+
+  // game.jugadores_inicializados_totalmente = contador_aux;
+  int contador_aux;
   for (int jugador = 0; jugador < game.jugadores_inicializados_totalmente; jugador++){
     if (game.players[jugador].socket == 0)
     {
       game.n_alive -= 1;
       game.players[jugador].alive = false;
+      contador_aux = 0;
       for (int juga2 = jugador; juga2 < game.jugadores_inicializados_totalmente; juga2++)
       {
-        if(game.players[juga2].socket > 0)
-          game.players[jugador] = game.players[juga2]; //Lo cambiamos de lugar, ahora falta reacomodar los espacios
+        if(game.players[juga2].socket > 0){
+          game.players[jugador+contador_aux] = game.players[juga2]; //Lo cambiamos de lugar, ahora falta reacomodar los espacios
+          contador_aux++;
+        }
       }
-      
+      game.jugadores_inicializados_totalmente--;
     }
   }
   //Ahora preguntamos al admin por el nuevo monstruo

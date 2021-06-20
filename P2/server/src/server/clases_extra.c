@@ -110,15 +110,12 @@ int heal(Entity* healer, Entity* objetivo, int heal_base){
   int heal_final = heal_base;
   assert (objetivo->hp > 0);
   int heal_max = objetivo->max_hp - objetivo->hp;
-  if (healer->reprobado){
+  if (healer->reprobado)
     heal_final /= 2; // inflige mitad de heal
-  }
-  if (objetivo->reprobado){
+  if (objetivo->reprobado)
     heal_final /= 2; // recibe mitad heal
-  }
-  if (heal_final > heal_max){
+  if (heal_final > heal_max)
     heal_final = heal_max;
-    objetivo->hp += heal_final;
-  }
+  objetivo->hp += heal_final;
   return heal_final;
 }
