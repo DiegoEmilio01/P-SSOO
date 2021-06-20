@@ -398,9 +398,9 @@ int main(int argc, char **argv)
         if(game.game_start == true)
         {
           printf("\e[0;94mJugando\n");
-          game_start(&game, maximo_clientes);
+          game_start(&game);
           printf("Juego Terminado, shao.\n");          
-          return;
+          return 1;
         }
         
         printf("Terminé todas las opciones FINAL\n");

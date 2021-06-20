@@ -23,7 +23,7 @@ typedef struct game{
   int admin_socket;  // para mayor facilidad de acceso, se guarda aqui
 } Game;
 
-void game_start(Game *game, int maximo_clientes);
+void game_start(Game *game);
 
 void send_txt_all(Game game, char* msg);
 

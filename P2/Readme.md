@@ -15,7 +15,7 @@
 * Asumimos que en el caso donde el monstruo intente saltar dos veces seguidas, el turno se consume y se imprime un mensaje
 * El envenenamiento hace su efecto al final del turno, y en caso de tratar de envenar al ya envenenado, se realiza 500 de daño EXTRA.
 * Destello regenerador hacel el heal según el daño realizado al enemigo (inlcuyendo bufs, entre otras cosas)
-* El jugador al rendirse se desconecta
+* El jugador al rendirse queda como expectador
 
 # Protocolos
 ## cliente -> servidor:

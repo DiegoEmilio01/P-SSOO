@@ -52,7 +52,7 @@ void send_txt_exclude(Game game, char* msg, int socket_evict){
 */
 
 /*El líder del grupo es el primero en jugar*/
-void game_start(Game *_game, int maximo_clientes){
+void game_start(Game *_game){
   Game game = *_game;
   // Rondas
   for(;;)
