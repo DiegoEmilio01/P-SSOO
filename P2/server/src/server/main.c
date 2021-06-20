@@ -23,7 +23,7 @@ char *NO_TXT = "\0";
 const uint8_t TXT_ONLY = 0;
 
 char 
-  *x_admin_req_monster_succ = "\e[0;93mSe decidió que haya mounstro\e[0m\n",
+  *x_admin_req_monster_succ = "\e[0;93mEscoge un mounstro\e[0m\n",
   *x_admin_req_monster_fail = "\e[0;93mSe decidió que NO haya mounstro\e[0m\n",
   *x_admin_req_monster = "\e[0;93m¿Deseas que haya un mounstro?\n \e[0m[1]>Si\n [2]>No\n",
   *x_req_nombre = "\e[0;93mA continuación, ingresa tu nombre. Se truncará a 12 caracteres\n",

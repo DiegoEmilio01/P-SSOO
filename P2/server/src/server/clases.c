@@ -239,7 +239,7 @@ char* f_ddos(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
   int damage = attack(&aliados[posicion_yo], &enemigos[enemy_pos], 1500);
  
-  char* sms_raw = "\e[1;35m%s ha lanzado ataque DDOS a %s. \nHa realizado %d daño\n\e[0m";
+  char* sms_raw = "\e[1;35m%s ha lanzado ataque DDOS a %s. \nHa realizado %d de daño\n\e[0m";
   char* sms = malloc(sizeof(char) * 300);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, damage);
   return sms;
@@ -294,7 +294,7 @@ char* f_coletazo(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   for (int n_enemy = 0; n_enemy < len_enemigos; n_enemy++){
     Entity* enemy = &enemigos[n_enemy];
     int dano = attack(&aliados[posicion_yo], enemy, 500);
-    sprintf(str1, "\e[1;320m%s recibe %d de daño.\e[0m\n", enemy->playername, dano);
+    sprintf(str1, "\e[1;32m%s recibe %d de daño.\e[0m\n", enemy->playername, dano);
     strcat(str_atqs, str1);
   }
   char* sms_raw = "\e[1;32m%s ha utilizado coletazo.\n%s\n\e[0m";
