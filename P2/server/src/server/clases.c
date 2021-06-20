@@ -260,7 +260,7 @@ char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* e
     sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, damage);
     yo->bruteforce = 0;
   } else {
-    char* sms_raw = "\e[1;35m%s ha utilizado Fuerza Bruta contra %s.\nNo realiza daño, al necesitar %d más usos\e[0m";
+    char* sms_raw = "\e[1;35m%s ha utilizado Fuerza Bruta contra %s.\nNo realiza daño, al necesitar %d más usos.\e[0m";
     sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, 3 - yo->bruteforce);
   }
   
@@ -297,7 +297,7 @@ char* f_coletazo(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
     sprintf(str1, "\e[1;32m%s recibe %d de daño.\e[0m\n", enemy->playername, dano);
     strcat(str_atqs, str1);
   }
-  char* sms_raw = "\e[1;32m%s ha utilizado coletazo.\n%s\n\e[0m";
+  char* sms_raw = "\n\e[1;32m%s ha utilizado coletazo.\e[0m\n%s\n";
   char* sms = malloc(sizeof(char) * 500);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, str_atqs);
   free(str1);

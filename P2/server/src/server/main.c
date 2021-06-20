@@ -22,10 +22,11 @@
 char *NO_TXT = "\0";
 const uint8_t TXT_ONLY = 0;
 
+// *x_admin_req_monster_succ = "\e[0;93mEscoge un mounstro\e[0m\n",
+// *x_admin_req_monster_fail = "\e[0;93mSe decidió que NO haya mounstro\e[0m\n",
+// *x_admin_req_monster = "\e[0;93m¿Deseas que haya un mounstro?\n \e[0m[1]>Si\n [2]>No\n",
 char 
-  *x_admin_req_monster_succ = "\e[0;93mEscoge un mounstro\e[0m\n",
-  *x_admin_req_monster_fail = "\e[0;93mSe decidió que NO haya mounstro\e[0m\n",
-  *x_admin_req_monster = "\e[0;93m¿Deseas que haya un mounstro?\n \e[0m[1]>Si\n [2]>No\n",
+  *x_admin_req_monster = "\e[0;93mEscoge un mounstro\e[0m\n",
   *x_req_nombre = "\e[0;93mA continuación, ingresa tu nombre. Se truncará a 12 caracteres\n",
   *x_req_class = "\e[0;93m¿Qué clases deseas ser?\n \e[0m[0]>Cazador\n [1]>Médico\n [2]>Hacker\n",
   *x_req_class_ex = " [3]>Monstruo\n"
@@ -345,7 +346,7 @@ int main(int argc, char **argv)
     {
       for (int i = 0; i < maximo_clientes; i++)
       {
-        send_txt(game.players[i].socket, x_admin_req_monster_succ);
+        send_txt(game.players[i].socket, x_admin_req_monster);
         game.can_have_monster = true;
         game.monsters[0].alive = true;
         //Acá hay que inicializar al monstruo.
