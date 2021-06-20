@@ -118,3 +118,16 @@ void send_signal(int client_socket, int bit_to_set){
   server_send_message(client_socket, pkg_id, x_none);
   return ;
 }
+
+void request_int_part1(int client_socket){
+  uint8_t pkg_id=0;
+  bt_set(&pkg_id, 1, 1);
+  server_send_message(client_socket, pkg_id, x_input);
+}
+
+int request_int_part2(int client_socket){
+  server_receive_id(client_socket);
+  char * recv = server_receive_payload(client_socket);
+  char opcion = recv[0]-'0';
+  return opcion;
+}

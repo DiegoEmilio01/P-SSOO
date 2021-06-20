@@ -65,9 +65,9 @@ int ally_selector(Entity* yo, int len_aliados, Entity* aliados){
   }else { // en el caso donde haya más opciones
     char *str1 = malloc(100*sizeof(char));
     char *str_atqs = calloc(450, sizeof(char));
-    strcat(str_atqs, "Escoge un aliado sobre el cual aplicar el efecto:\n");
+    strcat(str_atqs, "\e[0;93mEscoge un aliado sobre el cual aplicar el efecto:\e[0m\n");
     for (int i=0; i<len_aliados; i++){
-      sprintf(str1, "[%d] %s.\n", i+1, aliados[i].playername);
+      sprintf(str1, "[%d] %s\n", i+1, aliados[i].playername);
       strcat(str_atqs, str1);
     }
     free(str1);

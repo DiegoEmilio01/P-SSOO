@@ -320,7 +320,7 @@ void kill_player(Game *_game, int player_id, int mode)
 void play_again(Game *_game){
   Game game = *_game;
   char mensaje[100];
-  sprintf(mensaje, "\e[0;93mAhora que el enemigo está muerto, ¿quieres jugar otra partida?\e[0m\n");
+  sprintf(mensaje, "\e[0;93m\nAhora que el enemigo está muerto, ¿quieres jugar otra partida?\e[0m\n");
   send_txt_all(game, mensaje);
   int contador = 0;
   //Por comodidad, vamos a pasar los jugadores muertos a los jugadores vivos
