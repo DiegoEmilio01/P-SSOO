@@ -34,7 +34,7 @@ char get_char(){
 
 int main (int argc, char *argv[]){
   //Se obtiene la ip y el puerto donde está escuchando el servidor (la ip y puerto de este cliente da igual)
-  if (argc != 5 || argv[2] != "-i" || argv[3] != "-p"){
+  if (argc != 5 || strcmp(argv[1], "-i") || strcmp(argv[3], "-p")){
     printf("\e[1;91mERROR: INPUT INVÁLIDO.\nEl correcto uso del programa es: %s -i <IP> -p [PORT]\e[0m\n", argv[0]);
     return 1;
   }
@@ -82,6 +82,8 @@ int main (int argc, char *argv[]){
     }
     else if (bt_get(&msg_code, 6)){
       char * message = client_receive_payload(server_socket);
+      printf("%s", message);
+      free(message);
       break;
     }
     // printf("------------------\n");

@@ -1,5 +1,3 @@
-
-#pragma once
 // https://stackoverflow.com/questions/47981/how-do-you-set-clear-and-toggle-a-single-bit
 #include <stdint.h>
 #include "bits.h"

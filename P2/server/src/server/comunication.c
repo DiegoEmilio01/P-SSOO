@@ -1,8 +1,6 @@
-#pragma once
 #include <string.h>
 #include "comunication.h"
 #include "bits.h"
-#include "texts.h"
 
 char 
   *x_none = "Chao\n",
@@ -27,7 +25,7 @@ char * server_receive_payload(int client_socket){
   recv(client_socket, &len, 1, 0);
   // Se obtiene el payload
   char * payload = malloc(len);
-  int received = recv(client_socket, payload, len, 0);
+  recv(client_socket, payload, len, 0);
   // Se retorna
   return payload;
 }
@@ -88,7 +86,6 @@ int request_int(int client_socket, int low_b, int high_b){
     server_send_and_wait(client_socket, pkg_id, x_input);
     server_receive_id(client_socket);
     char * recv = server_receive_payload(client_socket);
-    printf("recv[0]: %d\n", recv[0]);
     opcion = recv[0]-'0';
     free(recv);
     if (!(low_b <= opcion && opcion <= high_b)){

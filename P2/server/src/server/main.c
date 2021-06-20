@@ -6,7 +6,6 @@
 #include "comunication.h"
 #include "conection.h"
 #include "bits.h"
-#include "texts.h"
 #include "clases.h"
 #include "game.h"
 
@@ -36,7 +35,7 @@ char
 int main(int argc, char **argv)
 {
   // Se define una IP y un puerto
-  if (argc != 5 || argv[2] != "-i" || argv[3] != "-p"){
+  if (argc != 5 || strcmp(argv[1], "-i") || strcmp(argv[3], "-p")){
     printf("\e[1;91mERROR: INPUT INVÁLIDO.\nEl correcto uso del programa es: %s -i <IP> -p [PORT]\e[0m\n", argv[0]);
     return 1;
   }
@@ -46,8 +45,6 @@ int main(int argc, char **argv)
   Game game;
   // todo: memset
   memset(&game, 0, sizeof(Game));
-  //game.active_players = {false, false, false, false, false};
-  //game.dead_players = {false, false, false, false};
   game.n_alive = 1;
   game.n_dead = 0;
   game.rondas = 0;
@@ -56,18 +53,7 @@ int main(int argc, char **argv)
   game.jugadores_inicializados_totalmente = 1;
   game.game_start = false;
   game.pos_monster = -1;
-/*   Game game = {
-    .active_players = {false, false, false, false, false},
-    .dead_players = {false, false, false, false},
-    .n_alive = 1,
-    .n_dead = 0,
-    .rondas = 0,
-    .can_have_monster = false,
-    .pos_admin = 0,
-    .jugadores_inicializados_totalmente = 1,
-    .game_start = false,
-    .pos_monster = -1
-  }; */
+
   
   printf("\e[0;94mServidor encendido\n");
   
@@ -405,6 +391,8 @@ int main(int argc, char **argv)
         {
           printf("\e[0;94mJugando\n");
           game_start(&game);
+          if(game.n_alive <= 0)
+            printf("Juego terminado\n");
           //printf("Juego Terminado, shao.\n");          
           return 1;
         }

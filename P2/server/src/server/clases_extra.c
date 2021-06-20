@@ -1,5 +1,8 @@
-#include "clases.h"
+#include <assert.h>
+#include <stdlib.h>
 
+#include "clases.h"
+#include "comunication.h"
 /** Aplica funciones necesarias al final del turno, se debe llamar una vez por cada lista de entidades (una aliada y una enemigia)
  * @param entes Lista de entes, puede ser aliado o enemigo
  * @param len_estes Largo de la lista de entes
@@ -35,7 +38,6 @@ void extras_handler(Entity* entes, int len_entes){
 
 int enemy_selector(Entity* yo, int len_enemigos){
   if (!len_enemigos) printf("Va a fallar, no hay enemigos\n");
-  int socket = yo->socket;
   int enemy_pos;
   if (len_enemigos == 1)
   {
@@ -53,20 +55,29 @@ int enemy_selector(Entity* yo, int len_enemigos){
   return enemy_pos;
 }
 
-int ally_selector(Entity* yo, int len_aliados){
+int ally_selector(Entity* yo, int len_aliados, Entity* aliados){
   if (!len_aliados) printf("Va a fallar, no hay aliados\n");
-  int socket = yo->socket;
   int ally_pos;
   if (len_aliados == 1)
   {
     printf("Se selecciona al único aliado disponible\n");
-    ally_pos = 0; // Solo hay un enemigo disponible
+    ally_pos = 1; // Solo hay un enemigo disponible
   }else { // en el caso donde haya más opciones
-    ally_pos = rand() % len_aliados;
+    char *str1 = malloc(100*sizeof(char));
+    char *str_atqs = calloc(450, sizeof(char));
+    strcat(str_atqs, "Escoge un aliado sobre el cual aplicar el efecto:\n");
+    for (int i=0; i<len_aliados; i++){
+      sprintf(str1, "[%d] %s.\n", i+1, aliados[i].playername);
+      strcat(str_atqs, str1);
+    }
+    free(str1);
+    send_txt(yo->socket, str_atqs);
+    free(str_atqs);
+    ally_pos = request_int(yo->socket, 1, len_aliados);
     printf("Se eligió ayudar a %i\n", ally_pos);
   }
 
-  return ally_pos;
+  return ally_pos-1;
 }
 
 

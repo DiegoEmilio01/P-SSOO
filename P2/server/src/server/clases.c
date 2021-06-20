@@ -1,11 +1,8 @@
-#pragma once
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
 
 #include "clases.h"
 #include "comunication.h"
-#include "texts.h"
 #include "clases_extra.h"
 
 char 
@@ -21,48 +18,84 @@ char* class_def(enum classname clases, Entity *entity){
   switch (clases)
   {
     case Cazador:
+      entity->pos_focused = -1;
+     entity->buffed = 0;
+      entity->bleed_counter = 0;
+      entity->bleed = 'k';
+      entity->jumped = false;
       entity->func[0] = f_estocada;
       entity->func[1] = f_corte_cruzado;
       entity->func[2] = f_distraer;
       entity->hp = 5000;
+      entity->reprobado = 0;
       entity->max_hp = 5000;
       return x_c_cazador;
     case Medico:
+      entity->pos_focused = -1;
+     entity->buffed = 0;
+      entity->bleed_counter = 0;
+      entity->bleed = 'k';
+      entity->jumped = false;
       entity->func[0] = f_curar;
       entity->func[1] = f_destello;
       entity->func[2] = f_descarga;
       entity->hp = 3000;
+      entity->reprobado = 0;
       entity->max_hp = 3000;
       return x_c_medico;
     case Hacker:
+      entity->pos_focused = -1;
+     entity->buffed = 0;
+      entity->bleed_counter = 0;
+      entity->bleed = 'k';
+      entity->jumped = false;
       entity->func[0] = f_inyeccion;
       entity->func[1] = f_ddos;
       entity->func[2] = f_fuerzabruta;
       entity->hp = 2500;
+      entity->reprobado = 0;
       entity->max_hp = 2500;
       return x_c_hacker;
     case GreatJagRuz:
+      entity->pos_focused = -1;
       strncpy(entity->playername, "GreatJagRuz", 12);
+      entity->buffed = 0;
+      entity->bleed_counter = 0;
+      entity->bleed = 'k';
+      entity->jumped = false;
       entity->func[0] = f_ruzgar;
       entity->func[1] = f_coletazo;
       entity->func[2] = NULL;
+      entity->reprobado = 0;
       entity->hp = 10000;
       entity->max_hp = 10000;
       return x_c_gjr;
     case Ruzalos:
+      entity->pos_focused = -1;
       strncpy(entity->playername, "Ruzalos", 12);
+      entity->buffed = 0;
+      entity->bleed_counter = 0;
+      entity->bleed = 'k';
+      entity->jumped = false;
       entity->func[0] = f_salto;
       entity->func[1] = f_espina;
       entity->func[2] = NULL;
       entity->hp = 20000;
+      entity->reprobado = 0;
       entity->max_hp = 20000;
       return x_c_ruzalos;
     case Ruiz:
+      entity->pos_focused = -1;
       strncpy(entity->playername, "Ruiz", 12);
+      entity->buffed = 0;
+      entity->bleed_counter = 0;
+      entity->bleed = 'k';
+      entity->jumped = false;
       entity->func[0] = f_copia;
       entity->func[1] = f_reprobaton;
       entity->func[2] = f_rm;
       entity->hp = 25000;
+      entity->reprobado = 0;
       entity->max_hp = 25000;
       return x_c_ruiz;
     default:
@@ -71,7 +104,6 @@ char* class_def(enum classname clases, Entity *entity){
 }
 
       
-#pragma region CAZADOR
 // ------ FUNCIONES CAZADOR ------
 
 // CAZADOR n[0]
@@ -118,10 +150,9 @@ char* f_distraer(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   return sms;
 }
 
-#pragma endregion CAZADOR
 
 
-#pragma region MEDICO
+
 // ------ FUNCIONES MEDICO ------
 
 // MEDICO n[0]
@@ -129,9 +160,9 @@ char* f_distraer(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
 char* f_curar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
 
   // elige al aliado, con la func del selector
-  int objective = ally_selector(&aliados[posicion_yo], len_aliados);
+  int objective = ally_selector(&aliados[posicion_yo], len_aliados, aliados);
   
-  int helaed = heal(&aliados[posicion_yo], &aliados[objective], 2000);
+  int healed = heal(&aliados[posicion_yo], &aliados[objective], 2000);
 
   char* sms_raw = "\e[1;35m%s ha curado a %s. \nHa recuperado %d de HP\n\e[0m";
   char* sms = malloc(sizeof(char) * 300);
@@ -182,10 +213,8 @@ char* f_descarga(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   return sms;
 }
 
-#pragma endregion MEDICO
 
 
-#pragma region HACKER
 // ------ FUNCIONES HACKER ------
 
 // HACKER n[0]
@@ -193,7 +222,7 @@ char* f_descarga(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
 // Duplica el daño de un aliado, por 2 turnos
 char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
 
-  int enemy_pos = ally_selector(&aliados[posicion_yo], len_aliados);
+  int enemy_pos = ally_selector(&aliados[posicion_yo], len_aliados, aliados);
   Entity* aliado = &aliados[enemy_pos];
   aliado->buffed = 2; // S'Q'L
 
@@ -210,7 +239,7 @@ char* f_ddos(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
   int damage = attack(&aliados[posicion_yo], &enemigos[enemy_pos], 1500);
  
-  char* sms_raw = "\e[1;35m%s ha lanzado ataque DDOs a %s. \nHa realizado %d daño\n\e[0m";
+  char* sms_raw = "\e[1;35m%s ha lanzado ataque DDOS a %s. \nHa realizado %d daño\n\e[0m";
   char* sms = malloc(sizeof(char) * 300);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, damage);
   return sms;
@@ -222,25 +251,24 @@ char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* e
   
   Entity* yo = &aliados[posicion_yo];
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos); 
+  char* sms = malloc(sizeof(char) * 300);
 
-  // en la práctica, == 2 es la tercera vez en ejecutar
-  if (yo->bruteforce == 2){
+  yo->bruteforce += 1;
+  if (yo->bruteforce == 3){
     int damage = attack(yo, &enemigos[enemy_pos], 10000);
+    char* sms_raw = "\e[1;35m%s ha utilizado Fuerza Bruta contra %s.\nHa realizado %d daño\n\e[0m";
+    sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, damage);
     yo->bruteforce = 0;
   } else {
-    yo->bruteforce += 1;
+    char* sms_raw = "\e[1;35m%s ha utilizado Fuerza Bruta contra %s.\nNo realiza daño, al necesitar %d más usos\e[0m";
+    sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, 3 - yo->bruteforce);
   }
   
-  char* sms_raw = "\e[1;35m%s ha utilizado Fuerza Bruta contra %s. \nHa realizado %d daño\n\e[0m";
-  char* sms = malloc(sizeof(char) * 300);
-  sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, damage);
   return sms;
 }
 
-#pragma endregion HACKER
 
 
-#pragma region JAGRUZ
 // ------ FUNCIONES JAGRUZ ------
 
 // JAGRUZ n[0]
@@ -252,7 +280,7 @@ char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
   int damage = attack(&aliados[posicion_yo], enemy, 1000);
   
   
-  char* sms_raw = "\e[1;35m%s ha utilizado ruzgar contra %s. \nHa realizado %d daño.\n\e[0m";
+  char* sms_raw = "\e[1;32m%s ha utilizado ruzgar contra %s. \nHa realizado %d daño.\n\e[0m";
   char* sms = malloc(sizeof(char) * 300);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, damage);
   return sms;
@@ -266,10 +294,10 @@ char* f_coletazo(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   for (int n_enemy = 0; n_enemy < len_enemigos; n_enemy++){
     Entity* enemy = &enemigos[n_enemy];
     int dano = attack(&aliados[posicion_yo], enemy, 500);
-    srintf(str1, "%s recive %d de daño.\n", enemigo->playername, dano);
+    sprintf(str1, "\e[1;320m%s recibe %d de daño.\e[0m\n", enemy->playername, dano);
     strcat(str_atqs, str1);
   }
-  char* sms_raw = "\e[1;35m%s ha utilizado coletazo.\n%s\n\e[0m";
+  char* sms_raw = "\e[1;32m%s ha utilizado coletazo.\n%s\n\e[0m";
   char* sms = malloc(sizeof(char) * 500);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, str_atqs);
   free(str1);
@@ -277,32 +305,29 @@ char* f_coletazo(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   return sms;
 }
 
-#pragma endregion JAGRUZ
 
 
-#pragma region RUZALOS
 // ------ FUNCIONES RUZALOS ------
 
 // RUZALOS n[0]
 // j de jump
 char* f_salto(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   char* sms = malloc(sizeof(char) * 300);
-
-
-    sprintf(sms, sms_raw, aliados[posicion_yo].playername);
   if (aliados[posicion_yo].jumped){
     // print "no puedes usarla dos veces seguidas!"
     aliados[posicion_yo].jumped = false;
-    char* sms_raw = "\e[1;35m%s intenta de usar salto, pero falla\e[0m";
+    char* sms_raw = "\e[1;32m%s intenta de usar salto, pero falla al usarlo por segunda vez seguida.\n\e[0m";
+    sprintf(sms, sms_raw, aliados[posicion_yo].playername);
   } else {
     int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
     Entity* enemy = &enemigos[enemy_pos];
     int damage = attack(&aliados[posicion_yo], enemy, 1500);
     aliados[posicion_yo].jumped = true;
     
-    char* sms_raw = "\e[1;35m%s ha saltado sobre %s.\nHa realizado %d daño.\n\e[0m";
+    char* sms_raw = "\e[1;32m%s ha saltado sobre %s.\nHa realizado %d daño.\n\e[0m";
     sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, damage);
-    return sms;
+  }
+  return sms;
 
 }
 
@@ -316,10 +341,10 @@ char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
 
   if (enemy->bleed == 'e' && enemy->bleed_counter > 0){
     int damage = attack(&aliados[posicion_yo], enemy, 500);
-    char* sms_raw = "\e[1;35m%s ha usado espina venenosa contra %s.\nAl ya estar envenenado, recive %d de daño.\n\e[0m";
+    char* sms_raw = "\e[1;32m%s ha usado espina venenosa contra %s.\nAl ya estar envenenado, recive %d de daño.\n\e[0m";
     sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, damage);
   }else {
-    char* sms_raw = "\e[1;35m%s ha usado espina venenosa contra %s, quedando intoxicado.\n\e[0m";
+    char* sms_raw = "\e[1;32m%s ha usado espina venenosa contra %s, quedando intoxicado.\n\e[0m";
     sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername);
     enemy->bleed = 'e';
     enemy->bleed_counter = 3;
@@ -327,10 +352,8 @@ char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
   return sms;
 }
 
-#pragma endregion RUZALOS
 
 
-#pragma region RUIZ
 
 // ------ FUNCIONES RUIZ ------
 
@@ -342,7 +365,7 @@ char* f_copia(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
   ENT_FUNC fn = enemigos[enemy_pos].func[habilidad_a_elegir];
   char* tx_otra_fn = fn(aliados, len_aliados, posicion_yo, enemigos, len_enemigos, auxiliar);
 
-  char* sms_raw = "\e[1;35m%s ha copiado la habilidad numero %d de %s.\n%s\e[0m";
+  char* sms_raw = "\e[1;32m%s ha copiado la habilidad numero %d de %s.\n%s\e[0m";
   char* sms = malloc(sizeof(char) * 400);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, habilidad_a_elegir+1, enemigos[enemy_pos].playername, tx_otra_fn);
   free(tx_otra_fn);
@@ -352,9 +375,9 @@ char* f_copia(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
 // RUIZ n[1]
 char* f_reprobaton(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
-  aliados[enemy_pos].reprobado = 2;
+  enemigos[enemy_pos].reprobado = 2;
 
-  char* sms_raw = "\e[1;35m%s ha reprobado a %s.\n\e[0m";
+  char* sms_raw = "\e[1;32m%s ha reprobado a %s.\n\e[0m";
   char* sms = malloc(sizeof(char) * 300);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername);
   return sms;
@@ -362,7 +385,6 @@ char* f_reprobaton(Entity* aliados, int len_aliados, int posicion_yo, Entity* en
 }
 
 // RUIZ n[2]
-// TODO: resetear contador de rondas a 0
 // RESETEAR AFUERA
 char* f_rm(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   int damage = auxiliar*100;
@@ -371,11 +393,11 @@ char* f_rm(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, 
   for(int pos_enemigo = 0; pos_enemigo < len_enemigos; pos_enemigo++){
     Entity* enemigo = &enemigos[pos_enemigo];
     int dano = attack(&aliados[posicion_yo], enemigo, damage);
-    srintf(str1, "%s recive %d de daño.\n", enemigo->playername, dano);
+    sprintf(str1, "\e[1;32m%s recibe %d de daño.\e[0m\n", enemigo->playername, dano);
     strcat(str_atqs, str1);
   }
 
-  char* sms_raw = "\e[1;35m%s ha borrado todas las rondas.\n%s\e[0m";
+  char* sms_raw = "\e[1;32m%s ha borrado todas las rondas.\n%s\e[0m";
   char* sms = malloc(sizeof(char) * 500);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, str_atqs);
   free(str1);
@@ -383,12 +405,8 @@ char* f_rm(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, 
   return sms;
 }
 
-#pragma endregion RUIZ
-
-
-// TODO: concatenar strings para retornar
 // TODO: init de variables
-
+// TODO: cambiar makefile a versión horrible
 // bleeds (1: bleed ('s' 'e'))                                             
 // distraido (2: distraido, pos_focused)                                             
 // reprobaton (1: reprobado)                                             

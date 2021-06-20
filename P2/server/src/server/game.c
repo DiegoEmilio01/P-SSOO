@@ -1,5 +1,8 @@
 #include "game.h"
 #include "comunication.h"
+#include "clases_extra.h"
+#include "clases.h"
+
 /** Envia un mensaje a todos los jugadores instanciados
  * 
  * 
@@ -9,7 +12,6 @@ void send_txt_all(Game game, char* msg){
     send_txt(game.players[i].socket, msg);
   for(int i = 0; i < game.n_dead; i++)
     send_txt(game.dead_players[i].socket, msg);
-  printf("Mensajes enviados!\n");
 }
 
 char *objetivos_habilidad(Game game, int pos_jugador, int movimiento, char* buffer_aux);
@@ -54,9 +56,11 @@ void send_txt_exclude(Game game, char* msg, int socket_evict){
 /*El líder del grupo es el primero en jugar*/
 void game_start(Game *_game){
   Game game = *_game;
+  game.rondas = -1;
   // Rondas
   for(;;)
   {
+    game.rondas++;
     char buffer[100];
     sprintf(buffer, "\n\e[0;93mNueva Ronda, piensa cuidadosamente tu jugada...\n");
     send_txt_all(game, buffer);
@@ -75,7 +79,7 @@ void game_start(Game *_game){
       }
     
       //Acá se muestra el estado a todos los jugadores, luego el admin hace el primer movimiento
-      char buffer_interfaz[100]; 
+      // char buffer_interfaz[100]; 
       int movimiento;
       // printf("ESTOY VIVO %d\n", game.players[i].alive);
       if(game.players[i].alive && game.players[i].hp > 0)
@@ -85,6 +89,8 @@ void game_start(Game *_game){
         send_txt(game.players[i].socket, movimientos_jugador(game.players[i].class, buffer_aux));
         //Ahora le pedimos la opción al jugador
         movimiento = request_int(game.players[i].socket, 0, 3);
+        //char *nuevo = objetivos_habilidad(game, i, movimiento, buffer_aux);
+        //send_txt(game.players[i].socket, movimientos_jugador(game.players[i].class, nuevo));
 
         //TODO: Colocar interacción con funciones de cada clase!
         
@@ -93,7 +99,9 @@ void game_start(Game *_game){
           kill_player(&game, i, 0);
           i--;
         }else{
-          game.players[i].func[movimiento-1](game.players, game.n_alive, i, game.monsters, 1, 1);
+          char *accion = game.players[i].func[movimiento-1](game.players, game.n_alive, i, game.monsters, 1, 1);
+          send_txt_all(game, accion);
+          free(accion);
         }
       }
       if (!game.monsters[0].alive)
@@ -101,18 +109,20 @@ void game_start(Game *_game){
         send_txt_all(game, "\e[0;93mFelicidades, vencieron al monstruo!\e[0m\n");
         printf("Ganaron uwu.\n");
         send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA1 -\e[0m\n");
-        for(int numero_jugador = 0; numero_jugador < game.n_alive + 1; numero_jugador++){
-          send_signal(game.players[numero_jugador].socket, 6);
-          close(game.players[numero_jugador].socket);
-          game.players[numero_jugador].socket = 0;
-        }
-        for(int numero_jugador = 0; numero_jugador < game.n_dead + 1; numero_jugador++){
-          send_signal(game.players[numero_jugador].socket, 6);
-          close(game.players[numero_jugador].socket);
-          game.players[numero_jugador].socket = 0;
-        }
         *_game = game;
+        play_again(_game);
         return;
+        // for(int numero_jugador = 0; numero_jugador < game.n_alive + 1; numero_jugador++){
+        //   send_signal(game.players[numero_jugador].socket, 6);
+        //   close(game.players[numero_jugador].socket);
+        //   game.players[numero_jugador].socket = 0;
+        // }
+        // for(int numero_jugador = 0; numero_jugador < game.n_dead + 1; numero_jugador++){
+        //   send_signal(game.players[numero_jugador].socket, 6);
+        //   close(game.players[numero_jugador].socket);
+        //   game.players[numero_jugador].socket = 0;
+        // }
+        //return;
       }
 
     }
@@ -143,13 +153,17 @@ void game_start(Game *_game){
           movimiento_enemigo = 1;
       }
       // AQUÍ ATACA EL MONSTRUO!
-      game.monsters[0].func[movimiento_enemigo](game.monsters, 1, 0, game.players, game.n_alive, game.rondas);
+      char *accion = game.monsters[0].func[movimiento_enemigo](game.monsters, 1, 0, game.players, game.n_alive, game.rondas);
+      send_txt_all(game, accion);
+      free(accion);
       if (movimiento_enemigo == 2)
         game.rondas = 0;
       //Para aliados
       for (int numero_jugador = 0; numero_jugador < game.n_alive; numero_jugador++)
-        if (game.players[numero_jugador].hp <= 0)
+        if (game.players[numero_jugador].hp <= 0){
           kill_player(&game, numero_jugador, 1);
+          numero_jugador--;
+        }
       extras_handler(game.players, game.n_alive);
       extras_handler(game.monsters, 1);
       if (!game.monsters[0].alive)
@@ -157,40 +171,46 @@ void game_start(Game *_game){
         send_txt_all(game, "\e[0;93mFelicidades, vencieron al monstruo!\e[0m\n");
         printf("Ganaron uwu.\n");
         send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA2 -\e[0m\n");
-        for(int numero_jugador = 0; numero_jugador < game.n_alive + 1; numero_jugador++){
-          send_signal(game.players[numero_jugador].socket, 6);
-          close(game.players[numero_jugador].socket);
-          game.players[numero_jugador].socket = 0;
-        }
-        for(int numero_jugador = 0; numero_jugador < game.n_dead + 1; numero_jugador++){
-          send_signal(game.players[numero_jugador].socket, 6);
-          close(game.players[numero_jugador].socket);
-          game.players[numero_jugador].socket = 0;
-        }
         *_game = game;
+        play_again(_game);
         return;
+        // for(int numero_jugador = 0; numero_jugador < game.n_alive + 1; numero_jugador++){
+        //   send_signal(game.players[numero_jugador].socket, 6);
+        //   close(game.players[numero_jugador].socket);
+        //   game.players[numero_jugador].socket = 0;
+        // }
+        // for(int numero_jugador = 0; numero_jugador < game.n_dead + 1; numero_jugador++){
+        //   send_signal(game.players[numero_jugador].socket, 6);
+        //   close(game.players[numero_jugador].socket);
+        //   game.players[numero_jugador].socket = 0;
+        // }
+        //return;
       }
       for (int numero_jugador = 0; numero_jugador < game.n_alive; numero_jugador++)
-        if (game.players[numero_jugador].hp <= 0)
+        if (game.players[numero_jugador].hp <= 0){
           kill_player(&game, numero_jugador, 1);
+          numero_jugador--;
+        }
     }
     
     if(game.n_alive <= 0)
       {
         printf("\e[0;93mTodos se murieron, na que hacerle \e[0m\n");
         send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA3 -\n");
-        for(int numero_jugador = 0; numero_jugador < game.n_alive + 1; numero_jugador++){
-          send_signal(game.players[numero_jugador].socket, 6);
-          close(game.players[numero_jugador].socket);
-          game.players[numero_jugador].socket = 0;
-        }
-        for(int numero_jugador = 0; numero_jugador < game.n_dead + 1; numero_jugador++){
-          send_signal(game.players[numero_jugador].socket, 6);
-          close(game.players[numero_jugador].socket);
-          game.players[numero_jugador].socket = 0;
-        }
         *_game = game;
+        play_again(_game);
         return;
+        // for(int numero_jugador = 0; numero_jugador < game.n_alive + 1; numero_jugador++){
+        //   send_signal(game.players[numero_jugador].socket, 6);
+        //   close(game.players[numero_jugador].socket);
+        //   game.players[numero_jugador].socket = 0;
+        // }
+        // for(int numero_jugador = 0; numero_jugador < game.n_dead + 1; numero_jugador++){
+        //   send_signal(game.players[numero_jugador].socket, 6);
+        //   close(game.players[numero_jugador].socket);
+        //   game.players[numero_jugador].socket = 0;
+        // }
+        //return;
       }
     
   }
@@ -284,27 +304,27 @@ void game_entities_init(Game game, int clientes_maximos)
 void kill_player(Game *_game, int player_id, int mode)
 {
   Game game = *_game;
-  game.players[player_id].hp = 0;
-  game.players[player_id].alive = false;
-  game.dead_players[game.n_dead] = game.players[player_id];
-  game.n_dead += 1;
-  int i_aux = 0;
-  for (int j = 0; j < game.n_alive; j++)
-    if (game.players[j].alive){
-      game.players[i_aux] = game.players[j];
-      i_aux += 1;
-    }
-  game.n_alive -= 1;
-  // game.jugadores_inicializados_totalmente -= 1;
-  char buffer[80];
+  char buffer[253];
   if (mode){
-    send_txt(game.players[player_id].socket, "Has muerto, ahora solo te queda mirar sentado uwu.\n");
+    send_txt(game.players[player_id].socket, "\e[0;93mHas muerto, ahora solo te queda mirar sentado uwu.\e[0m\n");
     sprintf(buffer, "\e[0;93mEl jugador %s ha muerto!\n", game.players[player_id].playername);
   }
   else{
     send_txt(game.players[player_id].socket, "\e[0;93mTe has rendido, ahora solo te queda mirar sentado uwu.\e[0m\n");
     sprintf(buffer, "\e[0;93mEl jugador %s se ha rendido!\e[0m\n", game.players[player_id].playername);
   }
+  game.players[player_id].hp = 0;
+  game.players[player_id].alive = false;
+  game.dead_players[game.n_dead] = game.players[player_id];
+  game.n_dead += 1;
+  int i_aux = player_id;
+  for (int j = player_id; j < game.n_alive; j++)
+    if (game.players[j].alive){
+      game.players[i_aux] = game.players[j];
+      i_aux += 1;
+    }
+  game.n_alive -= 1;
+  // game.jugadores_inicializados_totalmente -= 1;
   send_txt_all(game, buffer);
   *_game = game;
 }
@@ -313,53 +333,86 @@ void play_again(Game *_game)
 {
   Game game = *_game;
   char mensaje[100];
-  sprintf(mensaje, "Ahora que el enemigo está muerto, ¿quieres jugar otra partida?\n");
-  send_text_all(game, mensaje);
+  sprintf(mensaje, "\e[0;93mAhora que el enemigo está muerto, ¿quieres jugar otra partida?\e[0m\n");
+  send_txt_all(game, mensaje);
   int contador = 0;
   //Por comodidad, vamos a pasar los jugadores muertos a los jugadores vivos
   for (int j = 0; j < game.n_dead; j++)
   {//Si el jugador estaba muerto (debería), lo pasamos a la lista de los vivos
-    if (!game.dead_players[j].alive){
-      game.players[game.n_alive] = game.dead_players[j];
-      game.players[game.n_alive].alive = true;
-      contador += 1;
-      game.n_alive += 1;
-    }
+    // if (!game.dead_players[j].alive){
+    game.players[game.n_alive] = game.dead_players[j];
+    game.players[game.n_alive].alive = true;
+    contador++;
+    game.n_alive++;
+    //}
   }
   game.n_dead -= contador;
   
   // Ahora le preguntamos a cada jugador si quiere seguir jugando, y si sí le damos a escoger su clase
-  for (int jugador = 0; jugador < game.jugadores_inicializados_totalmente; jugador++)
+  for (int jugador = 0; jugador < game.n_alive; jugador++)
   {
-    sprintf(mensaje, "[0] Jugar otra partida\n[1]Desconectarme\n");
-    int eleccion = request_int(game.players[jugador].socket, 0, 1);
-    if (eleccion == 0) 
-    { //Si juega otra partida, le preguntamos por su clase
-      send_txt(game.players[jugador].socket, "\e[0;93m¿Qué clases deseas ser?\n \e[0m[0]>Cazador\n [1]>Médico\n [2]>Hacker\n");
-      eleccion = request_int(game.players[jugador].socket, 0, 2);
-      game.players[jugador].class = eleccion; //Clase seteada
-      //Ahora inicializamos la clase correspondiente para el jugador
-      class_def(eleccion, &game.players[jugador]);
-    }else{
-      //Si no, lo desconectamos
-      send_txt(game.players[jugador].socket, "Shao %s, gracias por jugar!\n", game.players[jugador].playername);
-      send_signal(game.players[jugador].socket, 6);
-      close(game.players[jugador].socket);
-      game.players[jugador].socket = 0;
+    if(game.players[jugador].socket != 0)
+    {
+      sprintf(mensaje, "\n[0] Jugar otra partida\n[1] Desconectarme\n");
+      send_txt(game.players[jugador].socket, mensaje);
+      int eleccion = request_int(game.players[jugador].socket, 0, 1);
+      if (eleccion == 0) 
+      { //Si juega otra partida, le preguntamos por su clase
+        send_txt(game.players[jugador].socket, "\e[0;93m¿Qué clases deseas ser?\n \e[0m[0]>Cazador\n [1]>Médico\n [2]>Hacker\n");
+        eleccion = request_int(game.players[jugador].socket, 0, 2);
+        game.players[jugador].class = eleccion; //Clase seteada
+        //Ahora inicializamos la clase correspondiente para el jugador
+        class_def(eleccion, &game.players[jugador]);
+      }else{
+        //Si no, lo desconectamos
+        char buffer_xd[100];
+        sprintf(buffer_xd, "Shao %s, gracias por jugar!\n", game.players[jugador].playername);
+        send_txt(game.players[jugador].socket, buffer_xd);
+        send_signal(game.players[jugador].socket, 6);
+        close(game.players[jugador].socket);
+        game.players[jugador].socket = 0;
+      }
     }
-    
   }
   //Ahora verificamos si el admin salió, y en caso de que eso haya sucedido, le damos el admin a otro
+  int contador_aux = 0;
   if(game.players[0].socket == 0) //Desconectado
   {
     for (int jugador = 1; jugador < game.jugadores_inicializados_totalmente; jugador++)
     {
       if (game.players[jugador].socket > 0)
       {
-        game.players[0] = game.players[jugador]; //Lo cambiamos ed lugar, ahora falta reacomodar los es
+        game.players[0] = game.players[jugador]; //Lo cambiamos de lugar, ahora falta reacomodar los espacios
+        contador_aux -= 1;
+        
       }
     }
   }
-  
+  game.jugadores_inicializados_totalmente -= contador_aux;
+  contador_aux = 0;
+  for (int jugador = 0; jugador < game.jugadores_inicializados_totalmente; jugador++)
+    {
+      if (game.players[jugador].socket == 0)
+      {
+        game.n_alive -= 1;
+        game.players[jugador].alive = false;
+        for (int juga2 = jugador; juga2 < game.jugadores_inicializados_totalmente; juga2++)
+        {
+          if(game.players[juga2].socket > 0)
+            game.players[jugador] = game.players[juga2]; //Lo cambiamos de lugar, ahora falta reacomodar los espacios
+        }
+        
+      }
+    }
+  //Ahora preguntamos al admin por el nuevo monstruo
+  if(game.n_alive > 0)
+  {
+    char buffer_monstruo[100];
+    sprintf(buffer_monstruo, "[3] GreatJagRuz\n[4] Ruzalos\n[5] Ruiz\n");
+    send_txt(game.players[0].socket, buffer_monstruo);
+    int opcion_monstruo = request_int(game.players[0].socket, 3, 5);
+    class_def(opcion_monstruo, &game.monsters[0]);
+    game.monsters->alive = true;
+  }
   *_game = game;
 }

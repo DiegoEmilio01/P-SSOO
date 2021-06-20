@@ -1,4 +1,3 @@
-#pragma once
 #include "conection.h"
 
 //LINKS REFERENCIAS:
@@ -21,7 +20,7 @@ int init_sockets(char * IP, int port){
 
   // Se configura el socket a gusto (recomiendo fuertemente el REUSEPORT!)
   int opt = 1;
-  int ret = setsockopt(server_socket, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
+  setsockopt(server_socket, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt));
 
   // Se guardan el puerto e IP en la estructura antes definida
   memset(&server_addr, 0, sizeof(server_addr));
@@ -30,10 +29,10 @@ int init_sockets(char * IP, int port){
   server_addr.sin_port = htons(port);
 
   // Se le asigna al socket del servidor un puerto y una IP donde escuchar
-  int ret2 = bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
+  bind(server_socket, (struct sockaddr *)&server_addr, sizeof(server_addr));
 
   // Se coloca el socket en modo listening
-  int ret3 = listen(server_socket, 5);
+  listen(server_socket, 5);
   return server_socket;
 }
 

@@ -18,18 +18,21 @@ typedef char* (*ENT_FUNC) (struct entity*, int, int, struct entity*, int, int);
 // entities1, len_entities1, yo, entities2, len_entities2, auxiliar
 
 typedef struct entity{
+  /* FIJO */
+  char playername[13];
+  int socket;
+  int is_monster;
+
+  /* Respecto a la clase, debe resetearse */
   int hp;
   int max_hp;
-/*int self_contador;  // contador de habilidades propias, que cambian con su cantidad de usos
-  int effect_contador;  // contador de cambios de status
-  int effect_value;  // valor del efecto
-  char effect_type;  // que fue afectado (puede ser en vez un enum) */
   ENT_FUNC func[3];
   int n_funciones;
   bool has_name; //Para no preguntar más de una vez
   enum classname class;
+  bool alive; // Variable para descartar que hagan algo cuando se tenga que revisar los efectos especiales.
 
-  /* efectos especiales */
+  /* efectos especiales, debe resetearse */
   int pos_focused;
   char bleed; // sangrado por estocada 's', o espinas 'e'
   int bleed_counter;
@@ -39,11 +42,7 @@ typedef struct entity{
   int buffed; //  >0 si hay efecto activo por hacker, parte en 2 y se resta 1 cada fin de turno
   int reprobado; // >0 si hay efecto activo por reprobaton, parte en 2 y se resta 1 cada fun de turno
 
-  char playername[13];
-  int is_monster;
-  int socket;
 
-  bool alive; //Variable para descartar que hagan algo cuando se tenga que revisar los efectos especiales.
 } Entity;
 
  

@@ -37,3 +37,5 @@ char *movimientos_jugador(int class, char *buffer_aux);
 void game_entities_init(Game game, int clientes_maximos);
 
 void kill_player(Game *game, int player_id, int mode);
+
+void play_again(Game *_game);
