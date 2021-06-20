@@ -23,7 +23,7 @@ typedef struct game{
   int admin_socket;  // para mayor facilidad de acceso, se guarda aqui
 } Game;
 
-int game_start(Game game, int maximo_clientes);
+void game_start(Game *game, int maximo_clientes);
 
 void send_txt_all(Game game, char* msg);
 
@@ -35,3 +35,5 @@ char *objetivos_habilidad(Game game, int pos_jugador, int movimiento, char* buff
 char *movimientos_jugador(int class, char *buffer_aux);
 
 void game_entities_init(Game game, int clientes_maximos);
+
+void kill_player(Game *game, int player_id, int mode);

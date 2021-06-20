@@ -5,28 +5,11 @@
  * 
  */
 void send_txt_all(Game game, char* msg){
-  //int counter_guerreros = 0;
   for(int i = 0; i < game.n_alive; i++)
-  {
-      send_txt(game.players[i].socket, msg);
-  }
+    send_txt(game.players[i].socket, msg);
   for(int i = 0; i < game.n_dead; i++)
-  {
-      send_txt(game.dead_players[i].socket, msg);
-  }
+    send_txt(game.dead_players[i].socket, msg);
   printf("Mensajes enviados!\n");
-//   for (int i=0; i<4; i++){
-//     switch (game.active_players[i])
-//     {
-//     case 1:
-//       send_txt(game.players[counter_guerreros].socket, msg);
-//       counter_guerreros++;
-//       break;
-//     default:
-//       send_txt(game.monsters[0].socket, msg);
-//       break;
-//     }
-//   }
 }
 
 char *objetivos_habilidad(Game game, int pos_jugador, int movimiento, char* buffer_aux);
@@ -69,12 +52,13 @@ void send_txt_exclude(Game game, char* msg, int socket_evict){
 */
 
 /*El líder del grupo es el primero en jugar*/
-int game_start(Game game, int maximo_clientes){
+void game_start(Game *_game, int maximo_clientes){
+  Game game = *_game;
   // Rondas
   for(;;)
   {
     char buffer[100];
-    sprintf(buffer, "\e[0;93mNuevo turno, piensa cuidadosamente tu jugada...\n");
+    sprintf(buffer, "\n\e[0;93mNueva Ronda, piensa cuidadosamente tu jugada...\n");
     send_txt_all(game, buffer);
     
     // turnos
@@ -92,58 +76,21 @@ int game_start(Game game, int maximo_clientes){
     
       //Acá se muestra el estado a todos los jugadores, luego el admin hace el primer movimiento
       char buffer_interfaz[100]; 
-      //game.players[i].hp -= 1000;
-      if (game.players[i].hp <= 0)
+      int movimiento;
+      // printf("ESTOY VIVO %d\n", game.players[i].alive);
+      if(game.players[i].alive && game.players[i].hp > 0)
       {
-        game.players[i].alive = false;
-        game.dead_players[game.n_dead] = game.players[i];
-        game.n_dead += 1;
-        int i_aux = 0;
-        for (int j = 0; j < game.n_alive; j++){
-          if (game.players[j].alive){
-            game.players[i_aux] = game.players[j];
-            i_aux += 1;
-          }
-        }
-        game.n_alive -= 1;
-        game.jugadores_inicializados_totalmente -= 1;
-        // TODO : REVISAR A QUIEN LE LLEGA EL PRINT
-        send_txt(game.players[i].socket, "Has muerto, ahora solo te queda mirar sentado uwu.\n");
-        char buffer[80];
-        sprintf(buffer, "\e[0;93mEl jugador %s ha muerto!\n", game.players[i].playername);
-        send_txt_all(game, buffer);
-        i--;
-      }else{
         // Ahora le damos al jugador la opción de escoger su ataque y su objetivo
         char buffer_aux[500];
         send_txt(game.players[i].socket, movimientos_jugador(game.players[i].class, buffer_aux));
         //Ahora le pedimos la opción al jugador
-        int movimiento = request_int(game.players[i].socket, 0, 3);
-        //Ahora preguntamos por el objetivo del ataque (Se asume que se puede atacar todos?)
-        
-        // send_txt(game.players[i].socket, objetivos_habilidad(game, i, movimiento, buffer_aux));
+        movimiento = request_int(game.players[i].socket, 0, 3);
 
-        // int objetivo = request_int(game.players[i].socket, -1, 2);
         //TODO: Colocar interacción con funciones de cada clase!
+        
         if(movimiento == 0)
         {
-          game.players[i].hp = 0;
-          game.players[i].alive = false;
-          game.dead_players[game.n_dead] = game.players[i];
-          game.n_dead += 1;
-          int i_aux = 0;
-          for (int j=0; j < game.n_alive; j++){
-            if (game.players[j].alive){
-              game.players[i_aux] = game.players[j];
-              i_aux += 1;
-            }
-          }
-          game.n_alive -= 1;
-          game.jugadores_inicializados_totalmente -= 1;
-          send_txt(game.players[i].socket, "\e[0;93mTe has rendido, ahora solo te queda mirar sentado uwu.\e[0m\n");
-          char buffer[80];
-          sprintf(buffer, "\e[0;93mEl jugador %s se ha rendido!\e[0m\n", game.players[i].playername);
-          send_txt_all(game, buffer);
+          kill_player(&game, i, 0);
           i--;
         }else{
           game.players[i].func[movimiento-1](game.players, game.n_alive, i, game.monsters, 1, 1);
@@ -153,45 +100,102 @@ int game_start(Game game, int maximo_clientes){
       {
         send_txt_all(game, "\e[0;93mFelicidades, vencieron al monstruo!\e[0m\n");
         printf("Ganaron uwu.\n");
-        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA -\e[0m\n");
-        for (int numero_jugador = 0; i < game.jugadores_inicializados_totalmente; numero_jugador++)
-        {
-          //Desconectamos a los jugadores y seteamos su socket en 0
+        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA1 -\e[0m\n");
+        for(int numero_jugador = 0; numero_jugador < game.n_alive + 1; numero_jugador++){
+          send_signal(game.players[numero_jugador].socket, 6);
           close(game.players[numero_jugador].socket);
           game.players[numero_jugador].socket = 0;
         }
-      }
-      
-      if (game.players[i].hp <= 0 && game.players[i].alive)
-      {
-        game.n_alive -= 1;
-        game.players[i].alive = false;
-      }
-      
-      if(game.n_alive <= 0)
-      {
-        printf("\e[0;93mTodos se murieron, na que hacerle \e[0m\n");
-        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA -\n");
-        for (int numero_jugador = 0; i < game.jugadores_inicializados_totalmente; numero_jugador++)
-        {
-          //Desconectamos a los jugadores y seteamos su socket en 0
+        for(int numero_jugador = 0; numero_jugador < game.n_dead + 1; numero_jugador++){
+          send_signal(game.players[numero_jugador].socket, 6);
           close(game.players[numero_jugador].socket);
           game.players[numero_jugador].socket = 0;
         }
-        
+        *_game = game;
+        return;
       }
-      
 
     }
-    //Revisamos si ya no quedan jugadores y si es así, se termina el juego
-    // for (int j = 0; j < game.jugadores_inicializados_totalmente; j++)
-    // {
-    //   game.players
-    // }
     //MOVIMIENTO DEL MONSTRUO
-    int movimiento_enemigo = rand() % 2;
-    game.monsters[0].func[movimiento_enemigo](game.monsters, 1, 0, game.players, game.jugadores_inicializados_totalmente, 1);
+    if (game.n_alive > 0)
+    {
+      //Ruiz tiene 3 movimientos.
+      int movimiento_enemigo = rand() % 100;
+      if(game.monsters[0].class == Ruiz)
+      {
+        if (movimiento_enemigo < 40)
+          movimiento_enemigo = 0;
+        else if (movimiento_enemigo < 60)
+          movimiento_enemigo = 1;
+        else 
+          movimiento_enemigo = 2;
+      }
+      if (game.monsters[0].class == Ruzalos) {
+        if (movimiento_enemigo < 40)
+          movimiento_enemigo = 0;
+        else
+          movimiento_enemigo = 1;
+      }
+      else { //GreatJagRuz
+        if (movimiento_enemigo < 50)
+          movimiento_enemigo = 0;
+        else
+          movimiento_enemigo = 1;
+      }
+      // AQUÍ ATACA EL MONSTRUO!
+      game.monsters[0].func[movimiento_enemigo](game.monsters, 1, 0, game.players, game.n_alive, game.rondas);
+      if (movimiento_enemigo == 2)
+        game.rondas = 0;
+      //Para aliados
+      for (int numero_jugador = 0; numero_jugador < game.n_alive; numero_jugador++)
+        if (game.players[numero_jugador].hp <= 0)
+          kill_player(&game, numero_jugador, 1);
+      extras_handler(game.players, game.n_alive);
+      extras_handler(game.monsters, 1);
+      if (!game.monsters[0].alive)
+      {
+        send_txt_all(game, "\e[0;93mFelicidades, vencieron al monstruo!\e[0m\n");
+        printf("Ganaron uwu.\n");
+        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA2 -\e[0m\n");
+        for(int numero_jugador = 0; numero_jugador < game.n_alive + 1; numero_jugador++){
+          send_signal(game.players[numero_jugador].socket, 6);
+          close(game.players[numero_jugador].socket);
+          game.players[numero_jugador].socket = 0;
+        }
+        for(int numero_jugador = 0; numero_jugador < game.n_dead + 1; numero_jugador++){
+          send_signal(game.players[numero_jugador].socket, 6);
+          close(game.players[numero_jugador].socket);
+          game.players[numero_jugador].socket = 0;
+        }
+        *_game = game;
+        return;
+      }
+      for (int numero_jugador = 0; numero_jugador < game.n_alive; numero_jugador++)
+        if (game.players[numero_jugador].hp <= 0)
+          kill_player(&game, numero_jugador, 1);
+    }
+    
+    if(game.n_alive <= 0)
+      {
+        printf("\e[0;93mTodos se murieron, na que hacerle \e[0m\n");
+        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA3 -\n");
+        for(int numero_jugador = 0; numero_jugador < game.n_alive + 1; numero_jugador++){
+          send_signal(game.players[numero_jugador].socket, 6);
+          close(game.players[numero_jugador].socket);
+          game.players[numero_jugador].socket = 0;
+        }
+        for(int numero_jugador = 0; numero_jugador < game.n_dead + 1; numero_jugador++){
+          send_signal(game.players[numero_jugador].socket, 6);
+          close(game.players[numero_jugador].socket);
+          game.players[numero_jugador].socket = 0;
+        }
+        *_game = game;
+        return;
+      }
+    
   }
+  *_game = game;
+  return;
 }
 
 /*Devuleve el buffer para envíar las habilidades para su impresión en el cliente*/
@@ -277,21 +281,30 @@ void game_entities_init(Game game, int clientes_maximos)
   }
 }
 
-//Esta función ya no va. Puede servir para printearle al jugador?
-void ejecutar_movimiento(Entity *jugador, int eleccion, Game game, int pos_jugador)
+void kill_player(Game *_game, int player_id, int mode)
 {
-  switch (eleccion)
-  {
-  case 0:
-    jugador->func[0](game.players, game.jugadores_inicializados_totalmente, pos_jugador, game.monsters, 1, 1);
-    break;
-  case 1:
-    jugador->func[1](game.players, game.jugadores_inicializados_totalmente, pos_jugador, game.monsters, 1, 1);
-    break;
-  case 2:
-    jugador->func[1](game.players, game.jugadores_inicializados_totalmente, pos_jugador, game.monsters, 1, 1);
-    break;
-  default:
-    break;
+  Game game = *_game;
+  game.players[player_id].hp = 0;
+  game.players[player_id].alive = false;
+  game.dead_players[game.n_dead] = game.players[player_id];
+  game.n_dead += 1;
+  int i_aux = 0;
+  for (int j = 0; j < game.n_alive; j++)
+    if (game.players[j].alive){
+      game.players[i_aux] = game.players[j];
+      i_aux += 1;
+    }
+  game.n_alive -= 1;
+  // game.jugadores_inicializados_totalmente -= 1;
+  char buffer[80];
+  if (mode){
+    send_txt(game.players[player_id].socket, "Has muerto, ahora solo te queda mirar sentado uwu.\n");
+    sprintf(buffer, "\e[0;93mEl jugador %s ha muerto!\n", game.players[player_id].playername);
   }
+  else{
+    send_txt(game.players[player_id].socket, "\e[0;93mTe has rendido, ahora solo te queda mirar sentado uwu.\e[0m\n");
+    sprintf(buffer, "\e[0;93mEl jugador %s se ha rendido!\e[0m\n", game.players[player_id].playername);
+  }
+  send_txt_all(game, buffer);
+  *_game = game;
 }

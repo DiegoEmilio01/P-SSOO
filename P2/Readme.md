@@ -6,7 +6,7 @@
 - Macarena Muñoz - 18637086
 - Maximiliano Narea - 17626463
 
-# Supuestos
+# Supuestos y Consideraciones
 * Reprobatón-9000 afecta tanto al recibir como dar healing (en ambos casos se disminuye la cantidad a la mitad, por lo que si están ambas, se reduce al cuarto)
 * Duración de efectos se mide en rondas  ( https://github.com/IIC2333/Foro-2021-1/discussions/282 )
 * Si alguien es afectado por el otro tipo de veneno, se sobreescribe
@@ -15,6 +15,7 @@
 * Asumimos que en el caso donde el monstruo intente saltar dos veces seguidas, el turno se consume y se imprime un mensaje
 * El envenenamiento hace su efecto al final del turno, y en caso de tratar de envenar al ya envenenado, se realiza 500 de daño EXTRA.
 * Destello regenerador hacel el heal según el daño realizado al enemigo (inlcuyendo bufs, entre otras cosas)
+* El jugador al rendirse se desconecta
 
 # Protocolos
 ## cliente -> servidor:

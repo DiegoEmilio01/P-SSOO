@@ -70,9 +70,9 @@ int main(int argc, char **argv)
   fd_set readfds;
   int max_sd;
   int maximo_clientes = 4;
-  int activity, valread, addrlen , new_socket;
+  int activity, valread, addrlen=0 , new_socket;
   char buffer[1025];
-  struct sockaddr_in address;
+  struct sockaddr_in address = {0};
   game_entities_init(game, maximo_clientes);
   /*
   fd_set readfds;
@@ -89,7 +89,6 @@ int main(int argc, char **argv)
   // Se crea el servidor y se obtienen los sockets de ambos clientes.
   // Se inicializa una estructura propia para guardar los n°s de sockets de los clientes.
   // guarda la información del jugador mientras se construye el jugador
-  //Entity BuildPlayer;
   int clientes = 0;
   int server_socket = init_sockets(IP, PORT);
   printf("\e[0;94mServidor escuchando\n");
@@ -106,8 +105,6 @@ int main(int argc, char **argv)
     //add master socket to set
     FD_SET(server_socket, &readfds);
     max_sd = server_socket;
-    //Acá creo que tengo que mover esto a 3/4
-    //get_client(server_socket, &BuildPlayer.socket);
 
     for (int i = 0; i < maximo_clientes; i++)
     {
@@ -147,7 +144,6 @@ int main(int argc, char **argv)
       char welcome[100];
       sprintf(welcome, "\e[0;93mBienvenido Cliente %d!!\n", clientes);
       clientes += 1;
-      //char hola[] = "Bienvenido Cliente 0!!\n";
       send_txt(new_socket, welcome);
       // if (send(new_socket, welcome, strlen(welcome), 0) != strlen(welcome))
       // {
@@ -161,6 +157,7 @@ int main(int argc, char **argv)
       printf("\e[0;94mAdding to list of sockets as 0\n"); //Le da al admin el primer socket
       game.players[0].has_name = false;
       game.players[0].class = -1;
+      game.players[0].alive = true;
       
       // Acá se inicializan atributos del admin, preguntar NOMBRE - CLASE y nada más. Hasta acá hay un if sin cerrar.
       if(game.players[0].has_name == false)
@@ -219,7 +216,6 @@ int main(int argc, char **argv)
               char welcome[1024];
               sprintf(welcome, "\e[0;93mBienvenido Cliente %d!!\n", clientes);
               clientes += 1;
-              // printf("cliente conectado\n");
               send_txt(new_socket, welcome);
               // if (send(new_socket, welcome, strlen(welcome), 0) != strlen(welcome))
               // {
@@ -273,7 +269,7 @@ int main(int argc, char **argv)
                     sprintf(auxiliar, "\e[1;35mEl jugador %s ha escogido la clase <%s>\n", game.players[i].playername, class_def(choice, &game.players[i]));
                     send_txt(game.players[0].socket, auxiliar);
                   }
-                  
+                  game.players[i].alive = true;
                   game.jugadores_inicializados_totalmente += 1;
                   game.n_alive += 1;
                   break;
@@ -311,12 +307,9 @@ int main(int argc, char **argv)
                   send(game.players[i].socket, buffer, strlen(buffer), 0);
                 }
               }
-            
-            
-            break;
+              break;
+            }
           }
-          }
-
           
           char auxiliar[300];
           sprintf(auxiliar, "\e[0;93m¿Iniciar partida?\n\e[0m[0] Esperar\n[1] Iniciar\n");
@@ -359,8 +352,6 @@ int main(int argc, char **argv)
     // Acá se mete la lógica? Sí
     for(;;)
     {
-
-    
       for (int i = 0; i < maximo_clientes; i++)
       {
         send_txt(game.players[i].socket, x_admin_req_monster_succ);
@@ -406,21 +397,17 @@ int main(int argc, char **argv)
         printf("GAME START %d\n", game.game_start);
         if(game.game_start == true)
         {
-          if (!game_start(game, maximo_clientes))
-          {
-            printf("Juego Terminado, shao.\n");
-          }
-          
-          
           printf("\e[0;94mJugando\n");
+          game_start(&game, maximo_clientes);
+          printf("Juego Terminado, shao.\n");          
+          return;
         }
+        
         printf("Terminé todas las opciones FINAL\n");
       }
     }
-
-   
+ 
   }
-  
   
   return 0;
 }

@@ -75,12 +75,16 @@ int main (int argc, char *argv[]){
       // free(message);
       client_receive_txt_only(server_socket, msg_code);
     }
+    else if (bt_get(&msg_code, 6)){
+      char * message = client_receive_payload(server_socket);
+      break;
+    }
     // printf("------------------\n");
   }
 
   // Se cierra el socket
   close(server_socket);
-  free(IP);
+  // free(IP);
 
   return 0;
 }

@@ -27,7 +27,7 @@ typedef struct entity{
   ENT_FUNC func[3];
   int n_funciones;
   bool has_name; //Para no preguntar más de una vez
-  int class;
+  enum classname class;
 
   /* efectos especiales */
   int pos_focused;
@@ -85,9 +85,9 @@ char* f_rm(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, 
 /* ----- EXTRAS ----- */
 
 void extras_handler(Entity* entes, int len_entes);
-int enemy_selector(Entity* yo, int len_enemigos);
+// int enemy_selector(Entity* yo, int len_enemigos, bool is_attack);
 
 
 char* class_def(enum classname clases, Entity *entity);
-int heal(Entity* healer, Entity* objetivo, int heal_base);
-int attack(Entity* atacante, Entity* objetivo, int dano_base);
+// int heal(Entity* healer, Entity* objetivo, int heal_base);
+// int attack(Entity* atacante, Entity* objetivo, int dano_base);

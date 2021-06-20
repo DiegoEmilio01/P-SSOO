@@ -5,6 +5,7 @@
 #include "texts.h"
 
 char 
+  *x_none = "Chao\n",
   *x_input = "$> ",
   *x_req_char_err = "\e[1;91mOpcion incorrecta, \e[0mrecuerda que debe ser entre %i y %i, inclusive\n"
 ;
@@ -108,4 +109,15 @@ char* request_txt(int client_socket){
   server_receive_id(client_socket);
   char * recv = server_receive_payload(client_socket);
   return recv;
+}
+
+/** Envia aviso al cliente
+ * @param bit_to_set 6 si se desea desconectar al cliente
+ *
+ */  
+void send_signal(int client_socket, int bit_to_set){
+  uint8_t pkg_id=0;
+  bt_set(&pkg_id, bit_to_set, 1);
+  server_send_message(client_socket, pkg_id, x_none);
+  return ;
 }

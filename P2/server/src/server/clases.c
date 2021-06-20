@@ -15,6 +15,7 @@ char
   *x_c_ruiz = "Ruiz"
 ;
 
+int enemy_selector(Entity* yo, int len_enemigos, bool is_attack);
 
 char* class_def(enum classname clases, Entity *entity){
   switch (clases)
@@ -77,7 +78,7 @@ char* class_def(enum classname clases, Entity *entity){
 // Sangrado se stackea, hasta 3 veces
 // Daña 1000 a enemigo, y deja sangrado de 500 infinito
 char* f_estocada(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  int objective = enemy_selector(&aliados[posicion_yo], len_enemigos); 
+  int objective = enemy_selector(&aliados[posicion_yo], len_enemigos, true); 
   attack(&aliados[posicion_yo], &enemigos[objective], 1000);
   
   if (enemigos[objective].bleed != 's'){
@@ -91,7 +92,7 @@ char* f_estocada(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
 // CAZADOR n[1]
 // Daña 3000 a enemigo
 char* f_corte_cruzado(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  int objective = enemy_selector(&aliados[posicion_yo], len_enemigos);
+  int objective = enemy_selector(&aliados[posicion_yo], len_enemigos, true);
   
   attack(&aliados[posicion_yo], &enemigos[objective], 3000);
 
@@ -101,7 +102,7 @@ char* f_corte_cruzado(Entity* aliados, int len_aliados, int posicion_yo, Entity*
 // CAZADOR n[2]
 // Distrae al monstruo, haciendo que este ataque al último cazador en distraerlo
 char* f_distraer(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  int objective = enemy_selector(&aliados[posicion_yo], len_enemigos);
+  int objective = enemy_selector(&aliados[posicion_yo], len_enemigos, true);
   enemigos[objective].distracted = true;  // distraer
   enemigos[objective].pos_focused = posicion_yo;
 
@@ -119,7 +120,7 @@ char* f_distraer(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
 char* f_curar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
 
   // elige al aliado, con la func del selector
-  int objective = enemy_selector(&aliados[posicion_yo], len_aliados);
+  int objective = enemy_selector(&aliados[posicion_yo], len_aliados, false);
   
   heal(&aliados[posicion_yo], &aliados[objective], 2000);
 
@@ -135,7 +136,7 @@ char* f_destello(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   damage += 750;
 
   int pos_to_heal = rand() % len_aliados;
-  int pos_to_dmg = enemy_selector(&aliados[posicion_yo], len_enemigos);
+  int pos_to_dmg = enemy_selector(&aliados[posicion_yo], len_enemigos, true);
 
   // ! dañamos al enemigo
   damage = attack(&aliados[posicion_yo], &enemigos[pos_to_dmg], damage);
@@ -155,7 +156,7 @@ char* f_descarga(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   Entity* aliado = &aliados[posicion_yo];
   int damage = (aliado->max_hp - aliado->hp) * 2;
   //int enemy_pos = rand() % len_enemigos;
-  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos); 
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos, true); 
   attack(&aliados[posicion_yo], &enemigos[enemy_pos], damage);
 
   return NULL;
@@ -172,7 +173,7 @@ char* f_descarga(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
 // Duplica el daño de un aliado, por 2 turnos
 char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
 
-  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_aliados);
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_aliados, false);
   Entity* aliado = &aliados[enemy_pos];
   aliado->buffed = 2; // S'Q'L
 
@@ -182,7 +183,7 @@ char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* ene
 // HACKER n[1]
 // Daña 1500 a enemigo aleatorio
 char* f_ddos(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos, true);
   attack(&aliados[posicion_yo], &enemigos[enemy_pos], 1500);
  
   return NULL; 
@@ -193,7 +194,7 @@ char* f_ddos(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos
 char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
   
   Entity* yo = &aliados[posicion_yo];
-  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos); 
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos, true); 
 
   // en la práctica, == 2 es la tercera vez en ejecutar
   if (yo->bruteforce == 2){
@@ -216,7 +217,7 @@ char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* e
 // 
 char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
 
-  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos, true);
   Entity* enemy = &enemigos[enemy_pos];
   attack(&aliados[posicion_yo], enemy, 1000);
   
@@ -247,7 +248,7 @@ char* f_salto(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
     // print "no puedes usarla dos veces seguidas!"
     aliados[posicion_yo].jumped = false;
   } else {
-    int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
+    int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos, true);
     Entity* enemy = &enemigos[enemy_pos];
     attack(&aliados[posicion_yo], enemy, 1500);
     aliados[posicion_yo].jumped = true;
@@ -258,7 +259,7 @@ char* f_salto(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
 
 // RUZALOS n[1]
 char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos, true);
   Entity* enemy = &enemigos[enemy_pos];
 
   aliados[posicion_yo].jumped = false;
@@ -284,7 +285,7 @@ char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
 // RUIZ n[0]
 // Copia una habilidad de un enemigo a elección, para usarla en contra
 char* f_copia(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos, true);
   int habilidad_a_elegir = rand() % 3;
   ENT_FUNC fn = enemigos[enemy_pos].func[habilidad_a_elegir];
   char* el_pepe = fn(aliados, len_aliados, posicion_yo, enemigos, len_enemigos, auxiliar);
@@ -294,7 +295,7 @@ char* f_copia(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
 
 // RUIZ n[1]
 char* f_reprobaton(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, int len_enemigos, int auxiliar){
-  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
+  int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos, true);
   aliados[enemy_pos].reprobado = 2;
 
   return NULL;
@@ -328,11 +329,19 @@ void extras_handler(Entity* entes, int len_entes){
     if (ente->bleed == 's'){
       
       ente->hp -= (ente->bleed_counter) * 500;
+      if (ente->hp <= 0){
+        ente->alive = false;
+        ente->hp = 0;
+      }
     }
     // bleed por espina
     if(ente->bleed == 'e' && ente->bleed_counter > 0){
       ente->hp -= 400;
       ente->bleed_counter--;
+      if (ente->hp <= 0){
+        ente->alive = false;
+        ente->hp = 0;
+      }
     }
     // disminuir la duplicación de daño por sql
     if (ente->buffed) ente->buffed--;
@@ -341,8 +350,7 @@ void extras_handler(Entity* entes, int len_entes){
   }
 }
 
-int enemy_selector(Entity* yo, int len_enemigos){
-
+int enemy_selector(Entity* yo, int len_enemigos, bool is_attack){
   if (!len_enemigos) printf("Va a fallar\n");
   // TODO: distraer
   int socket = yo->socket;
@@ -355,7 +363,11 @@ int enemy_selector(Entity* yo, int len_enemigos){
     /* en el caso que se haga el bonus donde el monstruo es un cliente: (necesitaría un if)
     enemy_pos = request_int(socket, 0, len_enemigos); 
     */
-    enemy_pos = rand() % len_enemigos; 
+    if (is_attack && yo->distracted){
+      enemy_pos = yo->pos_focused;
+      yo->distracted = false;
+    }else
+      enemy_pos = rand() % len_enemigos;
     printf("Se eligió atacar a %i\n", enemy_pos);
   }
 
@@ -378,6 +390,8 @@ int attack(Entity* atacante, Entity* objetivo, int dano_base){
   if (objetivo->hp < dano_final)
     dano_final = objetivo->hp;
   objetivo->hp -= dano_final;
+  if(objetivo->hp <= 0)
+    objetivo->alive = false;
   return dano_final;
 }
 

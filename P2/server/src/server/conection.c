@@ -39,7 +39,7 @@ int init_sockets(char * IP, int port){
 
 void get_client(int server_socket, int *socket_client){
   // Se definen las estructuras para almacenar info sobre los sockets de los clientes
-  struct sockaddr_in client1_addr;
+  struct sockaddr_in client1_addr = {0};
   socklen_t addr_size = sizeof(client1_addr);
 
   // Se acepta el cliente que llega
