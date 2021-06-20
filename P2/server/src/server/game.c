@@ -96,7 +96,7 @@ void game_start(Game *_game){
       {
         send_txt_all(game, "\e[0;93mFelicidades, vencieron al monstruo!\e[0m\n");
         printf("Ganaron uwu.\n");
-        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA1 -\e[0m\n");
+        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA -\e[0m\n");
         *_game = game;
         play_again(_game);
         return;
@@ -158,7 +158,7 @@ void game_start(Game *_game){
       {
         send_txt_all(game, "\e[0;93mFelicidades, vencieron al monstruo!\e[0m\n");
         printf("Ganaron uwu.\n");
-        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA2 -\e[0m\n");
+        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA -\e[0m\n");
         *_game = game;
         play_again(_game);
         return;
@@ -184,7 +184,7 @@ void game_start(Game *_game){
     if(game.n_alive <= 0)
       {
         printf("\e[0;93mTodos se murieron, na que hacerle \e[0m\n");
-        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA3 -\n");
+        send_txt_all(game, "\e[1;91m - FIN DE LA PARTIDA -\n");
         *_game = game;
         play_again(_game);
         return;
