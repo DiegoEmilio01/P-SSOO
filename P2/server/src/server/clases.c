@@ -86,7 +86,7 @@ char* f_estocada(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   }
   enemigos[objective].bleed_counter += 1;
 
-  return NULL;
+  return "\e[1;35mHas dado una estocada al monstruo y lo has dejado sangrando, buen movimiento\e[0m";
 }
 
 // CAZADOR n[1]
@@ -96,7 +96,7 @@ char* f_corte_cruzado(Entity* aliados, int len_aliados, int posicion_yo, Entity*
   
   attack(&aliados[posicion_yo], &enemigos[objective], 3000);
 
-  return NULL;
+  return "\e[1;35mRealizaste un corte al monstruo, honorable cazador\e[0m";
 }
 
 // CAZADOR n[2]
@@ -106,7 +106,7 @@ char* f_distraer(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   enemigos[objective].distracted = true;  // distraer
   enemigos[objective].pos_focused = posicion_yo;
 
-  return NULL;
+  return "\e[1;35mAcabas de distraer al monstruo\e[0m";
 }
 
 #pragma endregion CAZADOR
@@ -124,7 +124,7 @@ char* f_curar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
   
   heal(&aliados[posicion_yo], &aliados[objective], 2000);
 
-  return NULL;
+  return "\e[1;35mHas curado a uno de tus compañeros\e[0m";
 }
 
 // MEDICO n[1]
@@ -146,7 +146,7 @@ char* f_destello(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   // ! curamos al aliado
   healing = heal(&aliados[posicion_yo], &aliados[pos_to_heal], healing);
 
-  return NULL;
+  return "\e[1;35mAcabas de lanzar un poderoso destello regenerador\e[0m";
 }
 
 // MEDICO n[2]
@@ -159,7 +159,7 @@ char* f_descarga(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos, true); 
   attack(&aliados[posicion_yo], &enemigos[enemy_pos], damage);
 
-  return NULL;
+  return "\e[1;35mLiberaste todo tu dolor en una descarga vital contra el monstruo\e[0m";
 }
 
 #pragma endregion MEDICO
@@ -177,7 +177,7 @@ char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* ene
   Entity* aliado = &aliados[enemy_pos];
   aliado->buffed = 2; // S'Q'L
 
-  return NULL;
+  return "\e[1;35mDuplicaste el daño de un aliado con una Inyección SQL\e[0m";
 }
 
 // HACKER n[1]
@@ -186,7 +186,7 @@ char* f_ddos(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos, true);
   attack(&aliados[posicion_yo], &enemigos[enemy_pos], 1500);
  
-  return NULL; 
+  return "\e[1;35mLanzaste un veloz ataque DDOS, hiciste 1500 de daño al mosntruo\e[0m"; 
 }
 
 // HACKER n[2]
@@ -204,7 +204,7 @@ char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* e
     yo->bruteforce += 1;
   }
   
-  return NULL;
+  return "\e[1;35mAcabas de utilizar Fuerza Bruta ¿conoces su complejidad?\e[0m";
 }
 
 #pragma endregion HACKER
@@ -221,7 +221,7 @@ char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
   Entity* enemy = &enemigos[enemy_pos];
   attack(&aliados[posicion_yo], enemy, 1000);
   
-  return NULL;
+  return "\e[1;35mGreat JagRuz acaba de utilizar sus gaRaz\e[0m";
 }
 
 // JAGRUZ n[1]
@@ -231,7 +231,7 @@ char* f_coletazo(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
     Entity* enemy = &enemigos[n_enemy];
     attack(&aliados[posicion_yo], enemy, 500);
   }
-  return NULL;
+  return "\e[1;35mAcabas de ser golpeado por la cola de JagRuz\e[0m";
 }
 
 #pragma endregion JAGRUZ
@@ -254,7 +254,7 @@ char* f_salto(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
     aliados[posicion_yo].jumped = true;
   }
 
-  return NULL;
+  return "\e[1;35mRuzalos ha saltado sobre un alido y ha caído brutalmente sobre elle\e[0m";
 }
 
 // RUZALOS n[1]
@@ -271,7 +271,7 @@ char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
     enemy->bleed_counter = 3;
   }
 
-  return NULL;
+  return "\e[1;35mRuzalos usa la espina de su cola para intoxicar ¡Mucho cuidado!\e[0m";
 
 }
 
@@ -290,7 +290,7 @@ char* f_copia(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
   ENT_FUNC fn = enemigos[enemy_pos].func[habilidad_a_elegir];
   char* el_pepe = fn(aliados, len_aliados, posicion_yo, enemigos, len_enemigos, auxiliar);
 
-  return NULL;
+  return "\e[1;35mRuiz acaba de romper el código de honor, este mosntruo no tiene principios\e[0m";
 }
 
 // RUIZ n[1]
@@ -298,7 +298,7 @@ char* f_reprobaton(Entity* aliados, int len_aliados, int posicion_yo, Entity* en
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos, true);
   aliados[enemy_pos].reprobado = 2;
 
-  return NULL;
+  return "\e[1;35mRuiz acaba de reprobar a alguien ¿a ti?\e[0m";
 
 }
 
@@ -312,7 +312,7 @@ char* f_rm(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, 
     attack(&aliados[posicion_yo], enemigo, damage);
   }
 
-  return NULL;
+  return "\e[1;35mSe han borrado todas las rondas anteriores, este Ruiz y sus trucos\e[0m";
 }
 
 #pragma endregion RUIZ
