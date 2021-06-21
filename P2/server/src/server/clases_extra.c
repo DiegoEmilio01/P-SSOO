@@ -3,18 +3,20 @@
 
 #include "clases.h"
 #include "comunication.h"
+#include "clases_extra.h"
 /** Aplica funciones necesarias al final del turno, se debe llamar una vez por cada lista de entidades (una aliada y una enemigia)
  * @param entes Lista de entes, puede ser aliado o enemigo
  * @param len_estes Largo de la lista de entes
 */
-void extras_handler(Entity* entes, int len_entes){
-
+void extras_handler(Entity* entes, int len_entes, Game game){
+  char buffer[200];
   for (int n_ente = 0; n_ente < len_entes; n_ente++){
     Entity* ente = &entes[n_ente];
     // bleed por estocada
     if (ente->bleed == 's'){
-      
       ente->hp -= (ente->bleed_counter) * 500;
+      sprintf(buffer, "\e[0;36m\n%s ha sangrado %d por Estocada.\e[0m\n", ente->playername, (ente->bleed_counter) * 500);
+      send_txt_all(game, buffer);
       if (ente->hp <= 0){
         ente->alive = false;
         ente->hp = 0;
@@ -24,6 +26,8 @@ void extras_handler(Entity* entes, int len_entes){
     if(ente->bleed == 'e' && ente->bleed_counter > 0){
       ente->hp -= 400;
       ente->bleed_counter--;
+      sprintf(buffer, "\e[0;36m\n%s ha sangrado 400 por Espina Venenosa.\e[0m\n", ente->playername);
+      send_txt_all(game, buffer);
       if (ente->hp <= 0){
         ente->alive = false;
         ente->hp = 0;
@@ -41,7 +45,7 @@ int enemy_selector(Entity* yo, int len_enemigos){
   int enemy_pos;
   if (len_enemigos == 1)
   {
-    printf("Se ataca al único enemigo disponible\n");
+    //printf("Se ataca al único enemigo disponible\n");
     enemy_pos = 0; // Solo hay un enemigo disponible
   }else if (yo->distracted){ // en el caso donde haya más opciones
     enemy_pos = yo->pos_focused;
@@ -60,7 +64,7 @@ int ally_selector(Entity* yo, int len_aliados, Entity* aliados){
   int ally_pos;
   if (len_aliados == 1)
   {
-    printf("Se selecciona al único aliado disponible\n");
+    // printf("Se selecciona al único aliado disponible\n");
     ally_pos = 1; // Solo hay un enemigo disponible
   }else { // en el caso donde haya más opciones
     char *str1 = malloc(100*sizeof(char));

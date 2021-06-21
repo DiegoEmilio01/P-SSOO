@@ -121,7 +121,7 @@ char* f_estocada(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   enemigos[objective].bleed = 's';
   enemigos[objective].bleed_counter += 1;
 
-  char* sms_raw = "\e[1;35m%s ha dado una estocada a %s y lo ha dejado sangrando con nivel %d.\nHa realizado %d de daño\n\e[0m";
+  char* sms_raw = "\n\e[1;35m%s ha dado una estocada a %s y lo ha dejado sangrando con nivel %d.\nHa realizado %d de daño\n\e[0m";
   char* sms = malloc(sizeof(char) * 300);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[objective].playername, enemigos[objective].bleed_counter, dano_realizado);
   return sms;
@@ -134,7 +134,7 @@ char* f_corte_cruzado(Entity* aliados, int len_aliados, int posicion_yo, Entity*
   
   int damage = attack(&aliados[posicion_yo], &enemigos[objective], 3000);
 
-  char* sms_raw = "\e[1;35m%s ha realizado un corte a %s. \nHa realizado %d daño.\n\e[0m";
+  char* sms_raw = "\n\e[1;35m%s ha realizado un corte a %s. \nHa realizado %d daño.\n\e[0m";
   char* sms = malloc(sizeof(char) * 300);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[objective].playername, damage);
   return sms;
@@ -147,7 +147,7 @@ char* f_distraer(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   enemigos[objective].distracted = true;  // distraer
   enemigos[objective].pos_focused = posicion_yo;
 
-  char* sms_raw = "\e[1;35m%s ha distraido a %s.\n\e[0m";
+  char* sms_raw = "\n\e[1;35m%s ha distraido a %s.\n\e[0m";
   char* sms = malloc(sizeof(char) * 300);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[objective].playername);
   return sms;
@@ -167,7 +167,7 @@ char* f_curar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
   
   int healed = heal(&aliados[posicion_yo], &aliados[objective], 2000);
 
-  char* sms_raw = "\e[1;35m%s ha curado a %s. \nHa recuperado %d de HP\n\e[0m";
+  char* sms_raw = "\n\e[1;35m%s ha curado a %s. \nHa recuperado %d de HP\n\e[0m";
   char* sms = malloc(sizeof(char) * 300);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, aliados[objective].playername, healed);
   return sms;
@@ -193,7 +193,7 @@ char* f_destello(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   healing = heal(&aliados[posicion_yo], &aliados[pos_to_heal], healing);
 
 
-  char* sms_raw = "\e[1;35m%s ha usado Destello Regenerador. \nHa realizado %d daño a %s. %s ha recuperado %d de HP.\n\e[0m";
+  char* sms_raw = "\n\e[1;35m%s ha usado Destello Regenerador. \nHa realizado %d daño a %s. %s ha recuperado %d de HP.\n\e[0m";
   char* sms = malloc(sizeof(char) * 300);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, damage, enemigos[pos_to_dmg].playername, aliados[pos_to_heal].playername, healing);
   return sms;
@@ -210,7 +210,7 @@ char* f_descarga(Entity* aliados, int len_aliados, int posicion_yo, Entity* enem
   damage = attack(&aliados[posicion_yo], &enemigos[enemy_pos], damage);
 
   
-  char* sms_raw = "\e[1;35m%s ha usado Descarga Vital.\n%s recibe %d daño\n\e[0m";
+  char* sms_raw = "\n\e[1;35m%s ha usado Descarga Vital.\n%s recibe %d daño\n\e[0m";
   char* sms = malloc(sizeof(char) * 300);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, damage);
   return sms;
@@ -229,7 +229,7 @@ char* f_inyeccion(Entity* aliados, int len_aliados, int posicion_yo, Entity* ene
   Entity* aliado = &aliados[enemy_pos];
   aliado->buffed = 2; // S'Q'L
 
-  char* sms_raw = "\e[1;35m%s ha usado Inyección SQL.\n%s recibe doble ataque por 2 turnos\n\e[0m";
+  char* sms_raw = "\n\e[1;35m%s ha usado Inyección SQL.\n%s recibe doble ataque por 2 turnos\n\e[0m";
   char* sms = malloc(sizeof(char) * 300);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, aliado->playername);
 
@@ -242,7 +242,7 @@ char* f_ddos(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
   int damage = attack(&aliados[posicion_yo], &enemigos[enemy_pos], 1500);
  
-  char* sms_raw = "\e[1;35m%s ha lanzado ataque DDOS a %s. \nHa realizado %d de daño\n\e[0m";
+  char* sms_raw = "\n\e[1;35m%s ha lanzado ataque DDOS a %s. \nHa realizado %d de daño\n\e[0m";
   char* sms = malloc(sizeof(char) * 300);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, damage);
   return sms;
@@ -259,11 +259,11 @@ char* f_fuerzabruta(Entity* aliados, int len_aliados, int posicion_yo, Entity* e
   yo->bruteforce += 1;
   if (yo->bruteforce == 3){
     int damage = attack(yo, &enemigos[enemy_pos], 10000);
-    char* sms_raw = "\e[1;35m%s ha utilizado Fuerza Bruta contra %s.\nHa realizado %d daño\n\e[0m";
+    char* sms_raw = "\n\e[1;35m%s ha utilizado Fuerza Bruta contra %s.\nHa realizado %d daño\n\e[0m";
     sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, damage);
     yo->bruteforce = 0;
   } else {
-    char* sms_raw = "\e[1;35m%s ha utilizado Fuerza Bruta contra %s.\nNo realiza daño, al necesitar %d más usos.\n\e[0m";
+    char* sms_raw = "\n\e[1;35m%s ha utilizado Fuerza Bruta contra %s.\nNo realiza daño, al necesitar %d más usos.\n\e[0m";
     sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, 3 - yo->bruteforce);
   }
   
@@ -283,7 +283,7 @@ char* f_ruzgar(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
   int damage = attack(&aliados[posicion_yo], enemy, 1000);
   
   
-  char* sms_raw = "\e[1;32m%s ha utilizado ruzgar contra %s. \nHa realizado %d daño.\n\e[0m";
+  char* sms_raw = "\n\e[1;32m%s ha utilizado ruzgar contra %s. \nHa realizado %d daño.\n\e[0m";
   char* sms = malloc(sizeof(char) * 300);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, damage);
   return sms;
@@ -327,7 +327,7 @@ char* f_salto(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
     int damage = attack(&aliados[posicion_yo], enemy, 1500);
     aliados[posicion_yo].jumped = true;
     
-    char* sms_raw = "\e[1;32m%s ha saltado sobre %s.\nHa realizado %d daño.\n\e[0m";
+    char* sms_raw = "\n\e[1;32m%s ha saltado sobre %s.\nHa realizado %d daño.\n\e[0m";
     sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, damage);
   }
   return sms;
@@ -344,10 +344,10 @@ char* f_espina(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemig
 
   if (enemy->bleed == 'e' && enemy->bleed_counter > 0){
     int damage = attack(&aliados[posicion_yo], enemy, 500);
-    char* sms_raw = "\e[1;32m%s ha usado espina venenosa contra %s.\nAl ya estar envenenado, recive %d de daño.\n\e[0m";
+    char* sms_raw = "\n\e[1;32m%s ha usado espina venenosa contra %s.\nAl ya estar envenenado, recibe %d de daño.\n\e[0m";
     sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername, damage);
   }else {
-    char* sms_raw = "\e[1;32m%s ha usado espina venenosa contra %s, quedando intoxicado.\n\e[0m";
+    char* sms_raw = "\n\e[1;32m%s ha usado espina venenosa contra %s, quedando intoxicado.\n\e[0m";
     sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername);
     enemy->bleed = 'e';
     enemy->bleed_counter = 3;
@@ -368,7 +368,7 @@ char* f_copia(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigo
   ENT_FUNC fn = enemigos[enemy_pos].func[habilidad_a_elegir];
   char* tx_otra_fn = fn(aliados, len_aliados, posicion_yo, enemigos, len_enemigos, auxiliar);
 
-  char* sms_raw = "\e[1;32m%s ha copiado la habilidad numero %d de %s.\n%s\e[0m";
+  char* sms_raw = "\n\e[1;32m%s ha copiado la habilidad numero %d de %s.\n%s\e[0m";
   char* sms = malloc(sizeof(char) * 400);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, habilidad_a_elegir+1, enemigos[enemy_pos].playername, tx_otra_fn);
   free(tx_otra_fn);
@@ -380,7 +380,7 @@ char* f_reprobaton(Entity* aliados, int len_aliados, int posicion_yo, Entity* en
   int enemy_pos = enemy_selector(&aliados[posicion_yo], len_enemigos);
   enemigos[enemy_pos].reprobado = 2;
 
-  char* sms_raw = "\e[1;32m%s ha reprobado a %s.\n\e[0m";
+  char* sms_raw = "\n\e[1;32m%s ha reprobado a %s.\n\e[0m";
   char* sms = malloc(sizeof(char) * 300);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, enemigos[enemy_pos].playername);
   return sms;
@@ -400,7 +400,7 @@ char* f_rm(Entity* aliados, int len_aliados, int posicion_yo, Entity* enemigos, 
     strcat(str_atqs, str1);
   }
 
-  char* sms_raw = "\e[1;32m%s ha borrado todas las rondas.\n%s\e[0m";
+  char* sms_raw = "\n\e[1;32m%s ha borrado todas las rondas.\n%s\e[0m";
   char* sms = malloc(sizeof(char) * 500);
   sprintf(sms, sms_raw, aliados[posicion_yo].playername, str_atqs);
   free(str1);
